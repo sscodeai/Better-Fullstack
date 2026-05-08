@@ -58,6 +58,23 @@ env_logger = "0.11"
 # Environment variables
 dotenvy = "0.15"
 
+{{#if (eq email "resend")}}
+# Email delivery
+resend-rs = { version = "0.24", default-features = false, features = ["rustls-tls"] }
+{{/if}}
+{{#if (eq observability "sentry")}}
+# Error tracking and performance monitoring
+sentry = "0.48.1"
+{{/if}}
+{{#if (eq caching "upstash-redis")}}
+# Upstash Redis via Redis protocol
+redis = { version = "1.2.1", features = ["tokio-comp"] }
+{{/if}}
+{{#if (eq search "meilisearch")}}
+# Search
+meilisearch-sdk = "0.33.0"
+{{/if}}
+
 {{#if (eq rustWebFramework "axum")}}
 # Web framework (Axum)
 axum = "0.8"

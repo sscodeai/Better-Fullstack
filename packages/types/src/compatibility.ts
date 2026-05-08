@@ -1824,11 +1824,81 @@ export const getDisabledReason = (
   // EMAIL CONSTRAINTS
   // ============================================
   if (category === "email" && optionId !== "none") {
+    if (currentStack.ecosystem !== "typescript" && optionId !== "resend") {
+      return "Only Resend email is available for non-TypeScript ecosystems";
+    }
+    if (
+      currentStack.ecosystem === "java" &&
+      currentStack.javaBuildTool === "none" &&
+      optionId === "resend"
+    ) {
+      return "Resend email for Java requires Maven or Gradle to manage the SDK dependency";
+    }
+    if (currentStack.ecosystem !== "typescript") {
+      return null;
+    }
     if (currentStack.backend === "convex") {
       return "Email integration is not available with Convex backend";
     }
     if (currentStack.backend === "none") {
       return "Email integration requires a backend";
+    }
+  }
+
+  // ============================================
+  // OBSERVABILITY CONSTRAINTS
+  // ============================================
+  if (category === "observability" && optionId !== "none") {
+    if (currentStack.ecosystem !== "typescript" && optionId !== "sentry") {
+      return "Only Sentry observability is available for non-TypeScript ecosystems";
+    }
+    if (
+      currentStack.ecosystem === "java" &&
+      currentStack.javaBuildTool === "none" &&
+      optionId === "sentry"
+    ) {
+      return "Sentry observability for Java requires Maven or Gradle to manage the SDK dependency";
+    }
+    if (currentStack.ecosystem !== "typescript") {
+      return null;
+    }
+  }
+
+  // ============================================
+  // CACHING CONSTRAINTS
+  // ============================================
+  if (category === "caching" && optionId !== "none") {
+    if (currentStack.ecosystem !== "typescript" && optionId !== "upstash-redis") {
+      return "Only Upstash Redis caching is available for non-TypeScript ecosystems";
+    }
+    if (
+      currentStack.ecosystem === "java" &&
+      currentStack.javaBuildTool === "none" &&
+      optionId === "upstash-redis"
+    ) {
+      return "Upstash Redis caching for Java requires Maven or Gradle to manage the Redis client dependency";
+    }
+    if (currentStack.ecosystem !== "typescript") {
+      return null;
+    }
+  }
+
+  // ============================================
+  // SEARCH CONSTRAINTS
+  // ============================================
+  if (category === "search" && optionId !== "none") {
+    if (currentStack.ecosystem !== "typescript" && optionId !== "meilisearch") {
+      return "Only Meilisearch search is available for non-TypeScript ecosystems";
+    }
+    if (
+      currentStack.ecosystem === "java" &&
+      currentStack.javaBuildTool === "none" &&
+      optionId === "meilisearch"
+    ) {
+      return "Meilisearch search for Java requires Maven or Gradle to manage the SDK dependency";
+    }
+    if (currentStack.ecosystem !== "typescript") {
+      return null;
     }
   }
 

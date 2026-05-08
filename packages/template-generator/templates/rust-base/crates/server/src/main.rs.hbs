@@ -11,6 +11,18 @@ mod cache;
 {{#if (ne rustAuth "none")}}
 mod auth;
 {{/if}}
+{{#if (eq email "resend")}}
+mod email;
+{{/if}}
+{{#if (eq observability "sentry")}}
+mod observability;
+{{/if}}
+{{#if (eq caching "upstash-redis")}}
+mod upstash_cache;
+{{/if}}
+{{#if (eq search "meilisearch")}}
+mod meilisearch;
+{{/if}}
 {{#if (eq rustLogging "tracing")}}
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 {{/if}}
@@ -131,6 +143,9 @@ async fn graphiql() -> impl IntoResponse {
 async fn main() -> {{#if (eq rustErrorHandling "anyhow-thiserror")}}anyhow::Result<()>{{else if (eq rustErrorHandling "eyre")}}eyre::Result<()>{{else}}Result<(), Box<dyn std::error::Error>>{{/if}} {
     // Load environment variables
     dotenvy::dotenv().ok();
+{{#if (eq observability "sentry")}}
+    let _sentry_guard = observability::init_sentry();
+{{/if}}
 {{#if (eq rustErrorHandling "eyre")}}
 
     // Install color-eyre error handler
@@ -342,6 +357,9 @@ mod cache;
 {{/if}}
 {{#if (ne rustAuth "none")}}
 mod auth;
+{{/if}}
+{{#if (eq email "resend")}}
+mod email;
 {{/if}}
 {{#if (eq rustLogging "tracing")}}
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -692,6 +710,9 @@ mod cache;
 {{#if (ne rustAuth "none")}}
 mod auth;
 {{/if}}
+{{#if (eq email "resend")}}
+mod email;
+{{/if}}
 {{#if (eq rustLogging "tracing")}}
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 {{/if}}
@@ -973,6 +994,9 @@ mod cache;
 {{/if}}
 {{#if (ne rustAuth "none")}}
 mod auth;
+{{/if}}
+{{#if (eq email "resend")}}
+mod email;
 {{/if}}
 {{#if (eq rustLogging "tracing")}}
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};

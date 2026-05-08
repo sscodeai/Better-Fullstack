@@ -48,9 +48,14 @@ export function processCSSFrameworkDeps(vfs: VirtualFileSystem, config: ProjectC
       packagePath: webPath,
       devDependencies: ["less"],
     });
+  } else if (cssFramework === "tailwind" && frontend.includes("astro")) {
+    addPackageDependency({
+      vfs,
+      packagePath: webPath,
+      dependencies: ["tw-animate-css"],
+    });
   }
-  // tailwind, postcss-only, and none don't need extra dependencies
-  // tailwind is already included in the base templates
+  // Tailwind and postcss-only are included in the base templates.
 }
 
 /**

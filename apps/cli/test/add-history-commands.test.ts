@@ -205,6 +205,10 @@ describe("CLI history command", () => {
       "--python-task-queue celery " +
       "--python-graphql none " +
       "--python-quality ruff " +
+      "--email none " +
+      "--observability none " +
+      "--caching none " +
+      "--search none " +
       "--addons none " +
       "--examples none " +
       "--db-setup none " +
@@ -239,6 +243,14 @@ describe("CLI history command", () => {
         "none",
         "--python-quality",
         "ruff",
+        "--email",
+        "none",
+        "--observability",
+        "none",
+        "--caching",
+        "none",
+        "--search",
+        "none",
         "--addons",
         "none",
         "--examples",

@@ -63,5 +63,17 @@ require (
 {{#if (eq goAuth "jwt")}}
 	github.com/golang-jwt/jwt/v5 v5.2.2
 {{/if}}
+{{#if (eq email "resend")}}
+	github.com/resend/resend-go/v3 v3.4.1
+{{/if}}
+{{#if (eq observability "sentry")}}
+	github.com/getsentry/sentry-go v0.46.2
+{{/if}}
+{{#if (eq caching "upstash-redis")}}
+	github.com/redis/go-redis/v9 v9.19.0
+{{/if}}
+{{#if (eq search "meilisearch")}}
+	github.com/meilisearch/meilisearch-go v0.36.2
+{{/if}}
 	github.com/joho/godotenv v1.5.1
 )

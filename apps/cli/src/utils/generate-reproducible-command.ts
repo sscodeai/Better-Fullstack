@@ -40,6 +40,10 @@ function appendCommonFlags(flags: string[], config: ProjectConfig) {
 }
 
 function appendSharedNonTypeScriptFlags(flags: string[], config: ProjectConfig) {
+  flags.push(`--email ${config.email}`);
+  flags.push(`--observability ${config.observability}`);
+  flags.push(`--caching ${config.caching}`);
+  flags.push(`--search ${config.search}`);
   flags.push(formatArrayFlag("addons", config.addons));
   flags.push(formatArrayFlag("examples", config.examples));
   flags.push(`--db-setup ${config.dbSetup}`);

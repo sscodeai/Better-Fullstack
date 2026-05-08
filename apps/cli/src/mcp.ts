@@ -142,6 +142,12 @@ function getGuidance() {
         '"bun" or "node". Must be "none" when backend is "self" or "convex".',
       addons:
         "ARRAY of strings. Monorepo tools, code quality, desktop (tauri), browser extensions (wxt), etc.",
+      email:
+        "String. TypeScript supports multiple providers; Rust, Python, Go, and Java currently support resend or none.",
+      observability:
+        "String. TypeScript supports multiple providers; Rust, Python, Go, and Java currently support sentry or none.",
+      search:
+        "String. TypeScript supports multiple providers; Rust, Python, Go, and Java currently support meilisearch or none.",
     },
     ambiguityRules: [
       "If the user request leaves major stack choices unspecified, ASK the user before proceeding. Do not guess.",
@@ -160,6 +166,11 @@ function getGuidance() {
       "backend='convex' overrides: runtime=none, database=none, orm=none, api=none.",
       "TypeORM + better-auth: unsupported (no adapter). Use auth='none' or orm='drizzle'.",
       "Sequelize + better-auth: unsupported (no adapter). Use auth='none' or orm='drizzle'.",
+      "Non-TypeScript ecosystems only support email='resend' or email='none'.",
+      "Non-TypeScript ecosystems only support observability='sentry' or observability='none'.",
+      "Non-TypeScript ecosystems only support search='meilisearch' or search='none'.",
+      "Java email='resend' and observability='sentry' require javaBuildTool='maven' or javaBuildTool='gradle'.",
+      "Java search='meilisearch' requires javaBuildTool='maven' or javaBuildTool='gradle'.",
     ],
   };
 }
@@ -244,9 +255,9 @@ const ECOSYSTEM_CATEGORIES: Record<string, string[]> = {
     "logging", "observability", "featureFlags", "analytics", "cms", "caching",
     "i18n", "search", "fileStorage", "astroIntegration",
   ],
-  rust: ["rustWebFramework", "rustFrontend", "rustOrm", "rustApi", "rustCli", "rustLibraries", "rustLogging", "rustErrorHandling", "rustCaching", "rustAuth"],
-  python: ["pythonWebFramework", "pythonOrm", "pythonValidation", "pythonAi", "pythonAuth", "pythonApi", "pythonTaskQueue", "pythonGraphql", "pythonQuality"],
-  go: ["goWebFramework", "goOrm", "goApi", "goCli", "goLogging", "goAuth"],
+  rust: ["rustWebFramework", "rustFrontend", "rustOrm", "rustApi", "rustCli", "rustLibraries", "rustLogging", "rustErrorHandling", "rustCaching", "rustAuth", "email", "observability", "caching", "search"],
+  python: ["pythonWebFramework", "pythonOrm", "pythonValidation", "pythonAi", "pythonAuth", "pythonApi", "pythonTaskQueue", "pythonGraphql", "pythonQuality", "email", "observability", "caching", "search"],
+  go: ["goWebFramework", "goOrm", "goApi", "goCli", "goLogging", "goAuth", "email", "observability", "caching", "search"],
   java: [
     "javaWebFramework",
     "javaBuildTool",
@@ -254,6 +265,10 @@ const ECOSYSTEM_CATEGORIES: Record<string, string[]> = {
     "javaAuth",
     "javaLibraries",
     "javaTestingLibraries",
+    "email",
+    "observability",
+    "caching",
+    "search",
   ],
   shared: ["ecosystem", "packageManager", "addons", "examples", "webDeploy", "serverDeploy", "dbSetup"],
 };
@@ -578,6 +593,14 @@ const COMPATIBILITY_RULES_MD = `# Better-Fullstack Compatibility Rules
 ## Payments
 - Polar requires better-auth and a web frontend.
 
+## Email
+- Rust, Python, Go, and Java currently support only Resend for email (\`email=resend\`) or no email (\`email=none\`).
+- Java Resend requires Maven or Gradle so the generated project can manage the SDK dependency.
+
+## Observability
+- Rust, Python, Go, and Java currently support only Sentry for observability (\`observability=sentry\`) or no observability (\`observability=none\`).
+- Java Sentry requires Maven or Gradle so the generated project can manage the SDK dependency.
+
 ## Ecosystem Isolation
 - Rust, Python, Go, and Java ecosystems are independent — TypeScript fields are ignored.
 - Each ecosystem generates a standalone project with its own build system.
@@ -602,6 +625,8 @@ const GETTING_STARTED_MD = `# Getting Started with Better-Fullstack MCP
    - ecosystem: "rust"
    - rustWebFramework: "axum"
    - rustOrm: "sqlx"
+   - email: "resend" (optional)
+   - observability: "sentry" (optional)
 2. Tell the user to run: cd my-rust-app && cargo build
 
 ## Quick Start — Python Project
@@ -610,6 +635,8 @@ const GETTING_STARTED_MD = `# Getting Started with Better-Fullstack MCP
    - ecosystem: "python"
    - pythonWebFramework: "fastapi"
    - pythonOrm: "sqlalchemy"
+   - email: "resend" (optional)
+   - observability: "sentry" (optional)
 2. Tell the user to run: cd my-python-app && uv sync
 
 ## Quick Start — Go Project
@@ -618,6 +645,8 @@ const GETTING_STARTED_MD = `# Getting Started with Better-Fullstack MCP
    - ecosystem: "go"
    - goWebFramework: "gin"
    - goOrm: "gorm"
+   - email: "resend" (optional)
+   - observability: "sentry" (optional)
 2. Tell the user to run: cd my-go-app && go mod tidy && go run cmd/server/main.go
 
 ## Quick Start — Java Project
@@ -626,11 +655,14 @@ const GETTING_STARTED_MD = `# Getting Started with Better-Fullstack MCP
    - ecosystem: "java"
    - javaWebFramework: "spring-boot"
    - javaBuildTool: "maven"
+   - email: "resend" (optional)
+   - observability: "sentry" (optional)
 2. Tell the user to run: cd my-java-app && ./mvnw test && ./mvnw spring-boot:run
 
 ## Adding Features to Existing Projects
 1. Call bfs_add_feature with projectDir pointing to the project root.
 2. Provide addons array with features to add (e.g., ["biome", "turborepo"]).
+3. Service categories such as email and observability are scaffold-time options. To add those to an existing app, inspect the generated templates from bfs_plan_project and apply the equivalent dependency, env var, and initialization changes manually.
 `;
 
 export async function startMcpServer() {
@@ -679,9 +711,59 @@ export async function startMcpServer() {
       api: z.string().optional().describe("API layer"),
       auth: z.string().optional().describe("Auth provider"),
       payments: z.string().optional().describe("Payments provider"),
+      email: EmailSchema.optional().describe("Email provider"),
+      fileUpload: FileUploadSchema.optional().describe("File upload provider"),
+      ai: AISchema.optional().describe("AI SDK"),
+      stateManagement: StateManagementSchema.optional().describe("State management"),
+      forms: FormsSchema.optional().describe("Forms library"),
+      validation: ValidationSchema.optional().describe("Validation library"),
+      testing: TestingSchema.optional().describe("Testing framework"),
+      realtime: RealtimeSchema.optional().describe("Realtime library"),
+      jobQueue: JobQueueSchema.optional().describe("Job queue"),
+      animation: AnimationSchema.optional().describe("Animation library"),
+      logging: LoggingSchema.optional().describe("Logging library"),
+      observability: ObservabilitySchema.optional().describe("Observability provider"),
+      featureFlags: FeatureFlagsSchema.optional().describe("Feature flags provider"),
+      analytics: AnalyticsSchema.optional().describe("Analytics provider"),
+      cms: CMSSchema.optional().describe("CMS"),
+      caching: CachingSchema.optional().describe("Caching solution"),
+      i18n: I18nSchema.optional().describe("Internationalization library"),
+      search: SearchSchema.optional().describe("Search engine"),
+      fileStorage: FileStorageSchema.optional().describe("File storage"),
+      dbSetup: DatabaseSetupSchema.optional().describe("Database hosting provider"),
+      webDeploy: WebDeploySchema.optional().describe("Web deployment target"),
+      serverDeploy: ServerDeploySchema.optional().describe("Server deployment target"),
+      astroIntegration: AstroIntegrationSchema.optional().describe("Astro UI framework integration"),
       uiLibrary: z.string().optional().describe("UI component library"),
       cssFramework: z.string().optional().describe("CSS framework"),
-      addons: z.array(z.string()).optional().describe("Addon list"),
+      addons: z.array(AddonsSchema).optional().describe("Addon list"),
+      examples: z.array(ExamplesSchema).optional().describe("Example templates"),
+      packageManager: PackageManagerSchema.optional().describe("Package manager"),
+      rustWebFramework: RustWebFrameworkSchema.optional().describe("Rust web framework"),
+      rustFrontend: RustFrontendSchema.optional().describe("Rust frontend (WASM)"),
+      rustOrm: RustOrmSchema.optional().describe("Rust ORM"),
+      rustApi: RustApiSchema.optional().describe("Rust API layer"),
+      rustCli: RustCliSchema.optional().describe("Rust CLI framework"),
+      rustLibraries: z.array(RustLibrariesSchema).optional().describe("Rust libraries"),
+      rustLogging: RustLoggingSchema.optional().describe("Rust logging library"),
+      rustErrorHandling: RustErrorHandlingSchema.optional().describe("Rust error handling library"),
+      rustCaching: RustCachingSchema.optional().describe("Rust caching library"),
+      rustAuth: RustAuthSchema.optional().describe("Rust authentication library"),
+      pythonWebFramework: PythonWebFrameworkSchema.optional().describe("Python web framework"),
+      pythonOrm: PythonOrmSchema.optional().describe("Python ORM"),
+      pythonValidation: PythonValidationSchema.optional().describe("Python validation"),
+      pythonAi: z.array(PythonAiSchema).optional().describe("Python AI libraries"),
+      pythonAuth: PythonAuthSchema.optional().describe("Python auth library"),
+      pythonApi: PythonApiSchema.optional().describe("Python API framework"),
+      pythonTaskQueue: PythonTaskQueueSchema.optional().describe("Python task queue"),
+      pythonGraphql: PythonGraphqlSchema.optional().describe("Python GraphQL framework"),
+      pythonQuality: PythonQualitySchema.optional().describe("Python code quality"),
+      goWebFramework: GoWebFrameworkSchema.optional().describe("Go web framework"),
+      goOrm: GoOrmSchema.optional().describe("Go ORM"),
+      goApi: GoApiSchema.optional().describe("Go API layer"),
+      goCli: GoCliSchema.optional().describe("Go CLI framework"),
+      goLogging: GoLoggingSchema.optional().describe("Go logging library"),
+      goAuth: GoAuthSchema.optional().describe("Go authentication library"),
       javaWebFramework: JavaWebFrameworkSchema.optional().describe("Java web framework"),
       javaBuildTool: JavaBuildToolSchema.optional().describe("Java build tool"),
       javaOrm: JavaOrmSchema.optional().describe("Java ORM"),

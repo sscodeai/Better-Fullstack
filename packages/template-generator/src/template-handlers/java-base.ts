@@ -227,6 +227,8 @@ function createJavaTemplateContext(config: ProjectConfig): JavaTemplateContext {
 }
 
 function shouldSkipJavaTemplate(templatePath: string, context: JavaTemplateContext): boolean {
+  const isEmailServiceTemplate = templatePath.endsWith("/service/EmailService.java.hbs");
+
   if (
     (!context.isJavaMaven &&
       (templatePath === "java-base/pom.xml.hbs" ||
@@ -272,7 +274,7 @@ function shouldSkipJavaTemplate(templatePath: string, context: JavaTemplateConte
     if (
       templatePath.includes("/domain/") ||
       templatePath.includes("/repository/") ||
-      templatePath.includes("/service/") ||
+      (templatePath.includes("/service/") && !isEmailServiceTemplate) ||
       templatePath.endsWith("/controller/UserController.java.hbs") ||
       templatePath.endsWith("/service/AppUserServiceTest.java.hbs")
     ) {

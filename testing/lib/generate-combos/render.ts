@@ -135,6 +135,13 @@ export function buildCommand(name: string, config: ProjectConfig): string {
     ["server-deploy", config.serverDeploy],
   ];
 
+  const sharedServiceFlags: Array<[string, string | readonly string[]]> = [
+    ["email", config.email],
+    ["observability", config.observability],
+    ["caching", config.caching],
+    ["search", config.search],
+  ];
+
   const rustFlags: Array<[string, string | readonly string[]]> = [
     ["rust-web-framework", config.rustWebFramework],
     ["rust-frontend", config.rustFrontend],
@@ -201,16 +208,16 @@ export function buildCommand(name: string, config: ProjectConfig): string {
       if (config.shadcnRadius) orderedFlags.push(["shadcn-radius", config.shadcnRadius]);
       break;
     case "rust":
-      orderedFlags.push(...rustFlags);
+      orderedFlags.push(...sharedServiceFlags, ...rustFlags);
       break;
     case "python":
-      orderedFlags.push(...pythonFlags);
+      orderedFlags.push(...sharedServiceFlags, ...pythonFlags);
       break;
     case "go":
-      orderedFlags.push(...goFlags);
+      orderedFlags.push(...sharedServiceFlags, ...goFlags);
       break;
     case "java":
-      orderedFlags.push(...javaFlags);
+      orderedFlags.push(...sharedServiceFlags, ...javaFlags);
       break;
   }
 

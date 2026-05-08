@@ -1196,6 +1196,12 @@ function buildServerVars(
       comment: "Upstash Redis REST token - get it at https://console.upstash.com",
     },
     {
+      key: "UPSTASH_REDIS_URL",
+      value: "rediss://default:password@host.upstash.io:6379",
+      condition: caching === "upstash-redis",
+      comment: "Upstash Redis protocol URL for Go, Rust, and Java clients",
+    },
+    {
       key: "MEILISEARCH_HOST",
       value: "http://localhost:7700",
       condition: search === "meilisearch",
@@ -1589,7 +1595,10 @@ export function processEnvVariables(vfs: VirtualFileSystem, config: ProjectConfi
     config.fileStorage,
   );
 
-  if (backend === "self") {
+  if (config.ecosystem !== "typescript") {
+    if (!serverVars.some((variable) => variable.condition)) return;
+    writeEnvFile(vfs, ".env.example", serverVars);
+  } else if (backend === "self") {
     const webDir = "apps/web";
     if (vfs.directoryExists(webDir)) {
       const envPath = `${webDir}/.env`;

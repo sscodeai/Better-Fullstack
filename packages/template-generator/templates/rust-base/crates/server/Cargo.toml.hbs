@@ -37,6 +37,23 @@ env_logger.workspace = true
 # Environment
 dotenvy.workspace = true
 
+{{#if (eq email "resend")}}
+# Email delivery
+resend-rs.workspace = true
+{{/if}}
+{{#if (eq observability "sentry")}}
+# Error tracking and performance monitoring
+sentry.workspace = true
+{{/if}}
+{{#if (eq caching "upstash-redis")}}
+# Upstash Redis via Redis protocol
+redis.workspace = true
+{{/if}}
+{{#if (eq search "meilisearch")}}
+# Search
+meilisearch-sdk.workspace = true
+{{/if}}
+
 {{#if (eq rustWebFramework "axum")}}
 # Web framework
 axum.workspace = true

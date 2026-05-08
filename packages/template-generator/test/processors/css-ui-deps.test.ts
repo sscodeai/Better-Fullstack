@@ -34,6 +34,20 @@ describe("processCSSAndUILibraryDeps", () => {
     expect(getDeps(lessVfs, "apps/web/package.json").devDeps).toEqual(["less"]);
   });
 
+  it("adds tw-animate-css for Astro Tailwind styles", () => {
+    const vfs = createSeededVFS(["apps/web/package.json"]);
+
+    processCSSAndUILibraryDeps(
+      vfs,
+      makeConfig({
+        frontend: ["astro"],
+        cssFramework: "tailwind",
+      }),
+    );
+
+    expect(getDeps(vfs, "apps/web/package.json").deps).toEqual(["tw-animate-css"]);
+  });
+
   it("adds icon dependencies for React web templates even when uiLibrary is none", () => {
     const vfs = createSeededVFS(["apps/web/package.json"]);
 
@@ -148,7 +162,10 @@ describe("processCSSAndUILibraryDeps", () => {
       "@park-ui/panda-preset",
       "@ark-ui/solid",
     ]);
-    expect(getDeps(astroSvelteVfs, "apps/web/package.json").deps).toEqual(["@ark-ui/svelte"]);
+    expectIncludesAll(getDeps(astroSvelteVfs, "apps/web/package.json").deps, [
+      "@ark-ui/svelte",
+      "tw-animate-css",
+    ]);
   });
 
   it("adds React-only UI libraries to React-capable frontends", () => {

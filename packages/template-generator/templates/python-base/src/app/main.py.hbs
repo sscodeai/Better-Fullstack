@@ -4,6 +4,10 @@ import os
 
 from dotenv import load_dotenv
 
+{{#if (eq observability "sentry")}}
+from app.observability import init_sentry
+
+{{/if}}
 {{#if (eq pythonWebFramework "fastapi")}}
 from contextlib import asynccontextmanager
 
@@ -163,6 +167,9 @@ from app.graphql_schema import schema as graphql_schema
 {{/if}}
 
 load_dotenv()
+{{#if (eq observability "sentry")}}
+init_sentry()
+{{/if}}
 
 
 @asynccontextmanager

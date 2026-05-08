@@ -336,8 +336,7 @@ export async function gatherConfig(
         return getPaymentsChoice(flags.payments, results.auth, results.backend, results.frontend);
       },
       email: ({ results }) => {
-        if (results.ecosystem !== "typescript") return Promise.resolve("none" as Email);
-        return getEmailChoice(flags.email, results.backend);
+        return getEmailChoice(flags.email, results.backend, results.ecosystem);
       },
       effect: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as Effect);
@@ -444,8 +443,11 @@ export async function gatherConfig(
         return getLoggingChoice(flags.logging, results.backend);
       },
       observability: ({ results }) => {
-        if (results.ecosystem !== "typescript") return Promise.resolve("none" as Observability);
-        return getObservabilityChoice(flags.observability, results.backend);
+        return getObservabilityChoice(
+          flags.observability,
+          results.backend,
+          results.ecosystem,
+        );
       },
       featureFlags: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as FeatureFlags);
@@ -460,16 +462,14 @@ export async function gatherConfig(
         return getCMSChoice(flags.cms, results.backend);
       },
       caching: ({ results }) => {
-        if (results.ecosystem !== "typescript") return Promise.resolve("none" as Caching);
-        return getCachingChoice(flags.caching, results.backend);
+        return getCachingChoice(flags.caching, results.backend, results.ecosystem);
       },
       i18n: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as I18n);
         return getI18nChoice(flags.i18n, results.frontend);
       },
       search: ({ results }) => {
-        if (results.ecosystem !== "typescript") return Promise.resolve("none" as Search);
-        return getSearchChoice(flags.search, results.backend);
+        return getSearchChoice(flags.search, results.backend, results.ecosystem);
       },
       fileStorage: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as FileStorage);

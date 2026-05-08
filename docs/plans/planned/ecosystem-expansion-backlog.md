@@ -21,6 +21,7 @@ Master tracking file. Detailed plans live in dedicated files per area.
 | [dotnet-ecosystem.md](dotnet-ecosystem.md) | C#: ASP.NET Core, EF Core, Dapper, SignalR, etc. |
 | **Platform & Infra** | |
 | [platform-features.md](platform-features.md) | CLI features: dry-run, cross-ecosystem, template preview (MCP/add/history done) |
+| [mcp-incremental-library-updates.md](mcp-incremental-library-updates.md) | Future MCP stack mutation layer for adding scaffold-time libraries to existing projects |
 | [docker-and-devcontainers.md](docker-and-devcontainers.md) | Dockerfile gen, docker-compose, DevContainers, non-monorepo mode |
 | [payment-providers-expansion.md](payment-providers-expansion.md) | Creem.io, Autumn, Commet, Better Auth orgs plugin |
 | [community-requested-integrations.md](community-requested-integrations.md) | Cloudinary, SWR, shadcn-svelte, REST API, InstantDB, Intlayer, Plasmo, etc. |
@@ -156,4 +157,5 @@ Master tracking file. Detailed plans live in dedicated files per area.
 - [x] `history` command ✅
 - [x] Project config (`bts.jsonc`) ✅
 - [x] `--dry-run` flag ✅
+- [ ] MCP stack updates for adding scaffold-time libraries to existing projects
 - [ ] Cross-ecosystem stacks (research)

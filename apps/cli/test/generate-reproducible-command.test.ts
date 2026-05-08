@@ -151,6 +151,10 @@ describe("generateReproducibleCommand", () => {
         "--python-task-queue celery " +
         "--python-graphql none " +
         "--python-quality ruff " +
+        "--email none " +
+        "--observability none " +
+        "--caching none " +
+        "--search none " +
         "--addons none " +
         "--examples none " +
         "--db-setup none " +
@@ -223,6 +227,10 @@ describe("generateReproducibleCommand", () => {
         "--python-task-queue celery " +
         "--python-graphql none " +
         "--python-quality ruff " +
+        "--email none " +
+        "--observability none " +
+        "--caching none " +
+        "--search none " +
         "--addons skills " +
         "--examples none " +
         "--db-setup none " +
@@ -268,6 +276,10 @@ describe("generateReproducibleCommand", () => {
         "--rust-error-handling anyhow-thiserror " +
         "--rust-caching none " +
         "--rust-auth none " +
+        "--email none " +
+        "--observability none " +
+        "--caching none " +
+        "--search none " +
         "--addons none " +
         "--examples none " +
         "--db-setup none " +
@@ -308,6 +320,10 @@ describe("generateReproducibleCommand", () => {
         "--go-logging zap " +
         "--go-auth none " +
         "--auth go-better-auth " +
+        "--email none " +
+        "--observability none " +
+        "--caching none " +
+        "--search none " +
         "--addons none " +
         "--examples none " +
         "--db-setup none " +
@@ -391,6 +407,10 @@ describe("generateReproducibleCommand", () => {
         "--java-auth spring-security " +
         "--java-libraries spring-actuator flyway " +
         "--java-testing-libraries junit5 mockito " +
+        "--email none " +
+        "--observability none " +
+        "--caching none " +
+        "--search none " +
         "--addons none " +
         "--examples none " +
         "--db-setup none " +

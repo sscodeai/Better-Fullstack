@@ -1,7 +1,7 @@
 package main
 
 import (
-{{#if (or (or (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (eq goWebFramework "fiber")) (eq goWebFramework "chi")) (eq goApi "grpc-go")) (or (eq auth "go-better-auth") (ne goLogging "none")))}}
+{{#if (or (or (or (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (eq goWebFramework "fiber")) (eq goWebFramework "chi")) (eq goApi "grpc-go")) (or (eq auth "go-better-auth") (ne goLogging "none"))) (eq observability "sentry"))}}
 	"os"
 {{/if}}
 {{#if (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (eq goWebFramework "chi")) (and (eq auth "go-better-auth") (not (eq goWebFramework "fiber"))))}}
@@ -37,6 +37,10 @@ import (
 {{#if (or (eq auth "go-better-auth") (ne goAuth "none"))}}
 
 	appauth "{{projectName}}/internal/auth"
+{{/if}}
+{{#if (eq observability "sentry")}}
+
+	appobservability "{{projectName}}/internal/observability"
 {{/if}}
 {{#if (eq goLogging "zap")}}
 
@@ -119,6 +123,12 @@ func main() {
 	// Load environment variables
 	godotenv.Load()
 
+{{#if (eq observability "sentry")}}
+	// Initialize Sentry if configured
+	appobservability.InitSentry()
+	defer appobservability.FlushSentry()
+
+{{/if}}
 {{#if (eq goLogging "zap")}}
 	// Initialize logger
 	initLogger()

@@ -38,6 +38,18 @@ repositories {
 }
 
 dependencies {
+{{#if (eq email "resend")}}
+	implementation("com.resend:resend-java:4.13.0")
+{{/if}}
+{{#if (eq observability "sentry")}}
+	implementation("io.sentry:sentry:8.16.0")
+{{/if}}
+{{#if (eq caching "upstash-redis")}}
+	implementation("redis.clients:jedis:7.5.0")
+{{/if}}
+{{#if (eq search "meilisearch")}}
+	implementation("com.meilisearch.sdk:meilisearch-java:0.14.4")
+{{/if}}
 {{#if isJavaSpringBoot}}
 {{#if hasJavaJpa}}
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")

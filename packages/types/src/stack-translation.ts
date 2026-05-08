@@ -1040,6 +1040,10 @@ function generateRustCommand(selection: StackSelectionInput, projectName: string
     `--rust-error-handling ${selection.rustErrorHandling}`,
     `--rust-caching ${selection.rustCaching}`,
     `--rust-auth ${selection.rustAuth}`,
+    `--email ${selection.email}`,
+    `--observability ${selection.observability}`,
+    `--caching ${selection.caching}`,
+    `--search ${selection.search}`,
     formatArrayFlag("ai-docs", selection.aiDocs),
   ];
 
@@ -1061,6 +1065,10 @@ function generatePythonCommand(selection: StackSelectionInput, projectName: stri
     `--python-task-queue ${selection.pythonTaskQueue}`,
     `--python-graphql ${selection.pythonGraphql}`,
     `--python-quality ${selection.pythonQuality}`,
+    `--email ${selection.email}`,
+    `--observability ${selection.observability}`,
+    `--caching ${selection.caching}`,
+    `--search ${selection.search}`,
     formatArrayFlag("ai-docs", selection.aiDocs),
   ];
 
@@ -1080,6 +1088,10 @@ function generateGoCommand(selection: StackSelectionInput, projectName: string) 
     `--go-logging ${selection.goLogging}`,
     `--go-auth ${selection.goAuth}`,
     `--auth ${selection.auth}`,
+    `--email ${selection.email}`,
+    `--observability ${selection.observability}`,
+    `--caching ${selection.caching}`,
+    `--search ${selection.search}`,
     formatArrayFlag("ai-docs", selection.aiDocs),
   ];
 
@@ -1098,6 +1110,10 @@ function generateJavaCommand(selection: StackSelectionInput, projectName: string
     `--java-auth ${selection.javaAuth}`,
     formatArrayFlag("java-libraries", selection.javaLibraries),
     formatArrayFlag("java-testing-libraries", selection.javaTestingLibraries),
+    `--email ${selection.email}`,
+    `--observability ${selection.observability}`,
+    `--caching ${selection.caching}`,
+    `--search ${selection.search}`,
     formatArrayFlag("ai-docs", selection.aiDocs),
   ];
 
