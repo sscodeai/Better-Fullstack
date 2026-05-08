@@ -251,6 +251,19 @@ function TechResourceButtons({ category, techId }: { category: string; techId: s
   );
 }
 
+function NewToolLabel({ compact = false }: { compact?: boolean }) {
+  return (
+    <span
+      className={cn(
+        "bg-[#bef264] font-mono font-semibold uppercase leading-none text-[#0a0a0a]",
+        compact ? "px-1 py-0.5 text-[8px]" : "px-1.5 py-0.5 text-[9px]",
+      )}
+    >
+      New
+    </span>
+  );
+}
+
 function DisabledReasonInline({ reason, compact = false }: { reason: string; compact?: boolean }) {
   return (
     <div
@@ -1540,21 +1553,35 @@ const StackBuilder = () => {
                                                     )}
                                                   </div>
                                                   <div className="flex items-start gap-3">
-                                                    {tech.icon !== "" && (
-                                                      <div
-                                                        className={cn(
-                                                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors",
-                                                          isSelected
-                                                            ? "bg-primary/10"
-                                                            : "bg-muted/50 group-hover:bg-muted",
-                                                        )}
-                                                      >
-                                                        <TechIcon
-                                                          techId={tech.id}
-                                                          icon={tech.icon}
-                                                          name={tech.name}
-                                                          className="h-5 w-5"
-                                                        />
+                                                    {(tech.icon !== "" ||
+                                                      ICON_REGISTRY[tech.id] ||
+                                                      tech.isNew) && (
+                                                      <div className="flex shrink-0 flex-col items-center gap-1">
+                                                        <div
+                                                          className={cn(
+                                                            "flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+                                                            isSelected
+                                                              ? "bg-primary/10"
+                                                              : "bg-muted/50 group-hover:bg-muted",
+                                                            tech.icon === "" &&
+                                                              !ICON_REGISTRY[tech.id] &&
+                                                              "bg-gradient-to-br",
+                                                            tech.icon === "" &&
+                                                              !ICON_REGISTRY[tech.id] &&
+                                                              tech.color,
+                                                          )}
+                                                        >
+                                                          {(tech.icon !== "" ||
+                                                            ICON_REGISTRY[tech.id]) && (
+                                                            <TechIcon
+                                                              techId={tech.id}
+                                                              icon={tech.icon}
+                                                              name={tech.name}
+                                                              className="h-5 w-5"
+                                                            />
+                                                          )}
+                                                        </div>
+                                                        {tech.isNew && <NewToolLabel />}
                                                       </div>
                                                     )}
                                                     <div className="min-w-0 flex-1 pt-0.5">
@@ -1700,38 +1727,54 @@ const StackBuilder = () => {
                                                         <div className="flex items-start gap-2.5">
                                                           {key === "shadcnColorTheme" ||
                                                           key === "shadcnBaseColor" ? (
-                                                            <div
-                                                              className={cn(
-                                                                "flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors",
-                                                                isSelected
-                                                                  ? "bg-primary/10"
-                                                                  : "bg-muted/50 group-hover:bg-muted",
-                                                              )}
-                                                            >
+                                                            <div className="flex shrink-0 flex-col items-center gap-1">
                                                               <div
                                                                 className={cn(
-                                                                  "h-4 w-4 rounded-full bg-gradient-to-br",
-                                                                  tech.color,
-                                                                )}
-                                                              />
-                                                            </div>
-                                                          ) : (
-                                                            (tech.icon !== "" ||
-                                                              ICON_REGISTRY[tech.id]) && (
-                                                              <div
-                                                                className={cn(
-                                                                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors",
+                                                                  "flex h-8 w-8 items-center justify-center rounded-md transition-colors",
                                                                   isSelected
                                                                     ? "bg-primary/10"
                                                                     : "bg-muted/50 group-hover:bg-muted",
                                                                 )}
                                                               >
-                                                                <TechIcon
-                                                                  techId={tech.id}
-                                                                  icon={tech.icon}
-                                                                  name={tech.name}
-                                                                  className="h-4 w-4"
+                                                                <div
+                                                                  className={cn(
+                                                                    "h-4 w-4 rounded-full bg-gradient-to-br",
+                                                                    tech.color,
+                                                                  )}
                                                                 />
+                                                              </div>
+                                                              {tech.isNew && <NewToolLabel compact />}
+                                                            </div>
+                                                          ) : (
+                                                            (tech.icon !== "" ||
+                                                              ICON_REGISTRY[tech.id] ||
+                                                              tech.isNew) && (
+                                                              <div className="flex shrink-0 flex-col items-center gap-1">
+                                                                <div
+                                                                  className={cn(
+                                                                    "flex h-8 w-8 items-center justify-center rounded-md transition-colors",
+                                                                    isSelected
+                                                                      ? "bg-primary/10"
+                                                                      : "bg-muted/50 group-hover:bg-muted",
+                                                                    tech.icon === "" &&
+                                                                      !ICON_REGISTRY[tech.id] &&
+                                                                      "bg-gradient-to-br",
+                                                                    tech.icon === "" &&
+                                                                      !ICON_REGISTRY[tech.id] &&
+                                                                      tech.color,
+                                                                  )}
+                                                                >
+                                                                  {(tech.icon !== "" ||
+                                                                    ICON_REGISTRY[tech.id]) && (
+                                                                    <TechIcon
+                                                                      techId={tech.id}
+                                                                      icon={tech.icon}
+                                                                      name={tech.name}
+                                                                      className="h-4 w-4"
+                                                                    />
+                                                                  )}
+                                                                </div>
+                                                                {tech.isNew && <NewToolLabel compact />}
                                                               </div>
                                                             )
                                                           )}
@@ -1840,21 +1883,34 @@ const StackBuilder = () => {
                                               </Tooltip>
                                             )}
                                             <div className="flex items-start gap-3">
-                                              {tech.icon !== "" && (
-                                                <div
-                                                  className={cn(
-                                                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors",
-                                                    isSelected
-                                                      ? "bg-primary/10"
-                                                      : "bg-muted/50 group-hover:bg-muted",
-                                                  )}
-                                                >
-                                                  <TechIcon
-                                                    techId={tech.id}
-                                                    icon={tech.icon}
-                                                    name={tech.name}
-                                                    className="h-5 w-5"
-                                                  />
+                                              {(tech.icon !== "" ||
+                                                ICON_REGISTRY[tech.id] ||
+                                                tech.isNew) && (
+                                                <div className="flex shrink-0 flex-col items-center gap-1">
+                                                  <div
+                                                    className={cn(
+                                                      "flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+                                                      isSelected
+                                                        ? "bg-primary/10"
+                                                        : "bg-muted/50 group-hover:bg-muted",
+                                                      tech.icon === "" &&
+                                                        !ICON_REGISTRY[tech.id] &&
+                                                        "bg-gradient-to-br",
+                                                      tech.icon === "" &&
+                                                        !ICON_REGISTRY[tech.id] &&
+                                                        tech.color,
+                                                    )}
+                                                  >
+                                                    {(tech.icon !== "" || ICON_REGISTRY[tech.id]) && (
+                                                      <TechIcon
+                                                        techId={tech.id}
+                                                        icon={tech.icon}
+                                                        name={tech.name}
+                                                        className="h-5 w-5"
+                                                      />
+                                                    )}
+                                                  </div>
+                                                  {tech.isNew && <NewToolLabel />}
                                                 </div>
                                               )}
                                               <div className="min-w-0 flex-1 pt-0.5">

@@ -23,6 +23,7 @@ export const TECH_OPTIONS: Record<
     color: string;
     default?: boolean;
     legacy?: boolean;
+    isNew?: boolean;
     className?: string;
   }[]
 > = {
@@ -1331,6 +1332,7 @@ export const TECH_OPTIONS: Record<
       description: "Popular React component library implementing Material Design",
       icon: "https://cdn.simpleicons.org/mui/007FFF",
       color: "from-blue-500 to-blue-700",
+      isNew: true,
     },
     {
       id: "antd",
@@ -1338,6 +1340,7 @@ export const TECH_OPTIONS: Record<
       description: "Enterprise-class React UI component library",
       icon: "https://cdn.simpleicons.org/antdesign/0170FE",
       color: "from-sky-500 to-indigo-600",
+      isNew: true,
     },
     {
       id: "base-ui",
@@ -1429,6 +1432,7 @@ export const TECH_OPTIONS: Record<
       description: "Modern shadcn/ui v4 preset",
       icon: "",
       color: "from-violet-400 to-sky-600",
+      isNew: true,
     },
     {
       id: "sera",
@@ -1436,6 +1440,7 @@ export const TECH_OPTIONS: Record<
       description: "Modern shadcn/ui v4 preset",
       icon: "",
       color: "from-rose-400 to-orange-600",
+      isNew: true,
     },
   ],
   shadcnIconLibrary: [
@@ -1481,6 +1486,7 @@ export const TECH_OPTIONS: Record<
       description: "Tailwind Labs SVG icon set",
       icon: "",
       color: "from-blue-400 to-cyan-600",
+      isNew: true,
     },
     {
       id: "react-icons",
@@ -1488,6 +1494,7 @@ export const TECH_OPTIONS: Record<
       description: "Popular wrapper for many icon packs",
       icon: "",
       color: "from-red-400 to-pink-600",
+      isNew: true,
     },
   ],
   shadcnColorTheme: [
@@ -2778,6 +2785,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-blue-500 to-cyan-700",
       default: false,
+      isNew: true,
     },
     {
       id: "chrono",
@@ -2786,6 +2794,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-indigo-500 to-blue-700",
       default: false,
+      isNew: true,
     },
     {
       id: "reqwest",
@@ -2794,6 +2803,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-teal-500 to-emerald-700",
       default: false,
+      isNew: true,
     },
     {
       id: "config",
@@ -2802,6 +2812,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-slate-500 to-zinc-700",
       default: false,
+      isNew: true,
     },
     {
       id: "dashmap",
@@ -2810,6 +2821,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-cyan-500 to-blue-700",
       default: false,
+      isNew: true,
     },
     {
       id: "parking-lot",
@@ -2818,6 +2830,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-zinc-500 to-neutral-700",
       default: false,
+      isNew: true,
     },
     {
       id: "secrecy",
@@ -2826,6 +2839,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-violet-500 to-fuchsia-700",
       default: false,
+      isNew: true,
     },
     {
       id: "tokio-util",
@@ -2834,6 +2848,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-teal-500 to-cyan-700",
       default: false,
+      isNew: true,
     },
     {
       id: "utoipa",
@@ -2842,6 +2857,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-orange-500 to-red-700",
       default: false,
+      isNew: true,
     },
     {
       id: "validator",
@@ -2890,6 +2906,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-violet-500 to-purple-700",
       default: false,
+      isNew: true,
     },
     {
       id: "insta",
@@ -2898,6 +2915,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-amber-500 to-orange-700",
       default: false,
+      isNew: true,
     },
     {
       id: "none",
@@ -3157,6 +3175,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-amber-500 to-yellow-700",
       default: false,
+      isNew: true,
     },
     {
       id: "none",
@@ -3201,6 +3220,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/django/092E20",
       color: "from-green-600 to-emerald-800",
       default: false,
+      isNew: true,
     },
     {
       id: "django-ninja",
@@ -3209,6 +3229,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/django/092E20",
       color: "from-cyan-500 to-blue-700",
       default: false,
+      isNew: true,
     },
     {
       id: "none",
@@ -3235,6 +3256,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-red-500 to-rose-600",
       default: false,
+      isNew: true,
     },
     {
       id: "dramatiq",
@@ -3243,6 +3265,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-orange-500 to-red-700",
       default: false,
+      isNew: true,
     },
     {
       id: "huey",
@@ -3251,6 +3274,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-purple-500 to-fuchsia-700",
       default: false,
+      isNew: true,
     },
     {
       id: "none",
@@ -3277,6 +3301,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/graphql/E10098",
       color: "from-violet-500 to-purple-700",
       default: false,
+      isNew: true,
     },
     {
       id: "none",
@@ -3303,6 +3328,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/python/3776AB",
       color: "from-blue-500 to-sky-600",
       default: false,
+      isNew: true,
     },
     {
       id: "pyright",
@@ -3311,6 +3337,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/microsoft/5E5E5E",
       color: "from-violet-500 to-blue-600",
       default: false,
+      isNew: true,
     },
     {
       id: "none",
@@ -3440,6 +3467,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-emerald-500 to-cyan-600",
       default: false,
+      isNew: true,
     },
     {
       id: "none",
@@ -3482,6 +3510,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-orange-500 to-red-700",
       default: false,
+      isNew: true,
     },
     {
       id: "none",
@@ -3535,6 +3564,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/quarkus/4695EB",
       color: "from-blue-500 to-indigo-700",
       default: false,
+      isNew: true,
     },
     {
       id: "none",
@@ -3679,6 +3709,7 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-purple-500 to-indigo-700",
       default: false,
+      isNew: true,
     },
     {
       id: "spring-webflux",
@@ -3687,6 +3718,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/spring/6DB33F",
       color: "from-cyan-500 to-blue-700",
       default: false,
+      isNew: true,
     },
     {
       id: "spring-batch",
@@ -3695,6 +3727,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/spring/6DB33F",
       color: "from-slate-500 to-zinc-700",
       default: false,
+      isNew: true,
     },
     {
       id: "spring-kafka",
@@ -3703,6 +3736,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/apachekafka/231F20",
       color: "from-neutral-600 to-stone-800",
       default: false,
+      isNew: true,
     },
     {
       id: "spring-mail",
@@ -3711,6 +3745,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/spring/6DB33F",
       color: "from-emerald-500 to-teal-700",
       default: false,
+      isNew: true,
     },
     {
       id: "spring-devtools",
@@ -3719,6 +3754,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/springboot/6DB33F",
       color: "from-lime-500 to-green-700",
       default: false,
+      isNew: true,
     },
     {
       id: "micrometer-prometheus",
@@ -3727,6 +3763,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/prometheus/E6522C",
       color: "from-orange-500 to-red-700",
       default: false,
+      isNew: true,
     },
     {
       id: "thymeleaf",
@@ -3735,6 +3772,7 @@ export const TECH_OPTIONS: Record<
       icon: "https://cdn.simpleicons.org/thymeleaf/005F0F",
       color: "from-green-500 to-emerald-700",
       default: false,
+      isNew: true,
     },
     {
       id: "none",
