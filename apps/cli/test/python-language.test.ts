@@ -3,6 +3,8 @@ import type { VirtualNode, VirtualFile } from "@better-fullstack/template-genera
 import { describe, expect, it } from "bun:test";
 
 import { createVirtual } from "../src/index";
+import { runWithContext } from "../src/utils/context";
+import { validatePythonApiConstraints } from "../src/utils/config-validation";
 import {
   EcosystemSchema,
   PythonWebFrameworkSchema,
@@ -381,6 +383,18 @@ describe("Python Language Support", () => {
       expect(pyprojectContent).toContain("django-ninja");
       expect(mainContent).toContain("from ninja import NinjaAPI");
       expect(mainContent).toContain('path("api/", ninja_api.urls)');
+    });
+
+    it("should reject Django API frameworks without Django", () => {
+      expect(() =>
+        runWithContext({ silent: true }, () =>
+          validatePythonApiConstraints({
+            ecosystem: "python",
+            pythonWebFramework: "fastapi",
+            pythonApi: "django-ninja",
+          }),
+        ),
+      ).toThrow("Python API frameworks require --python-web-framework django.");
     });
   });
 
@@ -3015,6 +3029,9 @@ describe("Python Language Support", () => {
       expect(pyprojectContent).toBeDefined();
       expect(pyprojectContent).toContain("mypy>=1.20.2");
       expect(pyprojectContent).toContain("[tool.mypy]");
+      expect(pyprojectContent).toContain("check_untyped_defs = true");
+      expect(pyprojectContent).not.toContain("strict = true");
+      expect(pyprojectContent).not.toContain("disallow_untyped_defs = true");
       expect(pyprojectContent).toContain('files = ["src/app", "tests"]');
     });
 

@@ -674,6 +674,27 @@ export function validateShadcnConstraints(
   }
 }
 
+export function validatePythonApiConstraints(config: Partial<ProjectConfig>) {
+  if (
+    config.ecosystem === "python" &&
+    config.pythonApi &&
+    config.pythonApi !== "none" &&
+    config.pythonWebFramework !== "django"
+  ) {
+    incompatibilityError({
+      message: "Python API frameworks require --python-web-framework django.",
+      provided: {
+        "python-web-framework": config.pythonWebFramework || "none",
+        "python-api": config.pythonApi,
+      },
+      suggestions: [
+        "Use --python-web-framework django with --python-api django-rest-framework or django-ninja",
+        "Set --python-api none for FastAPI, Flask, Litestar, or no Python web framework",
+      ],
+    });
+  }
+}
+
 export function validateFullConfig(
   config: Partial<ProjectConfig>,
   providedFlags: Set<string>,
@@ -693,6 +714,7 @@ export function validateFullConfig(
   validateFrontendConstraints(config, providedFlags);
 
   validateApiConstraints(config, options);
+  validatePythonApiConstraints(config);
   validateJavaConstraints(config, providedFlags);
 
   validateServerDeployRequiresBackend(config.serverDeploy, config.backend);
