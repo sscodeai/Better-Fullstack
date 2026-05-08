@@ -115,6 +115,11 @@ describe("Rust Ecosystem", () => {
       expect(RUST_LIBRARIES).toContain("chrono");
       expect(RUST_LIBRARIES).toContain("reqwest");
       expect(RUST_LIBRARIES).toContain("config");
+      expect(RUST_LIBRARIES).toContain("dashmap");
+      expect(RUST_LIBRARIES).toContain("parking-lot");
+      expect(RUST_LIBRARIES).toContain("secrecy");
+      expect(RUST_LIBRARIES).toContain("tokio-util");
+      expect(RUST_LIBRARIES).toContain("utoipa");
       expect(RUST_LIBRARIES).toContain("validator");
       expect(RUST_LIBRARIES).toContain("jsonwebtoken");
       expect(RUST_LIBRARIES).toContain("argon2");
@@ -1826,6 +1831,36 @@ describe("Rust Ecosystem", () => {
       expect(serverCargoContent).toContain("[dev-dependencies]");
       expect(serverCargoContent).toContain("proptest.workspace = true");
       expect(serverCargoContent).toContain("insta.workspace = true");
+    });
+
+    it("should include additional runtime utility libraries when selected", async () => {
+      const result = await createVirtual({
+        projectName: "rust-runtime-libs",
+        ecosystem: "rust",
+        rustWebFramework: "axum",
+        rustFrontend: "none",
+        rustOrm: "none",
+        rustApi: "none",
+        rustCli: "none",
+        rustLibraries: ["dashmap", "parking-lot", "secrecy", "tokio-util", "utoipa"],
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+
+      const cargoContent = getFileContent(root, "Cargo.toml");
+      expect(cargoContent).toContain("dashmap");
+      expect(cargoContent).toContain("parking_lot");
+      expect(cargoContent).toContain("secrecy");
+      expect(cargoContent).toContain("tokio-util");
+      expect(cargoContent).toContain("utoipa");
+
+      const serverCargoContent = getFileContent(root, "crates/server/Cargo.toml");
+      expect(serverCargoContent).toContain("dashmap.workspace = true");
+      expect(serverCargoContent).toContain("parking_lot.workspace = true");
+      expect(serverCargoContent).toContain("secrecy.workspace = true");
+      expect(serverCargoContent).toContain("tokio-util.workspace = true");
+      expect(serverCargoContent).toContain("utoipa.workspace = true");
     });
 
     it("should include multiple libraries when selected", async () => {

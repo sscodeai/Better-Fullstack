@@ -75,6 +75,27 @@ dependencies {
 {{#if hasJavaResilience4j}}
 	implementation("io.github.resilience4j:resilience4j-spring-boot3:2.3.0")
 {{/if}}
+{{#if hasJavaWebflux}}
+	implementation("org.springframework.boot:spring-boot-starter-webflux")
+{{/if}}
+{{#if hasJavaBatch}}
+	implementation("org.springframework.boot:spring-boot-starter-batch")
+{{/if}}
+{{#if hasJavaKafka}}
+	implementation("org.springframework.kafka:spring-kafka")
+{{/if}}
+{{#if hasJavaMail}}
+	implementation("org.springframework.boot:spring-boot-starter-mail")
+{{/if}}
+{{#if hasJavaDevtools}}
+	developmentOnly("org.springframework.boot:spring-boot-devtools")
+{{/if}}
+{{#if hasJavaMicrometerPrometheus}}
+	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+{{/if}}
+{{#if hasJavaThymeleaf}}
+	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+{{/if}}
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 {{#if hasJavaJpa}}
 	runtimeOnly("com.h2database:h2")

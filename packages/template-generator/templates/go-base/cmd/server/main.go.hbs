@@ -49,6 +49,10 @@ import (
 {{#if (eq goLogging "slog")}}
 	"log/slog"
 {{/if}}
+{{#if (eq goLogging "logrus")}}
+
+	"github.com/sirupsen/logrus"
+{{/if}}
 	"github.com/joho/godotenv"
 {{#if (eq goApi "grpc-go")}}
 	"net"
@@ -100,6 +104,16 @@ func initLogger() {
 	slog.SetDefault(logger)
 }
 {{/if}}
+{{#if (eq goLogging "logrus")}}
+var logger = logrus.New()
+
+func initLogger() {
+	logger.SetFormatter(&logrus.JSONFormatter{})
+	if os.Getenv("LOG_LEVEL") == "debug" {
+		logger.SetLevel(logrus.DebugLevel)
+	}
+}
+{{/if}}
 
 func main() {
 	// Load environment variables
@@ -119,6 +133,12 @@ func main() {
 	logger.Info().Msg("Starting {{projectName}} server")
 {{/if}}
 {{#if (eq goLogging "slog")}}
+	// Initialize logger
+	initLogger()
+
+	logger.Info("Starting {{projectName}} server")
+{{/if}}
+{{#if (eq goLogging "logrus")}}
 	// Initialize logger
 	initLogger()
 

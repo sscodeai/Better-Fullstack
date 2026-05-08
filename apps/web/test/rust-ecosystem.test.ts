@@ -189,6 +189,15 @@ describe("Rust Ecosystem Tab", () => {
       expect(configOption?.description).toContain("Layered configuration");
     });
 
+    it("should have additional runtime utility options for rustLibraries", () => {
+      const options = TECH_OPTIONS.rustLibraries;
+      expect(options.find((o) => o.id === "dashmap")?.name).toBe("DashMap");
+      expect(options.find((o) => o.id === "parking-lot")?.name).toBe("parking_lot");
+      expect(options.find((o) => o.id === "secrecy")?.name).toBe("Secrecy");
+      expect(options.find((o) => o.id === "tokio-util")?.name).toBe("Tokio Util");
+      expect(options.find((o) => o.id === "utoipa")?.name).toBe("utoipa");
+    });
+
     it("should have jsonwebtoken option for rustLibraries", () => {
       const options = TECH_OPTIONS.rustLibraries;
       const jwtOption = options.find((o) => o.id === "jsonwebtoken");

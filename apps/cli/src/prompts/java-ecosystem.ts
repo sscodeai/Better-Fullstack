@@ -172,6 +172,41 @@ const JAVA_LIBRARY_PROMPT_OPTIONS: PromptOption<JavaLibraries>[] = [
     hint: "Fault tolerance patterns for retries, circuit breakers, and rate limiting",
   },
   {
+    value: "spring-webflux",
+    label: "Spring WebFlux",
+    hint: "Reactive HTTP stack for Spring applications",
+  },
+  {
+    value: "spring-batch",
+    label: "Spring Batch",
+    hint: "Batch processing framework for ETL and scheduled jobs",
+  },
+  {
+    value: "spring-kafka",
+    label: "Spring for Apache Kafka",
+    hint: "Kafka producer, consumer, and listener integration",
+  },
+  {
+    value: "spring-mail",
+    label: "Spring Mail",
+    hint: "Email support through Jakarta Mail and Spring abstractions",
+  },
+  {
+    value: "spring-devtools",
+    label: "Spring Boot DevTools",
+    hint: "Developer-time restart and local productivity support",
+  },
+  {
+    value: "micrometer-prometheus",
+    label: "Micrometer Prometheus",
+    hint: "Prometheus metrics registry for Micrometer and Actuator",
+  },
+  {
+    value: "thymeleaf",
+    label: "Thymeleaf",
+    hint: "Server-rendered HTML templates for Spring MVC apps",
+  },
+  {
     value: "none",
     label: "None",
     hint: "No extra Java libraries",

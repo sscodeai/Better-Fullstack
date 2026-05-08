@@ -111,6 +111,11 @@ const GO_LOGGING_PROMPT_OPTIONS: PromptOption<GoLogging>[] = [
     hint: "Go 1.21+ stdlib structured logging (no external dependency)",
   },
   {
+    value: "logrus",
+    label: "Logrus",
+    hint: "Classic structured logger with hooks and formatter ecosystem",
+  },
+  {
     value: "none",
     label: "None",
     hint: "No logging library",

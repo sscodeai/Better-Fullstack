@@ -11,6 +11,7 @@ import {
   PythonAiSchema,
   PythonApiSchema,
   PythonTaskQueueSchema,
+  PythonGraphqlSchema,
   PythonQualitySchema,
 } from "../src/types";
 
@@ -64,6 +65,7 @@ const PYTHON_VALIDATIONS = extractEnumValues(PythonValidationSchema);
 const PYTHON_AIS = extractEnumValues(PythonAiSchema);
 const PYTHON_APIS = extractEnumValues(PythonApiSchema);
 const PYTHON_TASK_QUEUES = extractEnumValues(PythonTaskQueueSchema);
+const PYTHON_GRAPHQLS = extractEnumValues(PythonGraphqlSchema);
 const PYTHON_QUALITIES = extractEnumValues(PythonQualitySchema);
 
 describe("Python Language Support", () => {
@@ -104,12 +106,15 @@ describe("Python Language Support", () => {
       expect(PYTHON_AIS).toContain("anthropic-sdk");
       expect(PYTHON_AIS).toContain("langgraph");
       expect(PYTHON_AIS).toContain("crewai");
+      expect(PYTHON_AIS).toContain("haystack");
       expect(PYTHON_AIS).toContain("none");
     });
 
     it("should have python task queue options", () => {
       expect(PYTHON_TASK_QUEUES).toContain("celery");
       expect(PYTHON_TASK_QUEUES).toContain("rq");
+      expect(PYTHON_TASK_QUEUES).toContain("dramatiq");
+      expect(PYTHON_TASK_QUEUES).toContain("huey");
       expect(PYTHON_TASK_QUEUES).toContain("none");
     });
 
@@ -117,6 +122,12 @@ describe("Python Language Support", () => {
       expect(PYTHON_APIS).toContain("django-rest-framework");
       expect(PYTHON_APIS).toContain("django-ninja");
       expect(PYTHON_APIS).toContain("none");
+    });
+
+    it("should have python GraphQL options", () => {
+      expect(PYTHON_GRAPHQLS).toContain("strawberry");
+      expect(PYTHON_GRAPHQLS).toContain("ariadne");
+      expect(PYTHON_GRAPHQLS).toContain("none");
     });
 
     it("should have python quality options", () => {
@@ -2874,6 +2885,88 @@ describe("Python Language Support", () => {
       expect(settingsContent).toContain("rq_redis_url");
       expect(settingsContent).toContain("rq_default_queue");
       expect(settingsContent).toContain("redis://localhost:6379/0");
+    });
+  });
+
+  describe("Additional Python ecosystem options", () => {
+    it("should include Haystack dependencies when selected", async () => {
+      const result = await createVirtual({
+        projectName: "python-haystack-deps",
+        ecosystem: "python",
+        pythonWebFramework: "fastapi",
+        pythonOrm: "none",
+        pythonValidation: "pydantic",
+        pythonAi: ["haystack"],
+        pythonTaskQueue: "none",
+        pythonQuality: "none",
+      });
+
+      expect(result.success).toBe(true);
+      const pyprojectContent = getFileContent(result.tree!.root, "pyproject.toml");
+      expect(pyprojectContent).toContain("haystack-ai");
+
+      const settingsContent = getFileContent(result.tree!.root, "src/app/settings.py");
+      expect(settingsContent).toContain("haystack_default_model");
+    });
+
+    it("should include Dramatiq files and dependencies when selected", async () => {
+      const result = await createVirtual({
+        projectName: "python-dramatiq-deps",
+        ecosystem: "python",
+        pythonWebFramework: "fastapi",
+        pythonOrm: "none",
+        pythonValidation: "pydantic",
+        pythonAi: [],
+        pythonTaskQueue: "dramatiq",
+        pythonQuality: "none",
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+      expect(getFileContent(root, "pyproject.toml")).toContain("dramatiq[redis,watch]");
+      expect(hasFile(root, "src/app/dramatiq_app.py")).toBe(true);
+      expect(hasFile(root, "src/app/dramatiq_tasks.py")).toBe(true);
+      expect(getFileContent(root, "src/app/settings.py")).toContain("dramatiq_broker_url");
+    });
+
+    it("should include Huey files and dependencies when selected", async () => {
+      const result = await createVirtual({
+        projectName: "python-huey-deps",
+        ecosystem: "python",
+        pythonWebFramework: "fastapi",
+        pythonOrm: "none",
+        pythonValidation: "pydantic",
+        pythonAi: [],
+        pythonTaskQueue: "huey",
+        pythonQuality: "none",
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+      expect(getFileContent(root, "pyproject.toml")).toContain("huey");
+      expect(hasFile(root, "src/app/huey_app.py")).toBe(true);
+      expect(hasFile(root, "src/app/huey_tasks.py")).toBe(true);
+      expect(getFileContent(root, "src/app/settings.py")).toContain("huey_redis_url");
+    });
+
+    it("should include Ariadne schema and dependency when selected", async () => {
+      const result = await createVirtual({
+        projectName: "python-ariadne-deps",
+        ecosystem: "python",
+        pythonWebFramework: "fastapi",
+        pythonOrm: "none",
+        pythonValidation: "none",
+        pythonAi: [],
+        pythonTaskQueue: "none",
+        pythonGraphql: "ariadne",
+        pythonQuality: "none",
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+      expect(getFileContent(root, "pyproject.toml")).toContain("ariadne[asgi]");
+      expect(hasFile(root, "src/app/ariadne_schema.py")).toBe(true);
+      expect(getFileContent(root, "src/app/ariadne_schema.py")).toContain("make_executable_schema");
     });
   });
 

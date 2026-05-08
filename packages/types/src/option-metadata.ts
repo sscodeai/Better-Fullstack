@@ -603,6 +603,11 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     chrono: "Chrono",
     reqwest: "Reqwest",
     config: "config",
+    dashmap: "DashMap",
+    "parking-lot": "parking_lot",
+    secrecy: "Secrecy",
+    "tokio-util": "Tokio Util",
+    utoipa: "utoipa",
     validator: "Validator",
     jsonwebtoken: "jsonwebtoken",
     argon2: "Argon2",
@@ -645,6 +650,7 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     "anthropic-sdk": "Anthropic SDK",
     langgraph: "LangGraph",
     crewai: "CrewAI",
+    haystack: "Haystack",
   },
   pythonAuth: {
     authlib: "Authlib",
@@ -657,9 +663,12 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   pythonTaskQueue: {
     celery: "Celery",
     rq: "RQ",
+    dramatiq: "Dramatiq",
+    huey: "Huey",
   },
   pythonGraphql: {
     strawberry: "Strawberry",
+    ariadne: "Ariadne",
   },
   pythonQuality: {
     ruff: "Ruff",
@@ -689,6 +698,7 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     zap: "Zap",
     zerolog: "Zerolog",
     slog: "slog",
+    logrus: "Logrus",
   },
   goAuth: {
     casbin: "Casbin",
@@ -716,6 +726,13 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     mapstruct: "MapStruct",
     caffeine: "Caffeine",
     resilience4j: "Resilience4j",
+    "spring-webflux": "Spring WebFlux",
+    "spring-batch": "Spring Batch",
+    "spring-kafka": "Spring for Apache Kafka",
+    "spring-mail": "Spring Mail",
+    "spring-devtools": "Spring Boot DevTools",
+    "micrometer-prometheus": "Micrometer Prometheus",
+    thymeleaf: "Thymeleaf",
   },
   javaTestingLibraries: {
     junit5: "JUnit 5",

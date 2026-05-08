@@ -173,6 +173,13 @@ describe("Java Ecosystem", () => {
         "mapstruct",
         "caffeine",
         "resilience4j",
+        "spring-webflux",
+        "spring-batch",
+        "spring-kafka",
+        "spring-mail",
+        "spring-devtools",
+        "micrometer-prometheus",
+        "thymeleaf",
         "none",
       ]);
       expect(JAVA_ORMS).toEqual(["spring-data-jpa", "none"]);
@@ -509,6 +516,13 @@ describe("Java Ecosystem", () => {
           "mapstruct",
           "caffeine",
           "resilience4j",
+          "spring-webflux",
+          "spring-batch",
+          "spring-kafka",
+          "spring-mail",
+          "spring-devtools",
+          "micrometer-prometheus",
+          "thymeleaf",
         ],
         javaTestingLibraries: [
           "junit5",
@@ -574,6 +588,13 @@ describe("Java Ecosystem", () => {
       expect(pomContent).toContain("spring-boot-starter-cache");
       expect(pomContent).toContain("caffeine");
       expect(pomContent).toContain("resilience4j-spring-boot3");
+      expect(pomContent).toContain("spring-boot-starter-webflux");
+      expect(pomContent).toContain("spring-boot-starter-batch");
+      expect(pomContent).toContain("spring-kafka");
+      expect(pomContent).toContain("spring-boot-starter-mail");
+      expect(pomContent).toContain("spring-boot-devtools");
+      expect(pomContent).toContain("micrometer-registry-prometheus");
+      expect(pomContent).toContain("spring-boot-starter-thymeleaf");
       expect(pomContent).toContain("<version>2.3.0</version>");
       expect(pomContent).toContain("<optional>true</optional>");
       expect(pomContent).toContain("<artifactId>maven-compiler-plugin</artifactId>");

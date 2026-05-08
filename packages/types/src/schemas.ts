@@ -299,6 +299,11 @@ export const RustLibrariesSchema = z
     "chrono",
     "reqwest",
     "config",
+    "dashmap",
+    "parking-lot",
+    "secrecy",
+    "tokio-util",
+    "utoipa",
     "validator",
     "jsonwebtoken",
     "argon2",
@@ -336,7 +341,16 @@ export const PythonValidationSchema = z
   .describe("Python validation library");
 
 export const PythonAiSchema = z
-  .enum(["langchain", "llamaindex", "openai-sdk", "anthropic-sdk", "langgraph", "crewai", "none"])
+  .enum([
+    "langchain",
+    "llamaindex",
+    "openai-sdk",
+    "anthropic-sdk",
+    "langgraph",
+    "crewai",
+    "haystack",
+    "none",
+  ])
   .describe("Python AI/ML framework");
 
 export const PythonAuthSchema = z
@@ -347,10 +361,12 @@ export const PythonApiSchema = z
   .enum(["django-rest-framework", "django-ninja", "none"])
   .describe("Python API framework");
 
-export const PythonTaskQueueSchema = z.enum(["celery", "rq", "none"]).describe("Python task queue");
+export const PythonTaskQueueSchema = z
+  .enum(["celery", "rq", "dramatiq", "huey", "none"])
+  .describe("Python task queue");
 
 export const PythonGraphqlSchema = z
-  .enum(["strawberry", "none"])
+  .enum(["strawberry", "ariadne", "none"])
   .describe("Python GraphQL framework");
 
 export const PythonQualitySchema = z
@@ -373,7 +389,7 @@ export const GoCliSchema = z
   .describe("Go CLI tools");
 
 export const GoLoggingSchema = z
-  .enum(["zap", "zerolog", "slog", "none"])
+  .enum(["zap", "zerolog", "slog", "logrus", "none"])
   .describe("Go logging library");
 
 export const GoAuthSchema = z.enum(["casbin", "jwt", "none"]).describe("Go authentication library");
@@ -404,6 +420,13 @@ export const JavaLibrariesSchema = z
     "mapstruct",
     "caffeine",
     "resilience4j",
+    "spring-webflux",
+    "spring-batch",
+    "spring-kafka",
+    "spring-mail",
+    "spring-devtools",
+    "micrometer-prometheus",
+    "thymeleaf",
     "none",
   ])
   .describe("Java application libraries");

@@ -174,6 +174,13 @@ describe("Go Ecosystem Tab", () => {
       expect(zapOption?.name).toBe("Zap");
       expect(zapOption?.description).toContain("logging");
     });
+
+    it("should have Logrus option for goLogging", () => {
+      const options = TECH_OPTIONS.goLogging;
+      const logrusOption = options.find((o) => o.id === "logrus");
+      expect(logrusOption).toBeDefined();
+      expect(logrusOption?.name).toBe("Logrus");
+    });
   });
 
   describe("DEFAULT_STACK", () => {

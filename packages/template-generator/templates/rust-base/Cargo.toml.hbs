@@ -161,6 +161,26 @@ reqwest = { version = "0.13.3", default-features = false, features = ["json", "r
 # Layered configuration
 config = "0.15.22"
 {{/if}}
+{{#if (includes rustLibraries "dashmap")}}
+# Concurrent maps
+dashmap = "6"
+{{/if}}
+{{#if (includes rustLibraries "parking-lot")}}
+# Synchronization primitives
+parking_lot = "0.12"
+{{/if}}
+{{#if (includes rustLibraries "secrecy")}}
+# Secret handling
+secrecy = { version = "0.10", features = ["serde"] }
+{{/if}}
+{{#if (includes rustLibraries "tokio-util")}}
+# Tokio utilities
+tokio-util = { version = "0.7", features = ["codec", "io", "rt"] }
+{{/if}}
+{{#if (includes rustLibraries "utoipa")}}
+# OpenAPI generation
+utoipa = { version = "5", features = ["axum_extras", "chrono", "uuid"] }
+{{/if}}
 {{#if (includes rustLibraries "validator")}}
 # Validation
 validator = { version = "0.19", features = ["derive"] }

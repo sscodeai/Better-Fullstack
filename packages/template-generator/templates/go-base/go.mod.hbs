@@ -54,6 +54,9 @@ require (
 {{#if (eq goLogging "zerolog")}}
 	github.com/rs/zerolog v1.34.0
 {{/if}}
+{{#if (eq goLogging "logrus")}}
+	github.com/sirupsen/logrus v1.9.3
+{{/if}}
 {{#if (eq goAuth "casbin")}}
 	github.com/casbin/casbin/v2 v2.103.0
 {{/if}}

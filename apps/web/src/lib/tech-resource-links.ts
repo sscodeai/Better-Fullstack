@@ -319,6 +319,34 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://resilience4j.readme.io/docs",
     githubUrl: "https://github.com/resilience4j/resilience4j",
   },
+  "spring-webflux": {
+    docsUrl: "https://docs.spring.io/spring-framework/reference/web/webflux.html",
+    githubUrl: "https://github.com/spring-projects/spring-framework",
+  },
+  "spring-batch": {
+    docsUrl: "https://docs.spring.io/spring-batch/reference/",
+    githubUrl: "https://github.com/spring-projects/spring-batch",
+  },
+  "spring-kafka": {
+    docsUrl: "https://docs.spring.io/spring-kafka/reference/",
+    githubUrl: "https://github.com/spring-projects/spring-kafka",
+  },
+  "spring-mail": {
+    docsUrl: "https://docs.spring.io/spring-framework/reference/integration/email.html",
+    githubUrl: "https://github.com/spring-projects/spring-framework",
+  },
+  "spring-devtools": {
+    docsUrl: "https://docs.spring.io/spring-boot/reference/using/devtools.html",
+    githubUrl: "https://github.com/spring-projects/spring-boot",
+  },
+  "micrometer-prometheus": {
+    docsUrl: "https://docs.micrometer.io/micrometer/reference/implementations/prometheus.html",
+    githubUrl: "https://github.com/micrometer-metrics/micrometer",
+  },
+  thymeleaf: {
+    docsUrl: "https://www.thymeleaf.org/documentation.html",
+    githubUrl: "https://github.com/thymeleaf/thymeleaf",
+  },
   junit5: {
     docsUrl: "https://junit.org/junit5/docs/current/user-guide/",
     githubUrl: "https://github.com/junit-team/junit5",
@@ -829,6 +857,26 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://docs.rs/config/latest/config/",
     githubUrl: "https://github.com/rust-cli/config-rs",
   },
+  dashmap: {
+    docsUrl: "https://docs.rs/dashmap/latest/dashmap/",
+    githubUrl: "https://github.com/xacrimon/dashmap",
+  },
+  "parking-lot": {
+    docsUrl: "https://docs.rs/parking_lot/latest/parking_lot/",
+    githubUrl: "https://github.com/Amanieu/parking_lot",
+  },
+  secrecy: {
+    docsUrl: "https://docs.rs/secrecy/latest/secrecy/",
+    githubUrl: "https://github.com/iqlusioninc/crates",
+  },
+  "tokio-util": {
+    docsUrl: "https://docs.rs/tokio-util/latest/tokio_util/",
+    githubUrl: "https://github.com/tokio-rs/tokio",
+  },
+  utoipa: {
+    docsUrl: "https://docs.rs/utoipa/latest/utoipa/",
+    githubUrl: "https://github.com/juhaku/utoipa",
+  },
   jsonwebtoken: {
     docsUrl: "https://docs.rs/jsonwebtoken/latest/jsonwebtoken/",
     githubUrl: "https://github.com/Keats/jsonwebtoken",
@@ -895,10 +943,16 @@ const BASE_LINKS: LinkMap = {
   },
   celery: { docsUrl: "https://docs.celeryq.dev/", githubUrl: "https://github.com/celery/celery" },
   rq: { docsUrl: "https://python-rq.org/", githubUrl: "https://github.com/rq/rq" },
+  dramatiq: { docsUrl: "https://dramatiq.io/", githubUrl: "https://github.com/Bogdanp/dramatiq" },
+  huey: {
+    docsUrl: "https://huey.readthedocs.io/",
+    githubUrl: "https://github.com/coleifer/huey",
+  },
   strawberry: {
     docsUrl: "https://strawberry.rocks/docs",
     githubUrl: "https://github.com/strawberry-graphql/strawberry",
   },
+  ariadne: { docsUrl: "https://ariadnegraphql.org/", githubUrl: "https://github.com/mirumee/ariadne" },
   ruff: { docsUrl: "https://docs.astral.sh/ruff/", githubUrl: "https://github.com/astral-sh/ruff" },
   mypy: { docsUrl: "https://mypy.readthedocs.io/", githubUrl: "https://github.com/python/mypy" },
   pyright: {
@@ -943,6 +997,10 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://pkg.go.dev/log/slog",
     githubUrl: "https://github.com/golang/go",
   },
+  logrus: {
+    docsUrl: "https://pkg.go.dev/github.com/sirupsen/logrus",
+    githubUrl: "https://github.com/sirupsen/logrus",
+  },
   casbin: {
     docsUrl: "https://casbin.org/docs/overview",
     githubUrl: "https://github.com/casbin/casbin",
@@ -986,6 +1044,10 @@ const CATEGORY_LINKS: LinkMap = {
   "pythonAi:crewai": {
     docsUrl: "https://docs.crewai.com/",
     githubUrl: "https://github.com/crewAIInc/crewAI",
+  },
+  "pythonAi:haystack": {
+    docsUrl: "https://docs.haystack.deepset.ai/",
+    githubUrl: "https://github.com/deepset-ai/haystack",
   },
   "pythonApi:django-rest-framework": {
     docsUrl: "https://www.django-rest-framework.org/",

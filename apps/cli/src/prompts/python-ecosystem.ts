@@ -118,6 +118,11 @@ const PYTHON_AI_PROMPT_OPTIONS: PromptOption<PythonAi>[] = [
     label: "CrewAI",
     hint: "Multi-agent orchestration framework",
   },
+  {
+    value: "haystack",
+    label: "Haystack",
+    hint: "Composable LLM pipelines, RAG, and search applications",
+  },
 ];
 
 const PYTHON_AUTH_PROMPT_OPTIONS: PromptOption<PythonAuth>[] = [
@@ -168,6 +173,16 @@ const PYTHON_TASK_QUEUE_PROMPT_OPTIONS: PromptOption<PythonTaskQueue>[] = [
     hint: "Simple Redis-backed job queue for Python",
   },
   {
+    value: "dramatiq",
+    label: "Dramatiq",
+    hint: "Distributed task processing with Redis or RabbitMQ brokers",
+  },
+  {
+    value: "huey",
+    label: "Huey",
+    hint: "Lightweight task queue with Redis-backed scheduling",
+  },
+  {
     value: "none",
     label: "None",
     hint: "No task queue",
@@ -179,6 +194,11 @@ const PYTHON_GRAPHQL_PROMPT_OPTIONS: PromptOption<PythonGraphql>[] = [
     value: "strawberry",
     label: "Strawberry",
     hint: "Python GraphQL library using dataclasses and type hints",
+  },
+  {
+    value: "ariadne",
+    label: "Ariadne",
+    hint: "Schema-first GraphQL server library for Python",
   },
   {
     value: "none",

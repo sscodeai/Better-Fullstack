@@ -217,6 +217,13 @@ describe("Python Ecosystem Tab", () => {
       expect(crewaiOption?.name).toBe("CrewAI");
     });
 
+    it("should have Haystack option for pythonAi", () => {
+      const options = TECH_OPTIONS.pythonAi;
+      const haystackOption = options.find((o) => o.id === "haystack");
+      expect(haystackOption).toBeDefined();
+      expect(haystackOption?.name).toBe("Haystack");
+    });
+
     it("should have none as default for pythonAi", () => {
       const options = TECH_OPTIONS.pythonAi;
       const noneOption = options.find((o) => o.id === "none");
@@ -230,6 +237,17 @@ describe("Python Ecosystem Tab", () => {
       expect(celeryOption).toBeDefined();
       expect(celeryOption?.name).toBe("Celery");
       expect(celeryOption?.description).toContain("task queue");
+    });
+
+    it("should have additional python task queue options", () => {
+      const options = TECH_OPTIONS.pythonTaskQueue;
+      expect(options.find((o) => o.id === "dramatiq")?.name).toBe("Dramatiq");
+      expect(options.find((o) => o.id === "huey")?.name).toBe("Huey");
+    });
+
+    it("should have Ariadne option for pythonGraphql", () => {
+      const options = TECH_OPTIONS.pythonGraphql;
+      expect(options.find((o) => o.id === "ariadne")?.name).toBe("Ariadne");
     });
 
     it("should have none as default for pythonTaskQueue", () => {

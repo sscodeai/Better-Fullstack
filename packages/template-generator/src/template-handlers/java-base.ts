@@ -26,6 +26,13 @@ type JavaTemplateContext = ProjectConfig & {
   hasJavaMapstruct: boolean;
   hasJavaCaffeine: boolean;
   hasJavaResilience4j: boolean;
+  hasJavaWebflux: boolean;
+  hasJavaBatch: boolean;
+  hasJavaKafka: boolean;
+  hasJavaMail: boolean;
+  hasJavaDevtools: boolean;
+  hasJavaMicrometerPrometheus: boolean;
+  hasJavaThymeleaf: boolean;
   hasJavaAnnotationProcessors: boolean;
   hasJavaMockito: boolean;
   hasJavaTestcontainers: boolean;
@@ -195,6 +202,13 @@ function createJavaTemplateContext(config: ProjectConfig): JavaTemplateContext {
     hasJavaMapstruct: javaLibraries.includes("mapstruct"),
     hasJavaCaffeine: javaLibraries.includes("caffeine"),
     hasJavaResilience4j: javaLibraries.includes("resilience4j"),
+    hasJavaWebflux: javaLibraries.includes("spring-webflux"),
+    hasJavaBatch: javaLibraries.includes("spring-batch"),
+    hasJavaKafka: javaLibraries.includes("spring-kafka"),
+    hasJavaMail: javaLibraries.includes("spring-mail"),
+    hasJavaDevtools: javaLibraries.includes("spring-devtools"),
+    hasJavaMicrometerPrometheus: javaLibraries.includes("micrometer-prometheus"),
+    hasJavaThymeleaf: javaLibraries.includes("thymeleaf"),
     hasJavaAnnotationProcessors:
       javaLibraries.includes("lombok") || javaLibraries.includes("mapstruct"),
     hasJavaMockito,

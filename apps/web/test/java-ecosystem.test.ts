@@ -110,6 +110,13 @@ describe("Java Ecosystem Tab", () => {
         "mapstruct",
         "caffeine",
         "resilience4j",
+        "spring-webflux",
+        "spring-batch",
+        "spring-kafka",
+        "spring-mail",
+        "spring-devtools",
+        "micrometer-prometheus",
+        "thymeleaf",
         "none",
       ]);
       expect(TECH_OPTIONS.javaTestingLibraries.map((option) => option.id)).toEqual([

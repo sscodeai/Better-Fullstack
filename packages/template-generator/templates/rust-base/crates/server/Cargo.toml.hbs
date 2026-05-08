@@ -117,6 +117,21 @@ reqwest.workspace = true
 {{#if (includes rustLibraries "config")}}
 config.workspace = true
 {{/if}}
+{{#if (includes rustLibraries "dashmap")}}
+dashmap.workspace = true
+{{/if}}
+{{#if (includes rustLibraries "parking-lot")}}
+parking_lot.workspace = true
+{{/if}}
+{{#if (includes rustLibraries "secrecy")}}
+secrecy.workspace = true
+{{/if}}
+{{#if (includes rustLibraries "tokio-util")}}
+tokio-util.workspace = true
+{{/if}}
+{{#if (includes rustLibraries "utoipa")}}
+utoipa.workspace = true
+{{/if}}
 {{#if (eq rustCaching "moka")}}
 # Caching
 moka.workspace = true

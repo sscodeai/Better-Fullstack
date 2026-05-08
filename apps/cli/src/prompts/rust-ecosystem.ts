@@ -146,6 +146,31 @@ const RUST_LIBRARIES_PROMPT_OPTIONS: PromptOption<RustLibraries>[] = [
     hint: "Layered configuration from files, environment, and defaults",
   },
   {
+    value: "dashmap",
+    label: "DashMap",
+    hint: "Concurrent hash map for shared mutable state",
+  },
+  {
+    value: "parking-lot",
+    label: "parking_lot",
+    hint: "Compact, fast synchronization primitives",
+  },
+  {
+    value: "secrecy",
+    label: "Secrecy",
+    hint: "Secret value wrapper that avoids accidental exposure",
+  },
+  {
+    value: "tokio-util",
+    label: "Tokio Util",
+    hint: "Tokio utilities for codecs, cancellation tokens, and IO helpers",
+  },
+  {
+    value: "utoipa",
+    label: "utoipa",
+    hint: "OpenAPI documentation generation from Rust types",
+  },
+  {
     value: "validator",
     label: "Validator",
     hint: "Struct validation derive macros",

@@ -109,6 +109,7 @@ describe("Go Language Support", () => {
       expect(GO_LOGGINGS).toContain("zap");
       expect(GO_LOGGINGS).toContain("zerolog");
       expect(GO_LOGGINGS).toContain("slog");
+      expect(GO_LOGGINGS).toContain("logrus");
       expect(GO_LOGGINGS).toContain("none");
     });
   });
@@ -1398,6 +1399,43 @@ describe("Go Language Support", () => {
       expect(mainContent).toContain("func initLogger()");
       expect(mainContent).toContain("slog.SetDefault(logger)");
       expect(mainContent).toContain("logger.Info(");
+    });
+  });
+
+  describe("Logrus Logging Integration", () => {
+    it("should include Logrus dependencies when selected", async () => {
+      const result = await createVirtual({
+        projectName: "go-logrus-project",
+        ecosystem: "go",
+        goWebFramework: "gin",
+        goOrm: "none",
+        goApi: "none",
+        goCli: "none",
+        goLogging: "logrus",
+      });
+
+      expect(result.success).toBe(true);
+      const goModContent = getFileContent(result.tree!.root, "go.mod");
+      expect(goModContent).toContain("github.com/sirupsen/logrus");
+    });
+
+    it("should include Logrus logger initialization in main.go", async () => {
+      const result = await createVirtual({
+        projectName: "go-logrus-main-check",
+        ecosystem: "go",
+        goWebFramework: "gin",
+        goOrm: "none",
+        goApi: "none",
+        goCli: "none",
+        goLogging: "logrus",
+      });
+
+      expect(result.success).toBe(true);
+      const mainContent = getFileContent(result.tree!.root, "cmd/server/main.go");
+      expect(mainContent).toContain("github.com/sirupsen/logrus");
+      expect(mainContent).toContain("var logger = logrus.New()");
+      expect(mainContent).toContain("logger.SetFormatter");
+      expect(mainContent).toContain("logger.Info");
     });
   });
 
