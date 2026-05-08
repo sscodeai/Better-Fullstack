@@ -262,7 +262,10 @@ function makeTypeScriptDraft(args: GeneratorArgs): CandidateDraft {
       fileUpload: sampleScalar(FILE_UPLOAD_VALUES, 0.82),
       logging: backend === "none" ? "none" : sampleScalar(LOGGING_VALUES, 0.65),
       observability: sampleScalar(OBSERVABILITY_VALUES, 0.85),
-      featureFlags: sampleScalar(["growthbook", "posthog", "none"] as const, 0.85),
+      featureFlags: sampleScalar(
+        ["growthbook", "posthog", "launchdarkly", "flagsmith", "unleash", "none"] as const,
+        0.85,
+      ),
       analytics: sampleScalar(ANALYTICS_VALUES, 0.9),
       effect: sampleScalar(EFFECT_VALUES, 0.82),
       stateManagement: sampleScalar(STATE_MANAGEMENT_VALUES, 0.7),

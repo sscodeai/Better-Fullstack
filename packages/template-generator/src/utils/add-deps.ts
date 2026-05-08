@@ -718,6 +718,19 @@ export const dependencyVersionMap = {
   "posthog-js": "^1.372.6",
   "posthog-node": "^5.33.0",
 
+  // Feature Flags - LaunchDarkly
+  "@launchdarkly/js-client-sdk": "^4.6.5",
+  "@launchdarkly/node-server-sdk": "^9.10.14",
+
+  // Feature Flags - Flagsmith
+  "@flagsmith/flagsmith": "^12.0.1",
+  "flagsmith-nodejs": "^8.1.0",
+
+  // Feature Flags - Unleash
+  "@unleash/proxy-client-react": "^5.0.1",
+  "unleash-proxy-client": "^6.10.1",
+  "unleash-client": "^6.10.1",
+
   // Analytics - Plausible
   "plausible-tracker": "^0.3.9",
 } as const;

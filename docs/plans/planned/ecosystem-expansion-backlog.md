@@ -51,9 +51,9 @@ Master tracking file. Detailed plans live in dedicated files per area.
 - [x] Add `elasticsearch` ✅
 
 ### Feature Flags
-- [ ] Add `unleash`
-- [ ] Add `flagsmith`
-- [ ] Add `launchdarkly`
+- [x] Add `unleash`
+- [x] Add `flagsmith`
+- [x] Add `launchdarkly`
 
 ### Observability
 - [ ] Add `axiom`

@@ -185,6 +185,9 @@ export const ICON_REGISTRY: Record<string, IconConfig> = {
   // ─── Feature Flags ─────────────────────────────────────────────────────────
   growthbook: { type: "si", slug: "growthbook", hex: "4E00DF" },
   posthog: { type: "si", slug: "posthog", hex: "F54E00" },
+  launchdarkly: { type: "si", slug: "launchdarkly", hex: "405BFF" },
+  flagsmith: { type: "si", slug: "flagsmith", hex: "1A1A1A" },
+  unleash: { type: "si", slug: "unleash", hex: "1D4ED8" },
 
   // ─── State Management ──────────────────────────────────────────────────────
   "redux-toolkit": { type: "si", slug: "redux", hex: "764ABC" },

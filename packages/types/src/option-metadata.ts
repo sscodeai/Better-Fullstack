@@ -468,6 +468,9 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   featureFlags: {
     growthbook: "GrowthBook",
     posthog: "PostHog",
+    launchdarkly: "LaunchDarkly",
+    flagsmith: "Flagsmith",
+    unleash: "Unleash",
   },
   analytics: {
     plausible: "Plausible",

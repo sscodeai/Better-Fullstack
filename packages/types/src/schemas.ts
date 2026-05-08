@@ -266,7 +266,7 @@ export const ObservabilitySchema = z
   .describe("Observability and distributed tracing");
 
 export const FeatureFlagsSchema = z
-  .enum(["growthbook", "posthog", "none"])
+  .enum(["growthbook", "posthog", "launchdarkly", "flagsmith", "unleash", "none"])
   .describe("Feature flags provider for A/B testing and feature management");
 
 export const AnalyticsSchema = z

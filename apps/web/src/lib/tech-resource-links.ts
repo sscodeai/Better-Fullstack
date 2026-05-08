@@ -409,6 +409,18 @@ const BASE_LINKS: LinkMap = {
     githubUrl: "https://github.com/growthbook/growthbook",
   },
   posthog: { docsUrl: "https://posthog.com/docs", githubUrl: "https://github.com/PostHog/posthog" },
+  launchdarkly: {
+    docsUrl: "https://launchdarkly.com/docs/sdk",
+    githubUrl: "https://github.com/launchdarkly",
+  },
+  flagsmith: {
+    docsUrl: "https://docs.flagsmith.com/",
+    githubUrl: "https://github.com/Flagsmith/flagsmith",
+  },
+  unleash: {
+    docsUrl: "https://docs.getunleash.io/",
+    githubUrl: "https://github.com/Unleash/unleash",
+  },
   plausible: {
     docsUrl: "https://plausible.io/docs",
     githubUrl: "https://github.com/plausible/analytics",
@@ -956,7 +968,10 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://strawberry.rocks/docs",
     githubUrl: "https://github.com/strawberry-graphql/strawberry",
   },
-  ariadne: { docsUrl: "https://ariadnegraphql.org/", githubUrl: "https://github.com/mirumee/ariadne" },
+  ariadne: {
+    docsUrl: "https://ariadnegraphql.org/",
+    githubUrl: "https://github.com/mirumee/ariadne",
+  },
   ruff: { docsUrl: "https://docs.astral.sh/ruff/", githubUrl: "https://github.com/astral-sh/ruff" },
   mypy: { docsUrl: "https://mypy.readthedocs.io/", githubUrl: "https://github.com/python/mypy" },
   pyright: {
