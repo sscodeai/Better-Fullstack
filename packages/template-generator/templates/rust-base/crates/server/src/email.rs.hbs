@@ -10,6 +10,6 @@ pub async fn send_email(to: impl IntoIterator<Item = String>, subject: &str, htm
     let recipients: Vec<String> = to.into_iter().collect();
     let email = CreateEmailBaseOptions::new(from, recipients, subject).with_html(html);
     let sent = resend.emails.send(email).await?;
-    Ok(sent.id)
+    Ok(sent.id.to_string())
 }
 {{/if}}

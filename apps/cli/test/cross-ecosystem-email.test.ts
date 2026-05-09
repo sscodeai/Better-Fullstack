@@ -69,6 +69,7 @@ describe("Cross-ecosystem email services", () => {
     expect(getFileContent(root, "Cargo.toml")).toContain("resend-rs");
     expect(getFileContent(root, "crates/server/src/main.rs")).toContain("mod email;");
     expect(getFileContent(root, "crates/server/src/email.rs")).toContain("Resend::default");
+    expect(getFileContent(root, "crates/server/src/email.rs")).toContain("Ok(sent.id.to_string())");
     expect(getFileContent(root, ".env.example")).toContain("RESEND_API_KEY=");
   });
 

@@ -728,7 +728,7 @@ export const dependencyVersionMap = {
 
   // Feature Flags - Unleash
   "@unleash/proxy-client-react": "^5.0.1",
-  "unleash-proxy-client": "^6.10.1",
+  "unleash-proxy-client": "^3.8.0",
   "unleash-client": "^6.10.1",
 
   // Analytics - Plausible
