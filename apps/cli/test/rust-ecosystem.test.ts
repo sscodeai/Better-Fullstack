@@ -2921,6 +2921,31 @@ describe("Rust Ecosystem", () => {
       expect(mainContent).toContain("mod cache;");
     });
 
+    it("should emit one redis workspace dependency when shared and Rust caching both use Redis", async () => {
+      const result = await createVirtual({
+        projectName: "rust-upstash-redis",
+        ecosystem: "rust",
+        rustWebFramework: "axum",
+        rustFrontend: "none",
+        rustOrm: "none",
+        rustApi: "none",
+        rustCli: "none",
+        rustLibraries: [],
+        rustLogging: "tracing",
+        rustErrorHandling: "anyhow-thiserror",
+        caching: "upstash-redis",
+        rustCaching: "redis",
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+
+      const cargoContent = getFileContent(root, "Cargo.toml");
+      expect(cargoContent).toBeDefined();
+      const redisWorkspaceDeps = cargoContent!.match(/^redis\s*=/gm) ?? [];
+      expect(redisWorkspaceDeps).toHaveLength(1);
+    });
+
     it("should not include caching deps when rustCaching is none", async () => {
       const result = await createVirtual({
         projectName: "rust-nocache",

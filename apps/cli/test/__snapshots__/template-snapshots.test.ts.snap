@@ -12327,7 +12327,6 @@ web-sys = { version = "0.3", features = ["Window", "Document", "Element", "HtmlE
 
 
 
-
 [profile.dev]
 opt-level = 0
 
@@ -12532,7 +12531,6 @@ tower-http.workspace = true
 
 # Database
 sea-orm.workspace = true
-
 
 
 
@@ -12753,7 +12751,6 @@ wasm-bindgen = "0.2"
 validator = { version = "0.19", features = ["derive"] }
 
 
-
 [profile.dev]
 opt-level = 0
 
@@ -12950,7 +12947,6 @@ sqlx.workspace = true
 
 
 validator.workspace = true
-
 
 
 [[bin]]
@@ -13158,7 +13154,6 @@ dotenvy = "0.15"
 
 # CLI (Clap)
 clap = { version = "4", features = ["derive"] }
-
 
 
 
@@ -13430,7 +13425,6 @@ dotenvy.workspace = true
 clap.workspace = true
 
 
-
 [[bin]]
 name = "server"
 path = "src/main.rs"
@@ -13581,7 +13575,6 @@ sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "sqlite", "my
 
 
 
-
 [profile.dev]
 opt-level = 0
 
@@ -13633,7 +13626,6 @@ tower-http.workspace = true
 
 # Database
 sqlx.workspace = true
-
 
 
 
@@ -13842,7 +13834,6 @@ tower-http = { version = "0.6", features = ["cors", "trace"] }
 
 
 
-
 [profile.dev]
 opt-level = 0
 
@@ -13891,7 +13882,6 @@ dotenvy.workspace = true
 axum.workspace = true
 tower.workspace = true
 tower-http.workspace = true
-
 
 
 
@@ -14080,7 +14070,6 @@ sea-orm-migration = "1.1"
 
 
 
-
 [profile.dev]
 opt-level = 0
 
@@ -14131,7 +14120,6 @@ rocket_cors.workspace = true
 
 # Database
 sea-orm.workspace = true
-
 
 
 
