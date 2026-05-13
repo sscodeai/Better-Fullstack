@@ -18,13 +18,10 @@ type MdxModule = {
   toc?: TocEntry[];
 };
 
-type RawMdxModule = string;
-
 export type GuidePage = {
   slug: string[];
   url: string;
   path: string;
-  raw: string;
   frontmatter: GuideFrontmatter;
   toc: TocEntry[];
   Component: MdxModule["default"];
@@ -34,12 +31,6 @@ const CONTENT_PREFIX = "/content/guides/";
 
 const mdxModules = import.meta.glob<MdxModule>("../../../content/guides/**/*.mdx", {
   eager: true,
-});
-
-const rawMdxModules = import.meta.glob<RawMdxModule>("../../../content/guides/**/*.mdx", {
-  eager: true,
-  query: "?raw",
-  import: "default",
 });
 
 function normalizeMdxPath(filePath: string): { relativePath: string; slug: string[] } {
@@ -60,7 +51,6 @@ for (const [filePath, module] of Object.entries(mdxModules)) {
     slug,
     url,
     path: relativePath,
-    raw: rawMdxModules[filePath] ?? "",
     frontmatter: module.frontmatter ?? {},
     toc: module.toc ?? [],
     Component: module.default,
