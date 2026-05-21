@@ -9,6 +9,9 @@ export type StarterTrack = {
   guideHref: string;
   docsHref: string;
   highlights: string[];
+  audience: string;
+  outcome: string;
+  ctaLabel: string;
 };
 
 export const STARTER_TRACKS = [
@@ -23,6 +26,9 @@ export const STARTER_TRACKS = [
     guideHref: "/guides/typescript/nextjs-drizzle-better-auth/",
     docsHref: "/docs/deployment/vercel/",
     highlights: ["Next.js", "Better Auth", "Stripe", "Drizzle"],
+    audience: "Founders validating paid products",
+    outcome: "Billing, auth, email, and data wired into one app",
+    ctaLabel: "Start SaaS",
   },
   {
     id: "ai-agent-app",
@@ -35,6 +41,9 @@ export const STARTER_TRACKS = [
     guideHref: "/guides/ai/nextjs-ai-cli-agent-workbench/",
     docsHref: "/docs/ai/overview/",
     highlights: ["Next.js", "AI CLI", "MCP", "Skills"],
+    audience: "Teams building agent-assisted products",
+    outcome: "AI docs, MCP, skills, and CLI workflow ready from day one",
+    ctaLabel: "Start AI",
   },
   {
     id: "rest-api",
@@ -47,6 +56,9 @@ export const STARTER_TRACKS = [
     guideHref: "/guides/python/fastapi-postgres-sqlalchemy/",
     docsHref: "/docs/deployment/docker/",
     highlights: ["FastAPI", "PostgreSQL", "SQLAlchemy", "Pydantic"],
+    audience: "Backend teams exposing typed services",
+    outcome: "FastAPI service with validation, persistence, and Ruff quality checks",
+    ctaLabel: "Start API",
   },
   {
     id: "java-api",
@@ -59,6 +71,9 @@ export const STARTER_TRACKS = [
     guideHref: "/guides/java/spring-security-api/",
     docsHref: "/docs/ecosystems/java/",
     highlights: ["Spring Boot", "Security", "JPA", "Testcontainers"],
+    audience: "Java teams shipping secure APIs",
+    outcome: "Spring Security, JPA, migrations, and test coverage scaffolded",
+    ctaLabel: "Start Java",
   },
   {
     id: "rust-backend",
@@ -71,6 +86,9 @@ export const STARTER_TRACKS = [
     guideHref: "/guides/rust/axum-postgres-seaorm/",
     docsHref: "/docs/ecosystems/rust/",
     highlights: ["Axum", "SeaORM", "PostgreSQL", "Tracing"],
+    audience: "Systems-minded backend developers",
+    outcome: "Axum service with typed persistence and clean compiler checks",
+    ctaLabel: "Start Rust",
   },
   {
     id: "mobile-app",
@@ -83,6 +101,9 @@ export const STARTER_TRACKS = [
     guideHref: "/guides/typescript/expo-uniwind-native/",
     docsHref: "/docs/ecosystems/typescript/",
     highlights: ["Expo", "Uniwind", "React Native", "Mobile"],
+    audience: "Product teams starting native first",
+    outcome: "Expo app shell with Uniwind styling and mobile defaults",
+    ctaLabel: "Start mobile",
   },
   {
     id: "internal-tool",
@@ -95,6 +116,9 @@ export const STARTER_TRACKS = [
     guideHref: "/guides/typescript/hono-trpc-drizzle/",
     docsHref: "/docs/deployment/docker/",
     highlights: ["TanStack Router", "Hono", "Drizzle", "tRPC"],
+    audience: "Teams building dashboards and admin tools",
+    outcome: "Frontend, API, auth, and data layer ready for CRUD workflows",
+    ctaLabel: "Start tool",
   },
 ] as const satisfies readonly StarterTrack[];
 
