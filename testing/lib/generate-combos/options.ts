@@ -533,6 +533,42 @@ function createValidationBase(projectName: string, draft: CandidateDraft): Proje
   };
 }
 
+function applyDerivedMobileDefaults(config: ProjectConfig, providedFlags: Set<string>) {
+  if (config.ecosystem !== "typescript") return;
+
+  const hasNativeFrontend = config.frontend.some((frontend) => frontend.startsWith("native-"));
+  if (!hasNativeFrontend) {
+    config.mobileNavigation = "none";
+    config.mobileUI = "none";
+    config.mobileStorage = "none";
+    config.mobileTesting = "none";
+    config.mobilePush = "none";
+    config.mobileOTA = "none";
+    config.mobileDeepLinking = "none";
+    return;
+  }
+
+  if (!providedFlags.has("mobileNavigation") && config.mobileNavigation === "none") {
+    config.mobileNavigation = "expo-router";
+  }
+
+  if (!providedFlags.has("mobileUI")) {
+    if (config.frontend.includes("native-uniwind")) {
+      config.mobileUI = "uniwind";
+    } else if (config.frontend.includes("native-unistyles")) {
+      config.mobileUI = "unistyles";
+    }
+  }
+
+  if (
+    !providedFlags.has("mobileDeepLinking") &&
+    config.mobileDeepLinking === "none" &&
+    config.auth !== "none"
+  ) {
+    config.mobileDeepLinking = "expo-linking";
+  }
+}
+
 function validateDraft(draft: CandidateDraft, projectName: string): ProjectConfig {
   const providedFlags = buildProvidedFlags(draft.options);
   const processed = processFlags({ ...draft.options, projectName } as CLIInput, projectName);
@@ -543,6 +579,8 @@ function validateDraft(draft: CandidateDraft, projectName: string): ProjectConfi
     relativePath: projectName,
     projectDir: path.resolve(process.cwd(), projectName),
   } as ProjectConfig;
+
+  applyDerivedMobileDefaults(config, providedFlags);
 
   runWithContext({ silent: true }, () => {
     validateFullConfig(config, providedFlags, { ...draft.options, projectName } as CLIInput);

@@ -466,6 +466,7 @@ describe("Frontend Configurations", () => {
       expectSuccess(result);
 
       if (result.projectDir) {
+        const rootDenoJson = await Bun.file(`${result.projectDir}/deno.json`).text();
         const denoJson = await Bun.file(`${result.projectDir}/apps/web/deno.json`).text();
         const webPkg = await Bun.file(`${result.projectDir}/apps/web/package.json`).json();
         const readme = await Bun.file(`${result.projectDir}/README.md`).text();
@@ -475,8 +476,14 @@ describe("Frontend Configurations", () => {
         const modernApp = Bun.file(`${result.projectDir}/apps/web/routes/_app.tsx`);
         const legacyLayout = Bun.file(`${result.projectDir}/apps/web/src/routes/_layout.tsx`);
 
+        expect(rootDenoJson).toContain('"workspace"');
+        expect(rootDenoJson).toContain('"./apps/web"');
+        expect(rootDenoJson).toContain('"nodeModulesDir": "auto"');
         expect(denoJson).toContain('"fresh": "jsr:@fresh/core@^2.2.0"');
+        expect(denoJson).toContain('"jsxImportSource": "npm:preact@^10.27.2"');
         expect(denoJson).toContain('"build": "vite build"');
+        expect(denoJson).not.toContain('"lock"');
+        expect(denoJson).not.toContain('"nodeModulesDir"');
         expect(webPkg.scripts["check-types"]).toBe("deno check");
         expect(readme).toContain("http://localhost:5173");
         expect(await viteConfig.exists()).toBe(true);

@@ -13,6 +13,10 @@ function renderFlag(flag: string, value: string | readonly string[]): string {
   return `--${flag} ${formatted}`;
 }
 
+function withExplicitScalar(value: string | undefined, fallback = "none"): string {
+  return value ?? fallback;
+}
+
 export function formatNameFromFingerprint(fingerprint: TemplateFingerprint): string {
   const ecosystem = typeof fingerprint.ecosystem === "string" ? fingerprint.ecosystem : "combo";
 
@@ -131,6 +135,13 @@ export function buildCommand(name: string, config: ProjectConfig): string {
     ["i18n", config.i18n],
     ["search", config.search],
     ["file-storage", config.fileStorage],
+    ["mobile-navigation", withExplicitScalar(config.mobileNavigation)],
+    ["mobile-ui", withExplicitScalar(config.mobileUI)],
+    ["mobile-storage", withExplicitScalar(config.mobileStorage)],
+    ["mobile-testing", withExplicitScalar(config.mobileTesting)],
+    ["mobile-push", withExplicitScalar(config.mobilePush)],
+    ["mobile-ota", withExplicitScalar(config.mobileOTA)],
+    ["mobile-deep-linking", withExplicitScalar(config.mobileDeepLinking)],
     ["web-deploy", config.webDeploy],
     ["server-deploy", config.serverDeploy],
   ];

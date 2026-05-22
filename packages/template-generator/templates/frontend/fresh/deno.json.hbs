@@ -1,5 +1,4 @@
 {
-  "lock": false,
   "tasks": {
     "check": "deno fmt --check . && deno lint . && deno check",
     "dev": "vite",
@@ -37,7 +36,7 @@
       "deno.ns"
     ],
     "jsx": "precompile",
-    "jsxImportSource": "preact",
+    "jsxImportSource": "npm:preact@^10.27.2",
     "jsxPrecompileSkipElements": [
       "a",
       "img",
@@ -57,6 +56,5 @@
     "types": [
       "vite/client"
     ]
-  },
-  "nodeModulesDir": "auto"
+  }
 }
