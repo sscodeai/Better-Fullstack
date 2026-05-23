@@ -188,10 +188,27 @@ describe("Virtual Generator Regressions", () => {
     expect(userSchema).toContain("Bcrypt.hash_pwd_salt(password)");
     expect(userSchema).toContain("Bcrypt.verify_pass(password, hashed_password)");
     expect(userSchema).not.toContain("cast(attrs, [:email, :hashed_password])");
+    expect(readTextFromTree(result.tree!, "priv/repo/migrations/20260101000001_create_users.exs")).toBeDefined();
     expect(accounts).toContain("get_user_by_email_and_password");
     expect(router).toContain('post "/users/register", UserSessionController, :register');
     expect(router).toContain('post "/users/login", UserSessionController, :login');
     expect(sessionController).toContain("def login");
+  });
+
+  it("skips auth-only user migration when Elixir auth is disabled", async () => {
+    const result = await createVirtual({
+      projectName: "elixir-no-auth",
+      ecosystem: "elixir",
+      elixirWebFramework: "phoenix",
+      elixirOrm: "ecto-sql",
+      elixirAuth: "none",
+      elixirApi: "rest",
+      elixirRealtime: "none",
+      elixirJobs: "none",
+    });
+
+    expect(result.success).toBe(true);
+    expect(readTextFromTree(result.tree!, "priv/repo/migrations/20260101000001_create_users.exs")).toBeUndefined();
   });
 
   it("normalizes Elixir app and module names that start with digits", async () => {

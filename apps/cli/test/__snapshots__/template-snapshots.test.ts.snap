@@ -16270,7 +16270,6 @@ exports[`Template Snapshots - Elixir Ecosystem Elixir File Structure Snapshots f
   "lib/snapshot_elixir_phoenix_ecto_rest_web/telemetry.ex",
   "mix.exs",
   "priv/repo/migrations/20260101000000_create_items.exs",
-  "priv/repo/migrations/20260101000001_create_users.exs",
   "priv/repo/seeds.exs",
   "test/snapshot_elixir_phoenix_ecto_rest_web/controllers/health_controller_test.exs",
   "test/support/conn_case.ex",
@@ -16329,7 +16328,7 @@ exports[`Template Snapshots - Elixir Ecosystem Elixir File Structure Snapshots f
 
 exports[`Template Snapshots - Elixir Ecosystem Elixir Key File Content Snapshots key files: phoenix-ecto-rest 1`] = `
 {
-  "fileCount": 34,
+  "fileCount": 33,
   "files": [
     {
       "content": 
@@ -16449,10 +16448,6 @@ CORS_ORIGIN=http://localhost:3001"
     {
       "content": "[exists]",
       "path": "priv/repo/migrations/20260101000000_create_items.exs",
-    },
-    {
-      "content": "[exists]",
-      "path": "priv/repo/migrations/20260101000001_create_users.exs",
     },
     {
       "content": "[exists]",

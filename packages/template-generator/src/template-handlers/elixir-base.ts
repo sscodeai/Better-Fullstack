@@ -36,6 +36,7 @@ export async function processElixirBaseTemplate(
     if (!hasEcto && (templatePath.includes("/repo.ex") || templatePath.includes("/migrations/"))) continue;
     if (!hasEcto && (templatePath.includes("/catalog") || templatePath.includes("/item_controller"))) continue;
     if (!hasAuth && templatePath.includes("/accounts")) continue;
+    if (!hasAuth && templatePath.includes("create_users")) continue;
     if (!hasAuth && templatePath.includes("/user_session_controller")) continue;
     if (!hasChannels && templatePath.includes("/channels/room_channel")) continue;
     if (!hasPresence && templatePath.includes("/channels/presence")) continue;
