@@ -76,6 +76,7 @@ describe("mobile native scaffolding", () => {
       "expo-updates": "^56.0.15",
     });
     expect(pkg.dependencies["expo-router"]).toBeUndefined();
+    expect(pkg.devDependencies["babel-preset-expo"]).toBe("^55.0.0");
     expect(pkg.scripts.test).toBe("jest");
 
     expect(appConfig.expo.plugins).not.toContain("expo-router");
