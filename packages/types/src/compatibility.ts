@@ -1677,10 +1677,6 @@ export const getDisabledReason = (
     }
   }
 
-  if (currentStack.ecosystem === "typescript" && category === "nativeFrontend" && optionId !== "none") {
-    return "Use the React Native ecosystem for native Expo frontends";
-  }
-
   // ============================================
   // NO BACKEND - locks down backend-dependent options
   // ============================================

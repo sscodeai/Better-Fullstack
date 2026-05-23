@@ -574,17 +574,6 @@ export function validateFrontendConstraints(
       });
     }
 
-    if (
-      config.ecosystem === "typescript" &&
-      frontend.some((item) => item.startsWith("native-"))
-    ) {
-      incompatibilityError({
-        message: "Native Expo frontends now belong to the React Native ecosystem.",
-        provided: { ecosystem: "typescript", frontend: frontend.join(" ") },
-        suggestions: ["Use --ecosystem react-native with --frontend native-bare"],
-      });
-    }
-
     ensureSingleWebAndNative(frontend);
 
     if (providedFlags.has("api") && providedFlags.has("frontend") && config.api) {
