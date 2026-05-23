@@ -35,6 +35,56 @@ export interface CreateHandlerOptions {
   silent?: boolean;
 }
 
+function getYesBaseConfig(flagConfig: Partial<ProjectConfig>): ProjectConfig {
+  const baseConfig = getDefaultConfig();
+
+  if (flagConfig.ecosystem !== "react-native") {
+    return baseConfig;
+  }
+
+  return {
+    ...baseConfig,
+    backend: "none",
+    runtime: "none",
+    frontend: ["native-bare"],
+    addons: [],
+    examples: [],
+    auth: "none",
+    payments: "none",
+    email: "none",
+    fileUpload: "none",
+    effect: "none",
+    dbSetup: "none",
+    api: "none",
+    webDeploy: "none",
+    serverDeploy: "none",
+    cssFramework: "none",
+    uiLibrary: "none",
+    stateManagement: "none",
+    forms: "none",
+    testing: "none",
+    realtime: "none",
+    jobQueue: "none",
+    animation: "none",
+    logging: "none",
+    observability: "none",
+    featureFlags: "none",
+    analytics: "none",
+    cms: "none",
+    caching: "none",
+    i18n: "none",
+    search: "none",
+    fileStorage: "none",
+    mobileNavigation: "expo-router",
+    mobileUI: "none",
+    mobileStorage: "none",
+    mobileTesting: "none",
+    mobilePush: "none",
+    mobileOTA: "none",
+    mobileDeepLinking: "none",
+  };
+}
+
 function shouldPromptForVersionChannel(input: CreateInput & { projectName?: string }): boolean {
   if (input.yes || input.versionChannel !== undefined || isSilent()) {
     return false;
@@ -268,7 +318,7 @@ export async function createProjectHandler(
         const flagConfig = processProvidedFlagsWithoutValidation(cliInput, finalBaseName);
 
         config = {
-          ...getDefaultConfig(),
+          ...getYesBaseConfig(flagConfig),
           ...flagConfig,
           projectName: finalBaseName,
           projectDir: finalResolvedPath,

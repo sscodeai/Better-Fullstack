@@ -163,6 +163,37 @@ describe("Virtual Generator Regressions", () => {
     expect(readTextFromTree(result.tree!, "lib/elixir_live_no_ecto/catalog.ex")).toBeUndefined();
   });
 
+  it("scaffolds phx.gen.auth-style password hashing and session endpoints", async () => {
+    const result = await createVirtual({
+      projectName: "elixir-auth",
+      ecosystem: "elixir",
+      elixirWebFramework: "phoenix",
+      elixirOrm: "ecto-sql",
+      elixirAuth: "phx-gen-auth",
+    });
+
+    expect(result.success).toBe(true);
+
+    const mixProject = readTextFromTree(result.tree!, "mix.exs");
+    const userSchema = readTextFromTree(result.tree!, "lib/elixir_auth/accounts/user.ex");
+    const accounts = readTextFromTree(result.tree!, "lib/elixir_auth/accounts.ex");
+    const router = readTextFromTree(result.tree!, "lib/elixir_auth_web/router.ex");
+    const sessionController = readTextFromTree(
+      result.tree!,
+      "lib/elixir_auth_web/controllers/user_session_controller.ex",
+    );
+
+    expect(mixProject).toContain("{:bcrypt_elixir");
+    expect(userSchema).toContain("field :password, :string, virtual: true");
+    expect(userSchema).toContain("Bcrypt.hash_pwd_salt(password)");
+    expect(userSchema).toContain("Bcrypt.verify_pass(password, hashed_password)");
+    expect(userSchema).not.toContain("cast(attrs, [:email, :hashed_password])");
+    expect(accounts).toContain("get_user_by_email_and_password");
+    expect(router).toContain('post "/users/register", UserSessionController, :register');
+    expect(router).toContain('post "/users/login", UserSessionController, :login');
+    expect(sessionController).toContain("def login");
+  });
+
   it("normalizes Elixir app and module names that start with digits", async () => {
     const result = await createVirtual({
       projectName: "123-app",

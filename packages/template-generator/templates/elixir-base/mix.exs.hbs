@@ -43,6 +43,9 @@ defmodule {{elixirModuleName}}.MixProject do
 {{#if (eq elixirAuth "guardian")}}
       {:guardian, "~> 2.3"},
 {{/if}}
+{{#if (eq elixirAuth "phx-gen-auth")}}
+      {:bcrypt_elixir, "~> 3.0"},
+{{/if}}
 {{#if (eq elixirJobs "oban")}}
       {:oban, "~> 2.19"},
 {{/if}}

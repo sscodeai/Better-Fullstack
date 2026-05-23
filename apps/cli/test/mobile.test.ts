@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { createVirtual } from "../src/index";
+import { create, createVirtual } from "../src/index";
 import type { VirtualDirectory, VirtualFile, VirtualNode } from "../src/index";
 
 function findFile(node: VirtualNode, path: string): VirtualFile | undefined {
@@ -21,6 +21,26 @@ function getFile(root: VirtualNode, path: string) {
 }
 
 describe("mobile native scaffolding", () => {
+  test("uses React Native defaults when --yes selects the React Native ecosystem", async () => {
+    const result = await create("mobile-yes", {
+      ecosystem: "react-native",
+      yes: true,
+      dryRun: true,
+      install: false,
+      git: false,
+      packageManager: "bun",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.projectConfig.ecosystem).toBe("react-native");
+    expect(result.projectConfig.frontend).toEqual(["native-bare"]);
+    expect(result.projectConfig.backend).toBe("none");
+    expect(result.projectConfig.runtime).toBe("none");
+    expect(result.projectConfig.api).toBe("none");
+    expect(result.projectConfig.cssFramework).toBe("none");
+    expect(result.projectConfig.uiLibrary).toBe("none");
+  });
+
   test("generates React Navigation with production mobile integrations", async () => {
     const result = await createVirtual({
       projectName: "mobile-rn",
