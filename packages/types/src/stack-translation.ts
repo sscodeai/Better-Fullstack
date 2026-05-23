@@ -666,13 +666,6 @@ const JAVA_CONFIG_KEYS = [
 ] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
 
 const REACT_NATIVE_CONFIG_KEYS = [
-  "frontend",
-  "backend",
-  "runtime",
-  "database",
-  "orm",
-  "api",
-  "auth",
   "mobileNavigation",
   "mobileUI",
   "mobileStorage",

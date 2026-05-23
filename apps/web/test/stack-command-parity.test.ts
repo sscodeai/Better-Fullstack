@@ -26,6 +26,22 @@ describe("generateStackCommand parity", () => {
     expect(command).toContain("--feature-flags launchdarkly");
   });
 
+  it("does not treat core TypeScript stack selections as React Native-only defaults", () => {
+    const backendCommand = generateStackCommand({
+      ...DEFAULT_STACK,
+      backend: "fastify",
+    });
+    const frontendCommand = generateStackCommand({
+      ...DEFAULT_STACK,
+      webFrontend: ["next"],
+    });
+
+    expect(backendCommand).not.toContain("--yes");
+    expect(backendCommand).toContain("--backend fastify");
+    expect(frontendCommand).not.toContain("--yes");
+    expect(frontendCommand).toContain("--frontend next");
+  });
+
   it("maps builder-only aliases to CLI flags", () => {
     const command = generateStackCommand({
       ...DEFAULT_STACK,
