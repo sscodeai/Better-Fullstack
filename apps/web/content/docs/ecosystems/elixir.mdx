@@ -1,0 +1,49 @@
+---
+title: Elixir
+description: Plain Mix / OTP and Phoenix-capable scaffolds with Ecto, BEAM libraries, and ExUnit support.
+---
+
+Elixir projects use Mix and language-native templates. Phoenix is optional: choose `--elixir-web-framework none` for a plain OTP application, or `phoenix` when you want web routing and endpoint files.
+
+## Prerequisites
+
+- Elixir and Erlang/OTP.
+- Git if you want repository initialization.
+
+## Scripted example
+
+```bash
+npm create better-fullstack@latest my-elixir-service -- \
+  --ecosystem elixir \
+  --elixir-web-framework none \
+  --elixir-database none \
+  --elixir-libraries jason req telemetry \
+  --elixir-testing exunit stream-data \
+  --ai-docs none \
+  --version-channel stable \
+  --no-install \
+  --no-git
+```
+
+## Elixir categories
+
+| Category | Values |
+| --- | --- |
+| Web framework | `phoenix` `none` |
+| Database | `ecto` `none` |
+| Libraries | `jason` `req` `oban` `broadway` `telemetry` `nx` `none` |
+| Testing | `exunit` `mox` `stream-data` `none` |
+
+## Compatibility notes
+
+- `none` for web framework creates a plain Mix / OTP app without Phoenix modules.
+- `phoenix` adds Phoenix endpoint, router, controllers, and web config.
+- `ecto` adds a Repo and Ecto SQL dependencies.
+- `oban` is intended for Ecto-backed projects.
+
+## Generated behavior
+
+- Install runs `mix deps.get` when dependency installation is enabled.
+- Plain Mix projects include an application supervisor and worker.
+- Phoenix projects include Phoenix web files without forcing every Elixir project through Phoenix.
+- AI instruction files are still available through `--ai-docs`, including `--ai-docs none`.

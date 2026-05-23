@@ -19,6 +19,10 @@ import {
   EcosystemSchema,
   EffectSchema,
   EmailSchema,
+  ElixirDatabaseSchema,
+  ElixirLibrariesSchema,
+  ElixirTestingSchema,
+  ElixirWebFrameworkSchema,
   ExamplesSchema,
   FeatureFlagsSchema,
   FileStorageSchema,
@@ -106,7 +110,7 @@ export const CreateCommandOptionsSchema = z.object({
     .default(false)
     .describe("Preview generated file tree without writing to disk"),
   ecosystem: EcosystemSchema.optional().describe(
-    "Language ecosystem (typescript, react-native, rust, python, go, or java)",
+    "Language ecosystem (typescript, react-native, rust, python, go, java, or elixir)",
   ),
   database: DatabaseSchema.optional(),
   orm: ORMSchema.optional(),
@@ -235,6 +239,15 @@ export const CreateCommandOptionsSchema = z.object({
     .array(JavaTestingLibrariesSchema)
     .optional()
     .describe("Java testing libraries"),
+  elixirWebFramework: ElixirWebFrameworkSchema.optional().describe(
+    "Elixir web framework (phoenix, none)",
+  ),
+  elixirDatabase: ElixirDatabaseSchema.optional().describe("Elixir database layer (ecto, none)"),
+  elixirLibraries: z
+    .array(ElixirLibrariesSchema)
+    .optional()
+    .describe("Elixir application libraries"),
+  elixirTesting: z.array(ElixirTestingSchema).optional().describe("Elixir testing libraries"),
   aiDocs: z
     .array(AiDocsSchema)
     .optional()

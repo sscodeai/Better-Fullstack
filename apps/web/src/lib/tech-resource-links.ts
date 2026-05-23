@@ -1204,6 +1204,52 @@ const CATEGORY_LINKS: LinkMap = {
   "shadcnFont:outfit": { docsUrl: "https://fonts.google.com/specimen/Outfit" },
   "shadcnFont:jetbrains-mono": { docsUrl: "https://www.jetbrains.com/lp/mono/" },
   "shadcnFont:geist-mono": { docsUrl: "https://vercel.com/font" },
+
+  // ─── Elixir ────────────────────────────────────────────────────────────────
+  "elixirWebFramework:phoenix": {
+    docsUrl: "https://hexdocs.pm/phoenix/overview.html",
+    githubUrl: "https://github.com/phoenixframework/phoenix",
+  },
+  "elixirDatabase:ecto": {
+    docsUrl: "https://hexdocs.pm/ecto/Ecto.html",
+    githubUrl: "https://github.com/elixir-ecto/ecto",
+  },
+  "elixirLibraries:jason": {
+    docsUrl: "https://hexdocs.pm/jason/Jason.html",
+    githubUrl: "https://github.com/michalmuskala/jason",
+  },
+  "elixirLibraries:req": {
+    docsUrl: "https://hexdocs.pm/req/Req.html",
+    githubUrl: "https://github.com/wojtekmach/req",
+  },
+  "elixirLibraries:oban": {
+    docsUrl: "https://hexdocs.pm/oban/Oban.html",
+    githubUrl: "https://github.com/sorentwo/oban",
+  },
+  "elixirLibraries:broadway": {
+    docsUrl: "https://hexdocs.pm/broadway/Broadway.html",
+    githubUrl: "https://github.com/dashbitco/broadway",
+  },
+  "elixirLibraries:telemetry": {
+    docsUrl: "https://hexdocs.pm/telemetry/",
+    githubUrl: "https://github.com/beam-telemetry/telemetry",
+  },
+  "elixirLibraries:nx": {
+    docsUrl: "https://hexdocs.pm/nx/Nx.html",
+    githubUrl: "https://github.com/elixir-nx/nx",
+  },
+  "elixirTesting:exunit": {
+    docsUrl: "https://hexdocs.pm/ex_unit/ExUnit.html",
+    githubUrl: "https://github.com/elixir-lang/elixir",
+  },
+  "elixirTesting:mox": {
+    docsUrl: "https://hexdocs.pm/mox/Mox.html",
+    githubUrl: "https://github.com/dashbitco/mox",
+  },
+  "elixirTesting:stream-data": {
+    docsUrl: "https://hexdocs.pm/stream_data/StreamData.html",
+    githubUrl: "https://github.com/whatyouhide/stream_data",
+  },
 };
 
 export function getTechResourceLinks(category: string, techId: string): TechResourceLinks {

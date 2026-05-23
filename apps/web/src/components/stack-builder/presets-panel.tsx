@@ -38,6 +38,9 @@ const HIGHLIGHT_SCALAR_KEYS = [
   "goApi",
   "goCli",
   "goLogging",
+  // Elixir
+  "elixirWebFramework",
+  "elixirDatabase",
 ] as const satisfies readonly (keyof StackState)[];
 
 function getPresetHighlights(presetStack: Partial<StackState>): string[] {

@@ -44,6 +44,10 @@ import {
   JavaOrmSchema,
   JavaTestingLibrariesSchema,
   JavaWebFrameworkSchema,
+  ElixirDatabaseSchema,
+  ElixirLibrariesSchema,
+  ElixirTestingSchema,
+  ElixirWebFrameworkSchema,
   I18nSchema,
   JobQueueSchema,
   LoggingSchema,
@@ -108,7 +112,7 @@ For existing projects:
 
 CRITICAL RULES:
 - Dependency installation is ALWAYS skipped in MCP mode (timeout risk). After scaffolding, tell the user to run install manually.
-- Array fields: "frontend", "addons", "examples", "aiDocs", "rustLibraries", "pythonAi", "javaLibraries", and "javaTestingLibraries". Most other option fields are strings.
+- Array fields: "frontend", "addons", "examples", "aiDocs", "rustLibraries", "pythonAi", "javaLibraries", "javaTestingLibraries", "elixirLibraries", and "elixirTesting". Most other option fields are strings.
 - "none" means "skip this feature entirely", not "use the default".
 - Always specify "ecosystem" first — it determines which other fields are relevant.
 - TypeScript web-specific fields (web frontend, backend, orm, etc.) are IGNORED for react-native/rust/python/go/java ecosystems.
@@ -144,7 +148,7 @@ function getGuidance() {
       frontend:
         "ARRAY of strings. TypeScript only. Supports multiple frontends in one monorepo. Use [] for API-only.",
       arrayFields:
-        'Use arrays for frontend, addons, examples, aiDocs, rustLibraries, pythonAi, javaLibraries, and javaTestingLibraries. Use [] for "none" on multi-select fields.',
+        'Use arrays for frontend, addons, examples, aiDocs, rustLibraries, pythonAi, javaLibraries, javaTestingLibraries, elixirLibraries, and elixirTesting. Use [] for "none" on multi-select fields.',
       backend:
         'String. "self" means fullstack mode (Next.js/Vinext/TanStack Start/Nuxt/Astro API routes). "none" for frontend-only.',
       runtime:
@@ -261,6 +265,10 @@ const SCHEMA_MAP: Record<string, z.ZodType> = {
   javaAuth: JavaAuthSchema,
   javaLibraries: JavaLibrariesSchema,
   javaTestingLibraries: JavaTestingLibrariesSchema,
+  elixirWebFramework: ElixirWebFrameworkSchema,
+  elixirDatabase: ElixirDatabaseSchema,
+  elixirLibraries: ElixirLibrariesSchema,
+  elixirTesting: ElixirTestingSchema,
 };
 
 const ECOSYSTEM_CATEGORIES: Record<string, string[]> = {
@@ -289,6 +297,12 @@ const ECOSYSTEM_CATEGORIES: Record<string, string[]> = {
     "observability",
     "caching",
     "search",
+  ],
+  elixir: [
+    "elixirWebFramework",
+    "elixirDatabase",
+    "elixirLibraries",
+    "elixirTesting",
   ],
   shared: ["ecosystem", "packageManager", "addons", "examples", "webDeploy", "serverDeploy", "dbSetup"],
 };
@@ -476,6 +490,15 @@ function buildProjectConfig(
     javaLibraries: (input.javaLibraries as ProjectConfig["javaLibraries"]) ?? [],
     javaTestingLibraries:
       (input.javaTestingLibraries as ProjectConfig["javaTestingLibraries"]) ?? ["junit5"],
+    elixirWebFramework:
+      (input.elixirWebFramework as ProjectConfig["elixirWebFramework"]) ?? "none",
+    elixirDatabase: (input.elixirDatabase as ProjectConfig["elixirDatabase"]) ?? "none",
+    elixirLibraries:
+      (input.elixirLibraries as ProjectConfig["elixirLibraries"]) ??
+      (ecosystem === "elixir" ? ["jason"] : []),
+    elixirTesting:
+      (input.elixirTesting as ProjectConfig["elixirTesting"]) ??
+      (ecosystem === "elixir" ? ["exunit"] : []),
   };
 }
 
@@ -603,6 +626,10 @@ function buildCompatibilityInput(input: Record<string, unknown>): CompatibilityI
     javaAuth: (input.javaAuth as string) ?? "none",
     javaLibraries: (input.javaLibraries as string[]) ?? [],
     javaTestingLibraries: (input.javaTestingLibraries as string[]) ?? ["junit5"],
+    elixirWebFramework: (input.elixirWebFramework as string) ?? "none",
+    elixirDatabase: (input.elixirDatabase as string) ?? "none",
+    elixirLibraries: (input.elixirLibraries as string[]) ?? [],
+    elixirTesting: (input.elixirTesting as string[]) ?? [],
   };
 }
 
@@ -851,6 +878,16 @@ export async function startMcpServer() {
         .array(JavaTestingLibrariesSchema)
         .optional()
         .describe("Java testing libraries"),
+      elixirWebFramework: ElixirWebFrameworkSchema.optional().describe("Elixir web framework"),
+      elixirDatabase: ElixirDatabaseSchema.optional().describe("Elixir database layer"),
+      elixirLibraries: z
+        .array(ElixirLibrariesSchema)
+        .optional()
+        .describe("Elixir application libraries"),
+      elixirTesting: z
+        .array(ElixirTestingSchema)
+        .optional()
+        .describe("Elixir testing libraries"),
     }),
     async (input: Record<string, unknown>) => {
       try {
@@ -950,6 +987,13 @@ export async function startMcpServer() {
       .array(JavaTestingLibrariesSchema)
       .optional()
       .describe("Java testing libraries"),
+    elixirWebFramework: ElixirWebFrameworkSchema.optional().describe("Elixir web framework"),
+    elixirDatabase: ElixirDatabaseSchema.optional().describe("Elixir database layer"),
+    elixirLibraries: z
+      .array(ElixirLibrariesSchema)
+      .optional()
+      .describe("Elixir application libraries"),
+    elixirTesting: z.array(ElixirTestingSchema).optional().describe("Elixir testing libraries"),
   };
 
   registerTool(

@@ -11,6 +11,10 @@ import {
   DATABASE_SETUP_VALUES,
   DATABASE_VALUES,
   EMAIL_VALUES,
+  ELIXIR_DATABASE_VALUES,
+  ELIXIR_LIBRARIES_VALUES,
+  ELIXIR_TESTING_VALUES,
+  ELIXIR_WEB_FRAMEWORK_VALUES,
   FILE_UPLOAD_VALUES,
   FORMS_VALUES,
   FRONTEND_VALUES,
@@ -75,6 +79,12 @@ import { resolveCMSPrompt } from "./cms";
 import { resolveCSSFrameworkPrompt } from "./css-framework";
 import { resolveDatabasePrompt } from "./database";
 import { resolveDBSetupPrompt } from "./database-setup";
+import {
+  resolveElixirDatabasePrompt,
+  resolveElixirLibrariesPrompt,
+  resolveElixirTestingPrompt,
+  resolveElixirWebFrameworkPrompt,
+} from "./elixir-ecosystem";
 import { resolveEmailPrompt } from "./email";
 import { resolveFileUploadPrompt } from "./file-upload";
 import { resolveFrontendPrompt } from "./frontend";
@@ -493,6 +503,27 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
     schemaValues: JAVA_TESTING_LIBRARIES_VALUES,
     resolve: ({ value }: { value?: string[] } = {}) =>
       resolveJavaTestingLibrariesPrompt(value as any),
+    coverageContexts: [{}, { value: ["none"] }],
+  },
+  elixirWebFramework: {
+    schemaValues: ELIXIR_WEB_FRAMEWORK_VALUES,
+    resolve: ({ value }: { value?: string } = {}) =>
+      resolveElixirWebFrameworkPrompt(value as any),
+    coverageContexts: [{}],
+  },
+  elixirDatabase: {
+    schemaValues: ELIXIR_DATABASE_VALUES,
+    resolve: ({ value }: { value?: string } = {}) => resolveElixirDatabasePrompt(value as any),
+    coverageContexts: [{}],
+  },
+  elixirLibraries: {
+    schemaValues: ELIXIR_LIBRARIES_VALUES,
+    resolve: ({ value }: { value?: string[] } = {}) => resolveElixirLibrariesPrompt(value as any),
+    coverageContexts: [{}, { value: ["none"] }],
+  },
+  elixirTesting: {
+    schemaValues: ELIXIR_TESTING_VALUES,
+    resolve: ({ value }: { value?: string[] } = {}) => resolveElixirTestingPrompt(value as any),
     coverageContexts: [{}, { value: ["none"] }],
   },
 };

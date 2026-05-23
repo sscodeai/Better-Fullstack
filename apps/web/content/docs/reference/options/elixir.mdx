@@ -1,0 +1,61 @@
+---
+title: "Elixir Options"
+description: "Elixir-ecosystem categories: web framework, database, libraries, and testing."
+---
+
+Categories applied when scaffolding an Elixir project.
+
+This page covers **15 options** across **4 categories**.
+
+Use CLI values in commands and MCP payloads.
+
+<Callout kind="info" title="Compatibility notes">
+Phoenix is optional. Use `elixirWebFramework=none` for plain Mix / OTP projects. `oban` is intended for Ecto-backed projects.
+</Callout>
+
+## Elixir Web Framework
+
+Selection: **single**
+
+| Option | Label | CLI value |
+| --- | --- | --- |
+| `phoenix` | Phoenix | `phoenix` |
+| `none` | No Web Framework | `none` |
+
+## Elixir Database
+
+Selection: **single**
+
+| Option | Label | CLI value |
+| --- | --- | --- |
+| `ecto` | Ecto | `ecto` |
+| `none` | None | `none` |
+
+## Elixir Libraries
+
+BEAM-native application libraries emitted into `mix.exs`.
+
+Selection: **multiple**
+
+| Option | Label | CLI value |
+| --- | --- | --- |
+| `jason` | Jason | `jason` |
+| `req` | Req | `req` |
+| `oban` | Oban | `oban` |
+| `broadway` | Broadway | `broadway` |
+| `telemetry` | Telemetry | `telemetry` |
+| `nx` | Nx | `nx` |
+| `none` | None | `none` |
+
+## Elixir Testing
+
+Elixir test libraries and support files.
+
+Selection: **multiple**
+
+| Option | Label | CLI value |
+| --- | --- | --- |
+| `exunit` | ExUnit | `exunit` |
+| `mox` | Mox | `mox` |
+| `stream-data` | StreamData | `stream-data` |
+| `none` | None | `none` |

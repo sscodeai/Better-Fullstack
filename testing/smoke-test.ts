@@ -67,7 +67,10 @@ function parseArgs(argv: string[]): SmokeTestArgs {
         i++;
         break;
       case "--ecosystem":
-        if (next && ["typescript", "react-native", "rust", "python", "go", "java"].includes(next)) {
+        if (
+          next &&
+          ["typescript", "react-native", "rust", "python", "go", "java", "elixir"].includes(next)
+        ) {
           args.ecosystem = next as Ecosystem;
         }
         i++;
@@ -164,7 +167,7 @@ function generateCombos(args: SmokeTestArgs) {
     count: args.count,
     ecosystems: args.ecosystem
       ? [args.ecosystem]
-      : ["typescript", "react-native", "rust", "python", "go", "java"],
+      : ["typescript", "react-native", "rust", "python", "go", "java", "elixir"],
     installMode: "no-install",
     rng,
     forceOptions: args.forceOptions,

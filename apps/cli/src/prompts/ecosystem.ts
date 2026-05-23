@@ -37,6 +37,11 @@ export async function getEcosystemChoice(ecosystem?: Ecosystem) {
       label: "Java",
       hint: "Java ecosystem with Spring Boot, Maven, Gradle, and more",
     },
+    {
+      value: "elixir" as const,
+      label: "Elixir",
+      hint: "Elixir ecosystem with Mix, OTP, Phoenix, and BEAM-native apps",
+    },
   ];
 
   const response = await navigableSelect<Ecosystem>({

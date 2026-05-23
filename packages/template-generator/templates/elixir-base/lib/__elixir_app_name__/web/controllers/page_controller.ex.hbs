@@ -1,0 +1,13 @@
+defmodule {{elixirModuleName}}Web.PageController do
+  use Phoenix.Controller, formats: [:html]
+
+  def home(conn, _params) do
+    html(conn, """
+    <main style="font-family: system-ui; margin: 4rem auto; max-width: 48rem;">
+      <p style="color: #64748b; letter-spacing: .08em; text-transform: uppercase;">Better Fullstack</p>
+      <h1>{{projectName}}</h1>
+      <p>Generated with Elixir, OTP, and Phoenix.</p>
+    </main>
+    """)
+  end
+end

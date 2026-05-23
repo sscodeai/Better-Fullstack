@@ -43,8 +43,8 @@ describe("Rust Ecosystem Tab", () => {
       expect(rustEcosystem?.description).toBe("High-performance Rust ecosystem");
     });
 
-    it("should have exactly 6 ecosystems", () => {
-      expect(ECOSYSTEMS).toHaveLength(6);
+    it("should have exactly 7 ecosystems", () => {
+      expect(ECOSYSTEMS).toHaveLength(7);
     });
   });
 

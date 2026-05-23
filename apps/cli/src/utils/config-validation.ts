@@ -653,6 +653,25 @@ export function validateJavaConstraints(
   }
 }
 
+export function validateElixirConstraints(config: Partial<ProjectConfig>) {
+  if (config.ecosystem !== "elixir") return;
+
+  const hasOban = (config.elixirLibraries ?? []).includes("oban");
+  if (hasOban && config.elixirDatabase !== "ecto") {
+    incompatibilityError({
+      message: "Oban requires Ecto in the Elixir scaffold.",
+      provided: {
+        "elixir-database": config.elixirDatabase ?? "none",
+        "elixir-libraries": (config.elixirLibraries ?? []).join(" ") || "none",
+      },
+      suggestions: [
+        "Use --elixir-database ecto with --elixir-libraries oban",
+        "Remove oban from --elixir-libraries for a database-free Mix project",
+      ],
+    });
+  }
+}
+
 export function validateEmailConstraints(config: Partial<ProjectConfig>) {
   if (!config.email || config.email === "none") return;
   if (config.ecosystem !== "typescript" && config.email !== "resend") {
@@ -826,6 +845,7 @@ export function validateFullConfig(
   validateCachingConstraints(config);
   validateSearchConstraints(config);
   validateJavaConstraints(config, providedFlags);
+  validateElixirConstraints(config);
 
   validateServerDeployRequiresBackend(config.serverDeploy, config.backend);
 
@@ -920,6 +940,7 @@ export function validateConfigForProgrammaticUse(config: Partial<ProjectConfig>)
     validateCachingConstraints(config);
     validateSearchConstraints(config);
     validateJavaConstraints(config);
+    validateElixirConstraints(config);
 
     validatePaymentsCompatibility(config.payments, config.auth, config.backend, config.frontend);
 

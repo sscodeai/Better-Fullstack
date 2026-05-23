@@ -148,7 +148,7 @@ describe("generateStackCommand parity", () => {
     expect(betaCommand).toContain("--version-channel beta");
   });
 
-  it("serializes python and rust multi-select arrays for their ecosystem commands", () => {
+  it("serializes python, rust, and elixir multi-select arrays for their ecosystem commands", () => {
     const pythonCommand = generateStackCommand({
       ...DEFAULT_STACK,
       ecosystem: "python",
@@ -159,13 +159,21 @@ describe("generateStackCommand parity", () => {
       ecosystem: "rust",
       rustLibraries: ["validator", "mockall"],
     });
+    const elixirCommand = generateStackCommand({
+      ...DEFAULT_STACK,
+      ecosystem: "elixir",
+      elixirLibraries: ["jason", "oban"],
+      elixirTesting: ["exunit", "mox"],
+    });
 
     expect(pythonCommand).toContain("--python-ai langchain openai-sdk");
     expect(rustCommand).toContain("--rust-libraries validator mockall");
     expect(rustCommand).toContain("--rust-auth none");
+    expect(elixirCommand).toContain("--elixir-libraries jason oban");
+    expect(elixirCommand).toContain("--elixir-testing exunit mox");
   });
 
-  it("serializes empty python and rust multi-select arrays as none", () => {
+  it("serializes empty python, rust, and elixir multi-select arrays as none", () => {
     const pythonCommand = generateStackCommand({
       ...DEFAULT_STACK,
       ecosystem: "python",
@@ -176,9 +184,17 @@ describe("generateStackCommand parity", () => {
       ecosystem: "rust",
       rustLibraries: [],
     });
+    const elixirCommand = generateStackCommand({
+      ...DEFAULT_STACK,
+      ecosystem: "elixir",
+      elixirLibraries: [],
+      elixirTesting: [],
+    });
 
     expect(pythonCommand).toContain("--python-ai none");
     expect(rustCommand).toContain("--rust-libraries none");
+    expect(elixirCommand).toContain("--elixir-libraries none");
+    expect(elixirCommand).toContain("--elixir-testing none");
   });
 
   it("serializes empty Go aiDocs arrays as none", () => {

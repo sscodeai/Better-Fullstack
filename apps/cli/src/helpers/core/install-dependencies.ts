@@ -122,6 +122,26 @@ export async function runGoModTidy({ projectDir }: { projectDir: string }) {
   }
 }
 
+export async function runMixDepsGet({ projectDir }: { projectDir: string }) {
+  const s = spinner();
+
+  try {
+    s.start("Running mix deps.get...");
+
+    await $({
+      cwd: projectDir,
+      stderr: "inherit",
+    })`mix deps.get`;
+
+    s.stop("Elixir dependencies installed successfully");
+  } catch (error) {
+    s.stop(pc.red("mix deps.get failed"));
+    if (error instanceof Error) {
+      consola.error(pc.red(`mix deps.get error: ${error.message}`));
+    }
+  }
+}
+
 export async function runMavenTests({ projectDir }: { projectDir: string }) {
   const s = spinner();
   const mvnw = process.platform === "win32" ? "mvnw.cmd" : "./mvnw";

@@ -144,6 +144,14 @@ import {
   type JavaAuth,
   JavaTestingLibrariesSchema,
   type JavaTestingLibraries,
+  ElixirWebFrameworkSchema,
+  type ElixirWebFramework,
+  ElixirDatabaseSchema,
+  type ElixirDatabase,
+  ElixirLibrariesSchema,
+  type ElixirLibraries,
+  ElixirTestingSchema,
+  type ElixirTesting,
   OPTION_CATEGORY_METADATA,
   AiDocsSchema,
   type AiDocs,
@@ -417,7 +425,12 @@ export async function createVirtual(
 ): Promise<{ success: boolean; tree?: VirtualFileTree; error?: string }> {
   try {
     const ecosystem = options.ecosystem || "typescript";
+    const isTypeScript = ecosystem === "typescript";
     const isReactNative = ecosystem === "react-native";
+    const frontend = options.frontend || (isReactNative ? ["native-bare"] : isTypeScript ? ["tanstack-router"] : []);
+    const hasNativeFrontend = frontend.some((item) =>
+      item === "native-bare" || item === "native-uniwind" || item === "native-unistyles"
+    );
     const config: ProjectConfig = {
       ecosystem,
       projectName: options.projectName || "my-project",
@@ -425,9 +438,9 @@ export async function createVirtual(
       relativePath: "./virtual",
       database: options.database || "none",
       orm: options.orm || "none",
-      backend: options.backend || (isReactNative ? "none" : "hono"),
-      runtime: options.runtime || (isReactNative ? "none" : "bun"),
-      frontend: options.frontend || (isReactNative ? ["native-bare"] : ["tanstack-router"]),
+      backend: options.backend || (isTypeScript ? "hono" : "none"),
+      runtime: options.runtime || (isTypeScript ? "bun" : "none"),
+      frontend,
       addons: options.addons || [],
       examples: options.examples || [],
       auth: options.auth || "none",
@@ -440,11 +453,11 @@ export async function createVirtual(
       versionChannel: options.versionChannel || "stable",
       install: false,
       dbSetup: options.dbSetup || "none",
-      api: options.api || (isReactNative ? "none" : "trpc"),
+      api: options.api || (isTypeScript ? "trpc" : "none"),
       webDeploy: options.webDeploy || "none",
       serverDeploy: options.serverDeploy || "none",
-      cssFramework: options.cssFramework || (isReactNative ? "none" : "tailwind"),
-      uiLibrary: options.uiLibrary || (isReactNative ? "none" : "shadcn-ui"),
+      cssFramework: options.cssFramework || (isTypeScript ? "tailwind" : "none"),
+      uiLibrary: options.uiLibrary || (isTypeScript ? "shadcn-ui" : "none"),
       shadcnBase: options.shadcnBase ?? "radix",
       shadcnStyle: options.shadcnStyle ?? "nova",
       shadcnIconLibrary: options.shadcnIconLibrary ?? "lucide",
@@ -454,9 +467,9 @@ export async function createVirtual(
       shadcnRadius: options.shadcnRadius ?? "default",
       ai: options.ai || "none",
       stateManagement: options.stateManagement || "none",
-      forms: options.forms || (isReactNative ? "none" : "react-hook-form"),
-      testing: options.testing || (isReactNative ? "none" : "vitest"),
-      validation: options.validation || "zod",
+      forms: options.forms || (isTypeScript ? "react-hook-form" : "none"),
+      testing: options.testing || (isTypeScript ? "vitest" : "none"),
+      validation: options.validation || (isTypeScript ? "zod" : "none"),
       realtime: options.realtime || "none",
       jobQueue: options.jobQueue || "none",
       animation: options.animation || "none",
@@ -464,13 +477,13 @@ export async function createVirtual(
       observability: options.observability || "none",
       featureFlags: options.featureFlags || "none",
       analytics: options.analytics || "none",
-      mobileNavigation: options.mobileNavigation || "expo-router",
+      mobileNavigation: options.mobileNavigation || (hasNativeFrontend ? "expo-router" : "none"),
       mobileUI: options.mobileUI || "none",
       mobileStorage: options.mobileStorage || "none",
       mobileTesting: options.mobileTesting || "none",
       mobilePush: options.mobilePush || "none",
       mobileOTA: options.mobileOTA || "none",
-      mobileDeepLinking: options.mobileDeepLinking || "expo-linking",
+      mobileDeepLinking: options.mobileDeepLinking || (hasNativeFrontend ? "expo-linking" : "none"),
       cms: options.cms || "none",
       caching: options.caching || "none",
       i18n: options.i18n || "none",
@@ -510,6 +523,10 @@ export async function createVirtual(
       javaAuth: options.javaAuth || "none",
       javaLibraries: options.javaLibraries || [],
       javaTestingLibraries: options.javaTestingLibraries || (options.ecosystem === "java" ? ["junit5"] : []),
+      elixirWebFramework: options.elixirWebFramework || "none",
+      elixirDatabase: options.elixirDatabase || "none",
+      elixirLibraries: options.elixirLibraries || (options.ecosystem === "elixir" ? ["jason"] : []),
+      elixirTesting: options.elixirTesting || (options.ecosystem === "elixir" ? ["exunit"] : []),
       // AI documentation files
       aiDocs: options.aiDocs || ["claude-md"],
     };
@@ -588,6 +605,10 @@ export type {
   JavaOrm,
   JavaAuth,
   JavaTestingLibraries,
+  ElixirWebFramework,
+  ElixirDatabase,
+  ElixirLibraries,
+  ElixirTesting,
   AiDocs,
   AddResult,
 };

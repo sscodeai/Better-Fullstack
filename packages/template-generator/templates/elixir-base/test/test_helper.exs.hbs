@@ -1,0 +1,6 @@
+ExUnit.start()
+
+{{#if hasElixirMox}}
+Code.require_file("support/mox.ex", __DIR__)
+Mox.defmock({{elixirModuleName}}.ExampleMock, for: {{elixirModuleName}}.ExampleBehaviour)
+{{/if}}

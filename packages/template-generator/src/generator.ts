@@ -18,6 +18,7 @@ import {
   processPythonBaseTemplate,
   processGoBaseTemplate,
   processJavaBaseTemplate,
+  processElixirBaseTemplate,
   processFrontendTemplates,
   processBackendTemplates,
   processDbTemplates,
@@ -71,6 +72,9 @@ export async function generateVirtualProject(options: GeneratorOptions): Promise
     } else if (config.ecosystem === "java") {
       // Java ecosystem - use Maven project structure
       await processJavaBaseTemplate(vfs, templates, config);
+    } else if (config.ecosystem === "elixir") {
+      // Elixir ecosystem - use Mix project structure with optional Phoenix modules
+      await processElixirBaseTemplate(vfs, templates, config);
     } else {
       // TypeScript and React Native ecosystems use package.json and TS project structure.
       await processBaseTemplate(vfs, templates, config);

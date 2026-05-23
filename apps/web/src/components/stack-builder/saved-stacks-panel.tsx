@@ -71,6 +71,11 @@ const RELEVANT_KEYS_BY_ECOSYSTEM: Record<string, readonly string[]> = {
     "email", "observability", "caching", "search",
     "aiDocs", "git", "install", "yolo",
   ],
+  elixir: [
+    "ecosystem", "projectName",
+    "elixirWebFramework", "elixirDatabase", "elixirLibraries", "elixirTesting",
+    "aiDocs", "git", "install", "yolo",
+  ],
 };
 
 /** Subset of keys used for the card highlight badges. */
@@ -80,6 +85,7 @@ const HIGHLIGHT_KEYS_BY_ECOSYSTEM: Record<string, readonly (keyof StackState)[]>
   python: ["pythonWebFramework", "pythonOrm", "pythonAi", "pythonApi", "pythonTaskQueue"],
   go: ["goWebFramework", "goOrm", "goApi", "goCli"],
   java: ["javaWebFramework", "javaBuildTool", "javaOrm", "javaAuth", "javaLibraries", "javaTestingLibraries"],
+  elixir: ["elixirWebFramework", "elixirDatabase", "elixirLibraries", "elixirTesting"],
 };
 
 interface SavedStacksPanelProps {

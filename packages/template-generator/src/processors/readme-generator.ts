@@ -74,10 +74,67 @@ export function processReadme(vfs: VirtualFileSystem, config: ProjectConfig): vo
     content = generateGoReadmeContent(config);
   } else if (config.ecosystem === "java") {
     content = generateJavaReadmeContent(config);
+  } else if (config.ecosystem === "elixir") {
+    content = generateElixirReadmeContent(config);
   } else {
     content = generateReadmeContent(config);
   }
   vfs.writeFile("README.md", content);
+}
+
+function generateElixirReadmeContent(config: ProjectConfig): string {
+  const libraries = (config.elixirLibraries || []).filter((library) => library !== "none");
+  const testing = (config.elixirTesting || []).filter((library) => library !== "none");
+  const isPhoenix = config.elixirWebFramework === "phoenix";
+  const runCommand = isPhoenix ? "mix phx.server" : "iex -S mix";
+  const features = [
+    "Elixir 1.17+ / OTP 27+",
+    isPhoenix ? "Phoenix web framework" : "Plain Mix / OTP application",
+    config.elixirDatabase === "ecto" ? "Ecto database layer" : null,
+    libraries.length > 0 ? `Libraries: ${libraries.join(", ")}` : null,
+    testing.length > 0 ? `Testing: ${testing.join(", ")}` : null,
+  ].filter(Boolean) as string[];
+
+  const testBlock = testing.includes("exunit")
+    ? `Run the test suite:
+
+\`\`\`bash
+mix test
+\`\`\`
+
+`
+    : "";
+
+  return `# ${config.projectName}
+
+This project was created with [Better Fullstack](https://github.com/Marve10s/Better-Fullstack) for the Elixir ecosystem.
+
+## Stack
+
+${features.map((feature) => `- ${feature}`).join("\n")}
+
+## Getting Started
+
+Make sure Elixir 1.17 or newer and OTP 27 or newer are installed.
+
+Install dependencies:
+
+\`\`\`bash
+mix deps.get
+\`\`\`
+
+${testBlock}Run the application:
+
+\`\`\`bash
+${runCommand}
+\`\`\`
+
+${
+  isPhoenix
+    ? "The Phoenix health endpoint is available at `http://localhost:4000/api/health`.\n"
+    : "The generated OTP app starts a supervised worker and can be explored from `iex -S mix`.\n"
+}
+`;
 }
 
 function sanitizeJavaPackageSuffix(projectName: string): string {

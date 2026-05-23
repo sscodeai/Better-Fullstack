@@ -57,6 +57,18 @@ export const ICON_REGISTRY: Record<string, IconConfig> = {
   python: { type: "si", slug: "python", hex: "3776AB" },
   go: { type: "si", slug: "go", hex: "00ADD8" },
   java: { type: "local", src: "/icon/java.svg" },
+  elixir: { type: "si", slug: "elixir", hex: "4B275F" },
+  phoenix: { type: "si", slug: "phoenixframework", hex: "FD4F00" },
+  ecto: { type: "si", slug: "elixir", hex: "4B275F" },
+  jason: { type: "si", slug: "elixir", hex: "4B275F" },
+  req: { type: "si", slug: "elixir", hex: "4B275F" },
+  oban: { type: "si", slug: "elixir", hex: "4B275F" },
+  broadway: { type: "si", slug: "elixir", hex: "4B275F" },
+  telemetry: { type: "si", slug: "elixir", hex: "4B275F" },
+  nx: { type: "si", slug: "elixir", hex: "4B275F" },
+  exunit: { type: "si", slug: "elixir", hex: "4B275F" },
+  mox: { type: "si", slug: "elixir", hex: "4B275F" },
+  "stream-data": { type: "si", slug: "elixir", hex: "4B275F" },
 
   // ─── API ───────────────────────────────────────────────────────────────────
   trpc: { type: "si", slug: "trpc", hex: "398CCB" },

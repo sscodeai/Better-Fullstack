@@ -4070,6 +4070,135 @@ export const TECH_OPTIONS: Record<
       default: false,
     },
   ],
+  // Elixir ecosystem options
+  elixirWebFramework: [
+    {
+      id: "none",
+      name: "No Web Framework",
+      description: "Plain Mix / OTP application without Phoenix",
+      icon: "",
+      color: "from-gray-400 to-gray-600",
+      default: true,
+    },
+    {
+      id: "phoenix",
+      name: "Phoenix",
+      description: "Elixir web framework with LiveView and Channels",
+      icon: "https://cdn.simpleicons.org/phoenixframework/FD4F00",
+      color: "from-orange-500 to-purple-600",
+      default: false,
+    },
+  ],
+  elixirDatabase: [
+    {
+      id: "none",
+      name: "No Database Layer",
+      description: "Skip Elixir database setup",
+      icon: "",
+      color: "from-gray-400 to-gray-600",
+      default: true,
+    },
+    {
+      id: "ecto",
+      name: "Ecto",
+      description: "Database wrapper and query generator for Elixir",
+      icon: "",
+      color: "from-violet-500 to-indigo-600",
+      default: false,
+    },
+  ],
+  elixirLibraries: [
+    {
+      id: "jason",
+      name: "Jason",
+      description: "Fast JSON encoder and decoder",
+      icon: "",
+      color: "from-purple-500 to-indigo-600",
+      default: true,
+    },
+    {
+      id: "req",
+      name: "Req",
+      description: "Modern HTTP client for Elixir",
+      icon: "",
+      color: "from-blue-500 to-cyan-600",
+      default: false,
+    },
+    {
+      id: "oban",
+      name: "Oban",
+      description: "PostgreSQL-backed background jobs",
+      icon: "",
+      color: "from-emerald-500 to-teal-600",
+      default: false,
+    },
+    {
+      id: "broadway",
+      name: "Broadway",
+      description: "Concurrent data ingestion and processing pipelines",
+      icon: "",
+      color: "from-rose-500 to-pink-600",
+      default: false,
+    },
+    {
+      id: "telemetry",
+      name: "Telemetry",
+      description: "Instrumentation events and metrics foundation",
+      icon: "",
+      color: "from-amber-500 to-orange-600",
+      default: false,
+    },
+    {
+      id: "nx",
+      name: "Nx",
+      description: "Numerical Elixir tensors and machine learning",
+      icon: "",
+      color: "from-sky-500 to-blue-600",
+      default: false,
+    },
+    {
+      id: "none",
+      name: "No Extra Libraries",
+      description: "Skip extra Elixir libraries",
+      icon: "",
+      color: "from-gray-400 to-gray-600",
+      default: false,
+    },
+  ],
+  elixirTesting: [
+    {
+      id: "exunit",
+      name: "ExUnit",
+      description: "Built-in Elixir test framework",
+      icon: "",
+      color: "from-purple-500 to-indigo-600",
+      default: true,
+    },
+    {
+      id: "mox",
+      name: "Mox",
+      description: "Explicit contract-based mocks",
+      icon: "",
+      color: "from-blue-500 to-indigo-600",
+      default: false,
+    },
+    {
+      id: "stream-data",
+      name: "StreamData",
+      description: "Property-based testing for ExUnit",
+      icon: "",
+      color: "from-green-500 to-emerald-600",
+      default: false,
+    },
+    {
+      id: "none",
+      name: "No Testing Libraries",
+      description: "Skip Elixir testing setup",
+      icon: "",
+      color: "from-gray-400 to-gray-600",
+      default: false,
+    },
+  ],
 };
 
 // Ecosystem configuration
@@ -4121,6 +4250,13 @@ export const ECOSYSTEMS: {
     description: "Modern Java ecosystem",
     icon: "/icon/java.svg",
     color: "from-red-500 to-orange-600",
+  },
+  {
+    id: "elixir",
+    name: "Elixir",
+    description: "Mix, OTP, Phoenix, and BEAM-native apps",
+    icon: "https://cdn.simpleicons.org/elixir/4B275F",
+    color: "from-purple-500 to-fuchsia-700",
   },
 ];
 
@@ -4244,6 +4380,15 @@ export const ECOSYSTEM_CATEGORIES: Record<Ecosystem, TechCategory[]> = {
     "git",
     "install",
   ],
+  elixir: [
+    "elixirWebFramework",
+    "elixirDatabase",
+    "elixirLibraries",
+    "elixirTesting",
+    "aiDocs",
+    "git",
+    "install",
+  ],
 };
 
 export const PRESET_CATEGORIES = [
@@ -4262,6 +4407,7 @@ export const PRESET_CATEGORIES = [
   { id: "python", name: "Python", icon: "fastapi", ecosystem: "python" },
   { id: "go", name: "Go", icon: "gin", ecosystem: "go" },
   { id: "java", name: "Java", icon: "java", ecosystem: "java" },
+  { id: "elixir", name: "Elixir", icon: "elixir", ecosystem: "elixir" },
 ] as const;
 
 export type PresetCategory = (typeof PRESET_CATEGORIES)[number]["id"];

@@ -21,6 +21,7 @@ import {
   runCargoBuild,
   runGradleTests,
   runMavenTests,
+  runMixDepsGet,
   runUvSync,
   runGoModTidy,
 } from "./install-dependencies";
@@ -103,6 +104,11 @@ export async function createProject(options: ProjectConfig, cliInput: CreateProj
       } else {
         await runMavenTests({ projectDir });
       }
+    }
+
+    // Run mix deps.get for Elixir projects
+    if (options.install && options.ecosystem === "elixir") {
+      await runMixDepsGet({ projectDir });
     }
 
     await initializeGit(projectDir, options.git);

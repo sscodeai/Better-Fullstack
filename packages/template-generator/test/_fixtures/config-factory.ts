@@ -90,6 +90,10 @@ const DEFAULT_CONFIG = {
   javaAuth: "none",
   javaLibraries: [],
   javaTestingLibraries: [],
+  elixirWebFramework: "none",
+  elixirDatabase: "none",
+  elixirLibraries: [],
+  elixirTesting: [],
   aiDocs: [],
 };
 

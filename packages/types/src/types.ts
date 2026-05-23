@@ -87,6 +87,10 @@ import type {
   JavaAuthSchema,
   JavaLibrariesSchema,
   JavaTestingLibrariesSchema,
+  ElixirWebFrameworkSchema,
+  ElixirDatabaseSchema,
+  ElixirLibrariesSchema,
+  ElixirTestingSchema,
   AiDocsSchema,
   ShadcnBaseSchema,
   ShadcnStyleSchema,
@@ -178,6 +182,10 @@ export type JavaOrm = z.infer<typeof JavaOrmSchema>;
 export type JavaAuth = z.infer<typeof JavaAuthSchema>;
 export type JavaLibraries = z.infer<typeof JavaLibrariesSchema>;
 export type JavaTestingLibraries = z.infer<typeof JavaTestingLibrariesSchema>;
+export type ElixirWebFramework = z.infer<typeof ElixirWebFrameworkSchema>;
+export type ElixirDatabase = z.infer<typeof ElixirDatabaseSchema>;
+export type ElixirLibraries = z.infer<typeof ElixirLibrariesSchema>;
+export type ElixirTesting = z.infer<typeof ElixirTestingSchema>;
 export type AiDocs = z.infer<typeof AiDocsSchema>;
 export type ShadcnBase = z.infer<typeof ShadcnBaseSchema>;
 export type ShadcnStyle = z.infer<typeof ShadcnStyleSchema>;

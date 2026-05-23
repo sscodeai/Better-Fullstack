@@ -88,6 +88,10 @@ export async function writeBtsConfig(projectConfig: ProjectConfig) {
     javaAuth: projectConfig.javaAuth,
     javaLibraries: projectConfig.javaLibraries,
     javaTestingLibraries: projectConfig.javaTestingLibraries,
+    elixirWebFramework: projectConfig.elixirWebFramework,
+    elixirDatabase: projectConfig.elixirDatabase,
+    elixirLibraries: projectConfig.elixirLibraries,
+    elixirTesting: projectConfig.elixirTesting,
     aiDocs: projectConfig.aiDocs,
   };
 
@@ -171,6 +175,10 @@ export async function writeBtsConfig(projectConfig: ProjectConfig) {
     javaAuth: btsConfig.javaAuth,
     javaLibraries: btsConfig.javaLibraries,
     javaTestingLibraries: btsConfig.javaTestingLibraries,
+    elixirWebFramework: btsConfig.elixirWebFramework,
+    elixirDatabase: btsConfig.elixirDatabase,
+    elixirLibraries: btsConfig.elixirLibraries,
+    elixirTesting: btsConfig.elixirTesting,
     aiDocs: btsConfig.aiDocs,
   };
 

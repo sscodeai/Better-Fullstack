@@ -137,6 +137,17 @@ Go also supports the global `--auth go-better-auth` option for GoBetterAuth. Tha
 
 Spring Boot requires Maven or Gradle. Java ORM, auth, and libraries require Spring Boot plus a build tool. Flyway requires Spring Data JPA.
 
+### Elixir
+
+| Flag | Values |
+| --- | --- |
+| `--elixir-web-framework` | `phoenix` `none` |
+| `--elixir-database` | `ecto` `none` |
+| `--elixir-libraries` | `jason` `req` `oban` `broadway` `telemetry` `nx` `none` |
+| `--elixir-testing` | `exunit` `mox` `stream-data` `none` |
+
+Phoenix is optional. Use `--elixir-web-framework none` for plain Mix / OTP projects.
+
 ## React Native flags
 
 Use `--ecosystem react-native` for Expo/React Native mobile projects.
@@ -156,7 +167,7 @@ Use `--ecosystem react-native` for Expo/React Native mobile projects.
 
 | Flag | Description |
 | --- | --- |
-| `--ecosystem` | `typescript` `react-native` `rust` `python` `go` `java`. Defaults to `typescript`. |
+| `--ecosystem` | `typescript` `react-native` `rust` `python` `go` `java` `elixir`. Defaults to `typescript`. |
 | `--template` | `t3` `mern` `pern` `uniwind` `none`. |
 | `--addons` | `mcp` `skills` `turborepo` `starlight` `fumadocs` `biome` `oxlint` `ultracite` `lefthook` `husky` `pwa` `tauri` `wxt` `msw` `storybook` `tanstack-query` `tanstack-table` `tanstack-virtual` `tanstack-db` `tanstack-pacer` `opentui` `ruler` `none`. |
 | `--examples` | `ai` `chat-sdk` `tanstack-showcase` `none`. |

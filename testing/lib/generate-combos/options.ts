@@ -15,6 +15,10 @@ import {
   DATABASE_VALUES,
   EFFECT_VALUES,
   EMAIL_VALUES,
+  ELIXIR_DATABASE_VALUES,
+  ELIXIR_LIBRARIES_VALUES,
+  ELIXIR_TESTING_VALUES,
+  ELIXIR_WEB_FRAMEWORK_VALUES,
   EXAMPLES_VALUES,
   FILE_STORAGE_VALUES,
   FILE_UPLOAD_VALUES,
@@ -462,6 +466,56 @@ function makeJavaDraft(args: GeneratorArgs): CandidateDraft {
   };
 }
 
+function makeElixirDraft(args: GeneratorArgs): CandidateDraft {
+  const elixirWebFramework = sampleScalar(
+    ELIXIR_WEB_FRAMEWORK_VALUES,
+    0.45,
+    "elixirWebFramework",
+  );
+  const elixirDatabase =
+    elixirWebFramework === "phoenix"
+      ? sampleScalar(ELIXIR_DATABASE_VALUES, 0.25, "elixirDatabase")
+      : sampleScalar(ELIXIR_DATABASE_VALUES, 0.55, "elixirDatabase");
+  const elixirLibraries = sampleArray(
+    ELIXIR_LIBRARIES_VALUES,
+    elixirWebFramework === "phoenix" ? 0.25 : 0.35,
+    3,
+    "elixirLibraries",
+  );
+
+  if (elixirLibraries.includes("oban") && elixirDatabase === "none") {
+    return {
+      ecosystem: "elixir",
+      options: {
+        ...createCommonOptions("elixir", args),
+        elixirWebFramework,
+        elixirDatabase: "ecto",
+        elixirLibraries,
+        elixirTesting: sampleArray(ELIXIR_TESTING_VALUES, 0.15, 2, "elixirTesting"),
+        email: sampleScalar(CROSS_ECOSYSTEM_EMAIL_VALUES, 0.75, "email"),
+        observability: sampleScalar(CROSS_ECOSYSTEM_OBSERVABILITY_VALUES, 0.75, "observability"),
+        caching: sampleScalar(CROSS_ECOSYSTEM_CACHING_VALUES, 0.75, "caching"),
+        search: sampleScalar(CROSS_ECOSYSTEM_SEARCH_VALUES, 0.75, "search"),
+      },
+    };
+  }
+
+  return {
+    ecosystem: "elixir",
+    options: {
+      ...createCommonOptions("elixir", args),
+      elixirWebFramework,
+      elixirDatabase,
+      elixirLibraries,
+      elixirTesting: sampleArray(ELIXIR_TESTING_VALUES, 0.15, 2, "elixirTesting"),
+      email: sampleScalar(CROSS_ECOSYSTEM_EMAIL_VALUES, 0.75, "email"),
+      observability: sampleScalar(CROSS_ECOSYSTEM_OBSERVABILITY_VALUES, 0.75, "observability"),
+      caching: sampleScalar(CROSS_ECOSYSTEM_CACHING_VALUES, 0.75, "caching"),
+      search: sampleScalar(CROSS_ECOSYSTEM_SEARCH_VALUES, 0.75, "search"),
+    },
+  };
+}
+
 function buildProvidedFlags(options: CLIInput): Set<string> {
   const providedFlags = new Set<string>();
 
@@ -568,6 +622,10 @@ function createValidationBase(projectName: string, draft: CandidateDraft): Proje
     javaAuth: "none",
     javaLibraries: [],
     javaTestingLibraries: [],
+    elixirWebFramework: "none",
+    elixirDatabase: "none",
+    elixirLibraries: [],
+    elixirTesting: [],
     aiDocs: [],
     packageManager: "bun",
     git: false,
@@ -674,6 +732,8 @@ function createDraft(ecosystem: Ecosystem, args: GeneratorArgs): CandidateDraft 
       return makeGoDraft(args);
     case "java":
       return makeJavaDraft(args);
+    case "elixir":
+      return makeElixirDraft(args);
   }
 }
 

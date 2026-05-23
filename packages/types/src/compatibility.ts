@@ -95,7 +95,11 @@ export type CompatibilityCategory =
   | "javaOrm"
   | "javaAuth"
   | "javaLibraries"
-  | "javaTestingLibraries";
+  | "javaTestingLibraries"
+  | "elixirWebFramework"
+  | "elixirDatabase"
+  | "elixirLibraries"
+  | "elixirTesting";
 
 export type CompatibilityIssue = {
   code: string;
@@ -116,7 +120,7 @@ export type CompatibilityAdjustment = {
 };
 
 export type CompatibilityInput = {
-  ecosystem: "typescript" | "react-native" | "rust" | "python" | "go" | "java";
+  ecosystem: "typescript" | "react-native" | "rust" | "python" | "go" | "java" | "elixir";
   projectName: string | null;
   webFrontend: string[];
   nativeFrontend: string[];
@@ -208,6 +212,10 @@ export type CompatibilityInput = {
   javaAuth: string;
   javaLibraries: string[];
   javaTestingLibraries: string[];
+  elixirWebFramework: string;
+  elixirDatabase: string;
+  elixirLibraries: string[];
+  elixirTesting: string[];
 };
 
 const TYPESCRIPT_CATEGORY_ORDER: CompatibilityCategory[] = [
@@ -293,6 +301,10 @@ const CATEGORY_ORDER: CompatibilityCategory[] = [
   "javaAuth",
   "javaLibraries",
   "javaTestingLibraries",
+  "elixirWebFramework",
+  "elixirDatabase",
+  "elixirLibraries",
+  "elixirTesting",
 ];
 
 const DEFAULT_RUNTIME = "bun";
@@ -406,6 +418,13 @@ export const getCategoryDisplayName = (categoryKey: string): string => {
     javaTestingLibraries: "Java Testing Libraries",
   };
 
+  const elixirCategoryNames: Record<string, string> = {
+    elixirWebFramework: "Elixir Web Framework",
+    elixirDatabase: "Elixir Database",
+    elixirLibraries: "Elixir Libraries",
+    elixirTesting: "Elixir Testing",
+  };
+
   if (rustCategoryNames[categoryKey]) {
     return rustCategoryNames[categoryKey];
   }
@@ -420,6 +439,10 @@ export const getCategoryDisplayName = (categoryKey: string): string => {
 
   if (javaCategoryNames[categoryKey]) {
     return javaCategoryNames[categoryKey];
+  }
+
+  if (elixirCategoryNames[categoryKey]) {
+    return elixirCategoryNames[categoryKey];
   }
 
   // Custom display names for TypeScript categories
@@ -3180,10 +3203,12 @@ export function evaluateCompatibility(input: CompatibilityInput): CompatibilityE
     ["stateManagement", input.stateManagement],
     ["animation", input.animation],
     ["pythonApi", input.pythonApi],
-   ["javaWebFramework", input.javaWebFramework],
+    ["javaWebFramework", input.javaWebFramework],
     ["javaBuildTool", input.javaBuildTool],
     ["javaOrm", input.javaOrm],
     ["javaAuth", input.javaAuth],
+    ["elixirWebFramework", input.elixirWebFramework],
+    ["elixirDatabase", input.elixirDatabase],
   ];
 
   for (const [category, optionId] of scalarChecks) {

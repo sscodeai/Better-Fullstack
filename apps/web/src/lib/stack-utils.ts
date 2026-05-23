@@ -154,6 +154,17 @@ const JAVA_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
   "install",
 ];
 
+// Elixir ecosystem category order
+const ELIXIR_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
+  "elixirWebFramework",
+  "elixirDatabase",
+  "elixirLibraries",
+  "elixirTesting",
+  "aiDocs",
+  "git",
+  "install",
+];
+
 // Combined category order for backwards compatibility
 const CATEGORY_ORDER = [
   ...new Set([
@@ -163,6 +174,7 @@ const CATEGORY_ORDER = [
     ...PYTHON_CATEGORY_ORDER,
     ...GO_CATEGORY_ORDER,
     ...JAVA_CATEGORY_ORDER,
+    ...ELIXIR_CATEGORY_ORDER,
   ]),
 ] as Array<keyof typeof TECH_OPTIONS>;
 
@@ -180,6 +192,8 @@ export function getCategoryOrderForEcosystem(
       return GO_CATEGORY_ORDER;
     case "java":
       return JAVA_CATEGORY_ORDER;
+    case "elixir":
+      return ELIXIR_CATEGORY_ORDER;
     case "typescript":
       return TYPESCRIPT_CATEGORY_ORDER;
   }
@@ -240,4 +254,5 @@ export {
   PYTHON_CATEGORY_ORDER,
   GO_CATEGORY_ORDER,
   JAVA_CATEGORY_ORDER,
+  ELIXIR_CATEGORY_ORDER,
 };

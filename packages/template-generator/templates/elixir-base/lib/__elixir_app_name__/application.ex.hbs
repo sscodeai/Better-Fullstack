@@ -1,0 +1,28 @@
+defmodule {{elixirModuleName}}.Application do
+  use Application
+
+  @impl true
+  def start(_type, _args) do
+    children = [
+{{#if hasElixirEcto}}
+      {{elixirModuleName}}.Repo,
+{{/if}}
+{{#if isElixirPhoenix}}
+      {Phoenix.PubSub, name: {{elixirModuleName}}.PubSub},
+      {{elixirModuleName}}Web.Endpoint,
+{{/if}}
+      {{elixirModuleName}}.Worker
+    ]
+
+    opts = [strategy: :one_for_one, name: {{elixirModuleName}}.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+
+{{#if isElixirPhoenix}}
+  @impl true
+  def config_change(changed, _new, removed) do
+    {{elixirModuleName}}Web.Endpoint.config_change(changed, removed)
+    :ok
+  end
+{{/if}}
+end

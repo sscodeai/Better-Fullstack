@@ -108,6 +108,10 @@ export const DEFAULT_STACK_SELECTION: StackSelectionState = {
   javaAuth: "none",
   javaLibraries: [],
   javaTestingLibraries: ["junit5"],
+  elixirWebFramework: "none",
+  elixirDatabase: "none",
+  elixirLibraries: ["jason"],
+  elixirTesting: ["exunit"],
 };
 
 export type StackSelectionKey = keyof StackSelectionState;
@@ -210,6 +214,10 @@ export const STACK_SELECTION_OPTION_CATEGORY_BY_KEY: Record<
   javaAuth: "javaAuth",
   javaLibraries: "javaLibraries",
   javaTestingLibraries: "javaTestingLibraries",
+  elixirWebFramework: "elixirWebFramework",
+  elixirDatabase: "elixirDatabase",
+  elixirLibraries: "elixirLibraries",
+  elixirTesting: "elixirTesting",
 };
 
 export const VIRTUAL_NONE_MULTI_SELECT_STACK_SELECTION_KEYS = [
@@ -217,6 +225,8 @@ export const VIRTUAL_NONE_MULTI_SELECT_STACK_SELECTION_KEYS = [
   "pythonAi",
   "javaLibraries",
   "javaTestingLibraries",
+  "elixirLibraries",
+  "elixirTesting",
   "aiDocs",
 ] as const;
 
@@ -319,6 +329,10 @@ export const STACK_SELECTION_URL_KEYS = {
   javaAuth: "jauth",
   javaLibraries: "jlib",
   javaTestingLibraries: "jtest",
+  elixirWebFramework: "ewf",
+  elixirDatabase: "edb",
+  elixirLibraries: "elib",
+  elixirTesting: "etest",
 } as const satisfies Record<StackSelectionKey, string>;
 
 export const STACK_SELECTION_KEYS = Object.keys(
@@ -589,6 +603,8 @@ const CLI_SCALAR_CONFIG_FIELDS = [
   ["javaBuildTool", "javaBuildTool"],
   ["javaOrm", "javaOrm"],
   ["javaAuth", "javaAuth"],
+  ["elixirWebFramework", "elixirWebFramework"],
+  ["elixirDatabase", "elixirDatabase"],
 ] as const satisfies readonly (readonly [keyof CLIInput, keyof ProjectConfig])[];
 
 const CLI_NON_EMPTY_ARRAY_CONFIG_FIELDS = [
@@ -603,6 +619,8 @@ const CLI_DEFINED_ARRAY_CONFIG_FIELDS = [
   ["pythonAi", "pythonAi"],
   ["javaLibraries", "javaLibraries"],
   ["javaTestingLibraries", "javaTestingLibraries"],
+  ["elixirLibraries", "elixirLibraries"],
+  ["elixirTesting", "elixirTesting"],
 ] as const satisfies readonly (readonly [keyof CLIInput, keyof ProjectConfig])[];
 
 const PACKAGE_MANAGER_COMMANDS = {
@@ -663,6 +681,13 @@ const JAVA_CONFIG_KEYS = [
   "javaAuth",
   "javaLibraries",
   "javaTestingLibraries",
+] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
+
+const ELIXIR_CONFIG_KEYS = [
+  "elixirWebFramework",
+  "elixirDatabase",
+  "elixirLibraries",
+  "elixirTesting",
 ] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
 
 const REACT_NATIVE_CONFIG_KEYS = [
@@ -920,6 +945,12 @@ function buildProjectConfigBase(
     javaTestingLibraries: toUniqueNonNoneArray(
       stack.javaTestingLibraries,
     ) as ProjectConfig["javaTestingLibraries"],
+    elixirWebFramework: stack.elixirWebFramework as ProjectConfig["elixirWebFramework"],
+    elixirDatabase: stack.elixirDatabase as ProjectConfig["elixirDatabase"],
+    elixirLibraries: toUniqueNonNoneArray(
+      stack.elixirLibraries,
+    ) as ProjectConfig["elixirLibraries"],
+    elixirTesting: toUniqueNonNoneArray(stack.elixirTesting) as ProjectConfig["elixirTesting"],
     aiDocs: toUniqueNonNoneArray(stack.aiDocs) as ProjectConfig["aiDocs"],
   };
 }
@@ -968,6 +999,7 @@ export function isCliDefaultStackSelection(
           ...PYTHON_CONFIG_KEYS,
           ...GO_CONFIG_KEYS,
           ...JAVA_CONFIG_KEYS,
+          ...ELIXIR_CONFIG_KEYS,
           ...(selection.ecosystem === "typescript" ? REACT_NATIVE_CONFIG_KEYS : []),
         ])
       : new Set<keyof CliDefaultProjectConfigBase>();
@@ -1200,6 +1232,22 @@ function generateJavaCommand(selection: StackSelectionInput, projectName: string
   return `${getBaseCommand(selection)} ${projectName} ${flags.join(" ")}`;
 }
 
+function generateElixirCommand(selection: StackSelectionInput, projectName: string) {
+  const flags: string[] = [
+    "--ecosystem elixir",
+    `--elixir-web-framework ${selection.elixirWebFramework}`,
+    `--elixir-database ${selection.elixirDatabase}`,
+    formatArrayFlag("elixir-libraries", selection.elixirLibraries),
+    formatArrayFlag("elixir-testing", selection.elixirTesting),
+    formatArrayFlag("ai-docs", selection.aiDocs),
+  ];
+
+  if (selection.git === "false") flags.push("--no-git");
+  if (selection.install === "false") flags.push("--no-install");
+
+  return `${getBaseCommand(selection)} ${projectName} ${flags.join(" ")}`;
+}
+
 export function generateStackSelectionCommand(selection: StackSelectionInput): string {
   const projectName = getProjectName(selection);
 
@@ -1214,6 +1262,8 @@ export function generateStackSelectionCommand(selection: StackSelectionInput): s
       return generateGoCommand(selection, projectName);
     case "java":
       return generateJavaCommand(selection, projectName);
+    case "elixir":
+      return generateElixirCommand(selection, projectName);
     case "typescript":
     default:
       return generateTypeScriptCommand(selection, projectName);

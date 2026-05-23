@@ -54,6 +54,12 @@ export async function displayPostInstallInstructions(
     return;
   }
 
+  // Handle Elixir projects with different instructions
+  if (ecosystem === "elixir") {
+    displayElixirInstructions(config);
+    return;
+  }
+
   // Handle Python projects with different instructions
   if (ecosystem === "python") {
     displayPythonInstructions(config);
@@ -950,6 +956,49 @@ function getJavaMainClass(projectName: string): string {
 
 function getJavaMainSourcePath(projectName: string): string {
   return `src/main/java/${getJavaMainClass(projectName).replace(/\./g, "/")}.java`;
+}
+
+function displayElixirInstructions(config: ProjectConfig & { depsInstalled: boolean }) {
+  const {
+    relativePath,
+    depsInstalled,
+    elixirWebFramework,
+    elixirDatabase,
+    elixirLibraries,
+    elixirTesting,
+  } = config;
+
+  const cdCmd = `cd ${relativePath}`;
+  const isPhoenix = elixirWebFramework === "phoenix";
+  const libraries = elixirLibraries.filter((library) => library !== "none");
+  const testingLibraries = elixirTesting.filter((library) => library !== "none");
+
+  let output = `${pc.bold("Next steps")}\n${pc.cyan("1.")} ${cdCmd}\n`;
+  let stepCounter = 2;
+
+  if (!depsInstalled) {
+    output += `${pc.cyan(`${stepCounter++}.`)} mix deps.get\n`;
+  }
+
+  if (testingLibraries.includes("exunit")) {
+    output += `${pc.cyan(`${stepCounter++}.`)} mix test\n`;
+  }
+
+  output += `${pc.cyan(`${stepCounter++}.`)} ${isPhoenix ? "mix phx.server" : "iex -S mix"}\n`;
+
+  output += `\n${pc.bold("Your Elixir project includes:")}\n`;
+  output += `${pc.cyan("•")} Scaffold: ${isPhoenix ? "Phoenix" : "Plain Mix / OTP"}\n`;
+  if (elixirDatabase !== "none") {
+    output += `${pc.cyan("•")} Database: ${elixirDatabase}\n`;
+  }
+  if (libraries.length > 0) {
+    output += `${pc.cyan("•")} Libraries: ${libraries.join(", ")}\n`;
+  }
+  if (testingLibraries.length > 0) {
+    output += `${pc.cyan("•")} Testing: ${testingLibraries.join(", ")}\n`;
+  }
+
+  consola.box(output);
 }
 
 function displayJavaInstructions(config: ProjectConfig & { depsInstalled: boolean }) {

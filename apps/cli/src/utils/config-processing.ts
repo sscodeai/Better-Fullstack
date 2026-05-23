@@ -52,4 +52,6 @@ export function validateArrayOptions(options: CLIInput) {
   validateNoneExclusivity(options.pythonAi, "python ai libraries");
   validateNoneExclusivity(options.javaLibraries, "java libraries");
   validateNoneExclusivity(options.javaTestingLibraries, "java testing libraries");
+  validateNoneExclusivity(options.elixirLibraries, "elixir libraries");
+  validateNoneExclusivity(options.elixirTesting, "elixir testing libraries");
 }

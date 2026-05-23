@@ -221,6 +221,19 @@ function getJavaFlags(config: ProjectConfig) {
   return flags;
 }
 
+function getElixirFlags(config: ProjectConfig) {
+  const flags = ["--ecosystem elixir"];
+
+  flags.push(`--elixir-web-framework ${config.elixirWebFramework}`);
+  flags.push(`--elixir-database ${config.elixirDatabase}`);
+  flags.push(formatArrayFlag("elixir-libraries", config.elixirLibraries));
+  flags.push(formatArrayFlag("elixir-testing", config.elixirTesting));
+
+  appendCommonFlags(flags, config);
+
+  return flags;
+}
+
 export function generateReproducibleCommand(config: ProjectConfig) {
   let flags: string[];
 
@@ -239,6 +252,9 @@ export function generateReproducibleCommand(config: ProjectConfig) {
       break;
     case "java":
       flags = getJavaFlags(config);
+      break;
+    case "elixir":
+      flags = getElixirFlags(config);
       break;
     case "typescript":
     default:

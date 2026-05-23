@@ -30,6 +30,8 @@ export function getDefaultConfig() {
     pythonAi: [...DEFAULT_CONFIG_BASE.pythonAi],
     javaLibraries: [...DEFAULT_CONFIG_BASE.javaLibraries],
     javaTestingLibraries: [...DEFAULT_CONFIG_BASE.javaTestingLibraries],
+    elixirLibraries: [...DEFAULT_CONFIG_BASE.elixirLibraries],
+    elixirTesting: [...DEFAULT_CONFIG_BASE.elixirTesting],
     aiDocs: [...DEFAULT_CONFIG_BASE.aiDocs],
   };
 }

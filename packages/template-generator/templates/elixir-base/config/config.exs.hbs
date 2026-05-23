@@ -1,0 +1,31 @@
+import Config
+
+config :{{elixirOtpApp}},
+  app_name: "{{projectName}}"
+
+{{#if isElixirPhoenix}}
+config :{{elixirOtpApp}}, {{elixirModuleName}}Web.Endpoint,
+  url: [host: "localhost"],
+  adapter: Phoenix.Endpoint.Cowboy2Adapter,
+  render_errors: [
+    formats: [html: {{elixirModuleName}}Web.ErrorHTML, json: {{elixirModuleName}}Web.ErrorJSON],
+    layout: false
+  ],
+  pubsub_server: {{elixirModuleName}}.PubSub,
+  live_view: [signing_salt: "better-fullstack"]
+
+config :phoenix, :json_library, Jason
+{{/if}}
+
+{{#if hasElixirEcto}}
+config :{{elixirOtpApp}},
+  ecto_repos: [{{elixirModuleName}}.Repo]
+
+config :{{elixirOtpApp}}, {{elixirModuleName}}.Repo,
+  database: "{{elixirAppName}}_#{config_env()}",
+  username: System.get_env("POSTGRES_USER", "postgres"),
+  password: System.get_env("POSTGRES_PASSWORD", "postgres"),
+  hostname: System.get_env("POSTGRES_HOST", "localhost")
+{{/if}}
+
+import_config "#{config_env()}.exs"

@@ -87,6 +87,10 @@ function makeConfig(overrides: Partial<ProjectConfig> = {}): ProjectConfig {
     javaAuth: "none",
     javaLibraries: [],
     javaTestingLibraries: ["junit5"],
+    elixirWebFramework: "none",
+    elixirDatabase: "none",
+    elixirLibraries: [],
+    elixirTesting: [],
     aiDocs: ["claude-md"],
     ...overrides,
   };
@@ -432,5 +436,38 @@ describe("generateReproducibleCommand", () => {
         "--no-install",
     );
     expect(command).not.toContain("--auth ");
+  });
+
+  it("generates an Elixir command with Mix and Phoenix options", () => {
+    const config = makeConfig({
+      ecosystem: "elixir",
+      frontend: [],
+      backend: "none",
+      runtime: "none",
+      api: "none",
+      cssFramework: "none",
+      uiLibrary: "none",
+      forms: "none",
+      testing: "none",
+      validation: "none",
+      elixirWebFramework: "phoenix",
+      elixirDatabase: "ecto",
+      elixirLibraries: ["jason", "oban"],
+      elixirTesting: ["exunit", "mox"],
+      aiDocs: ["none"],
+    });
+
+    expect(generateReproducibleCommand(config)).toBe(
+      "bun create better-fullstack@latest my-app " +
+        "--ecosystem elixir " +
+        "--elixir-web-framework phoenix " +
+        "--elixir-database ecto " +
+        "--elixir-libraries jason oban " +
+        "--elixir-testing exunit mox " +
+        "--ai-docs none " +
+        "--git " +
+        "--package-manager bun " +
+        "--install",
+    );
   });
 });

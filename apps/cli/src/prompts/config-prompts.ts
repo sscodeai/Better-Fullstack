@@ -14,6 +14,10 @@ import type {
   I18n,
   Database,
   DatabaseSetup,
+  ElixirDatabase,
+  ElixirLibraries,
+  ElixirTesting,
+  ElixirWebFramework,
   Ecosystem,
   Effect,
   Email,
@@ -97,6 +101,12 @@ import { getDatabaseChoice } from "./database";
 import { getDBSetupChoice } from "./database-setup";
 import { getEcosystemChoice } from "./ecosystem";
 import { getEffectChoice } from "./effect";
+import {
+  getElixirDatabaseChoice,
+  getElixirLibrariesChoice,
+  getElixirTestingChoice,
+  getElixirWebFrameworkChoice,
+} from "./elixir-ecosystem";
 import { getEmailChoice } from "./email";
 import { getExamplesChoice } from "./examples";
 import { getFileStorageChoice } from "./file-storage";
@@ -255,6 +265,11 @@ type PromptGroupResults = {
   javaAuth: JavaAuth;
   javaLibraries: JavaLibraries[];
   javaTestingLibraries: JavaTestingLibraries[];
+  // Elixir ecosystem
+  elixirWebFramework: ElixirWebFramework;
+  elixirDatabase: ElixirDatabase;
+  elixirLibraries: ElixirLibraries[];
+  elixirTesting: ElixirTesting[];
   // Keep at end
   aiDocs: AiDocs[];
   git: boolean;
@@ -718,6 +733,23 @@ export async function gatherConfig(
         }
         return getJavaTestingLibrariesChoice(flags.javaTestingLibraries);
       },
+      // Elixir ecosystem prompts (skip if not Elixir)
+      elixirWebFramework: ({ results }) => {
+        if (results.ecosystem !== "elixir") return Promise.resolve("none" as ElixirWebFramework);
+        return getElixirWebFrameworkChoice(flags.elixirWebFramework);
+      },
+      elixirDatabase: ({ results }) => {
+        if (results.ecosystem !== "elixir") return Promise.resolve("none" as ElixirDatabase);
+        return getElixirDatabaseChoice(flags.elixirDatabase);
+      },
+      elixirLibraries: ({ results }) => {
+        if (results.ecosystem !== "elixir") return Promise.resolve([] as ElixirLibraries[]);
+        return getElixirLibrariesChoice(flags.elixirLibraries);
+      },
+      elixirTesting: ({ results }) => {
+        if (results.ecosystem !== "elixir") return Promise.resolve([] as ElixirTesting[]);
+        return getElixirTestingChoice(flags.elixirTesting);
+      },
       // Keep at end
       aiDocs: () => getAiDocsChoice(flags.aiDocs),
       git: () => getGitChoice(flags.git),
@@ -727,7 +759,8 @@ export async function gatherConfig(
           results.ecosystem === "rust" ||
           results.ecosystem === "python" ||
           results.ecosystem === "go" ||
-          results.ecosystem === "java"
+          results.ecosystem === "java" ||
+          results.ecosystem === "elixir"
         )
           return Promise.resolve(flags.packageManager ?? getUserPkgManager());
         return getPackageManagerChoice(flags.packageManager);
@@ -829,6 +862,11 @@ export async function gatherConfig(
     javaAuth: result.javaAuth,
     javaLibraries: result.javaLibraries,
     javaTestingLibraries: result.javaTestingLibraries,
+    // Elixir ecosystem options
+    elixirWebFramework: result.elixirWebFramework,
+    elixirDatabase: result.elixirDatabase,
+    elixirLibraries: result.elixirLibraries,
+    elixirTesting: result.elixirTesting,
     // AI documentation files
     aiDocs: result.aiDocs,
   };

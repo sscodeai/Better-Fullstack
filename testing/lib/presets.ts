@@ -83,6 +83,10 @@ export function makeBaseConfig(name: string, ecosystem: Ecosystem): ProjectConfi
     javaAuth: "none",
     javaLibraries: [],
     javaTestingLibraries: [],
+    elixirWebFramework: "none",
+    elixirDatabase: "none",
+    elixirLibraries: [],
+    elixirTesting: [],
     versionChannel: "stable",
   } as ProjectConfig;
 }
@@ -516,6 +520,27 @@ const SMOKE_TEST_PRESETS: Record<string, PresetDef> = {
       javaTestingLibraries: [],
     },
   },
+
+  // === ELIXIR PRESETS ===
+  "elixir-mix-otp": {
+    ecosystem: "elixir",
+    overrides: {
+      elixirWebFramework: "none",
+      elixirDatabase: "none",
+      elixirLibraries: ["jason", "req", "telemetry"],
+      elixirTesting: ["exunit", "stream-data"],
+    },
+  },
+  "elixir-phoenix-ecto": {
+    ecosystem: "elixir",
+    overrides: {
+      elixirWebFramework: "phoenix",
+      elixirDatabase: "ecto",
+      elixirLibraries: ["jason", "req", "oban", "telemetry"],
+      elixirTesting: ["exunit", "mox"],
+      observability: "sentry",
+    },
+  },
 };
 
 const PRESET_GROUPS = {
@@ -529,6 +554,7 @@ const PRESET_GROUPS = {
     "python-fastapi-sqlalchemy",
     "go-gin-gorm",
     "java-spring-maven",
+    "elixir-mix-otp",
     "frontend-only-react-vite",
   ],
   "pr-broad": [
@@ -543,6 +569,7 @@ const PRESET_GROUPS = {
     "go-echo-sqlc",
     "java-spring-gradle-jpa",
     "java-plain-cli",
+    "elixir-phoenix-ecto",
     "react-vite-hono",
     "solid-start-express",
     "angular-fets",

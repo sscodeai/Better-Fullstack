@@ -1,0 +1,10 @@
+import Config
+
+{{#if isElixirPhoenix}}
+config :{{elixirOtpApp}}, {{elixirModuleName}}Web.Endpoint,
+  http: [ip: {127, 0, 0, 1}, port: 4002],
+  server: false,
+  secret_key_base: "better_fullstack_test_secret_key_base_for_local_testing_only"
+{{/if}}
+
+config :logger, level: :warning

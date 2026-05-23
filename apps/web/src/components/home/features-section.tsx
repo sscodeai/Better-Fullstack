@@ -34,12 +34,13 @@ const LAYERS: ReadonlyArray<Layer> = [
       "pythonWebFramework",
       "goWebFramework",
       "javaWebFramework",
+      "elixirWebFramework",
     ],
     word: "BACKEND FRAMEWORKS",
   },
   {
     type: "categories",
-    categories: ["orm", "rustOrm", "pythonOrm", "goOrm", "javaOrm"],
+    categories: ["orm", "rustOrm", "pythonOrm", "goOrm", "javaOrm", "elixirDatabase"],
     word: "DATABASE ORMs",
   },
   {
@@ -90,8 +91,8 @@ export default function FeaturesSection() {
               <span className="italic text-muted-foreground">Everything.</span>
             </h2>
             <p className="mt-8 max-w-md text-pretty text-base text-muted-foreground sm:text-lg">
-              TypeScript, React Native, Rust, Python, Go, Java — one CLI scaffolds production-ready
-              apps across all six. Pick your ecosystem, pick your stack.
+              TypeScript, React Native, Rust, Python, Go, Java, Elixir — one CLI scaffolds
+              production-ready apps across all seven. Pick your ecosystem, pick your stack.
             </p>
           </div>
 
@@ -291,7 +292,7 @@ function TotalBlock() {
               </span>
             </motion.div>
             <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.22em] text-background/70">
-              options across 6 ecosystems · ts · rn · rust · go · python · java
+              options across 7 ecosystems · ts · rn · rust · go · python · java · elixir
             </p>
           </div>
         </div>

@@ -230,6 +230,18 @@ function generateTechStackSection(config: ProjectConfig): string {
     if (testingLibraries.length > 0) lines.push(`- Testing: ${testingLibraries.join(", ")}`);
   }
 
+  if (config.ecosystem === "elixir") {
+    const libraries = (config.elixirLibraries || []).filter((library) => library !== "none");
+    const testingLibraries = (config.elixirTesting || []).filter((library) => library !== "none");
+    lines.push(`- Elixir Version: 1.17+`);
+    lines.push(
+      `- Scaffold: ${config.elixirWebFramework === "phoenix" ? "phoenix" : "plain-mix-otp"}`,
+    );
+    if (config.elixirDatabase !== "none") lines.push(`- Database: ${config.elixirDatabase}`);
+    if (libraries.length > 0) lines.push(`- Libraries: ${libraries.join(", ")}`);
+    if (testingLibraries.length > 0) lines.push(`- Testing: ${testingLibraries.join(", ")}`);
+  }
+
   return lines.join("\n");
 }
 
@@ -339,6 +351,19 @@ function generateStructureSection(config: ProjectConfig): string {
       lines.push("├── src/test/java/       # Test suite");
     }
     lines.push("```");
+  } else if (config.ecosystem === "elixir") {
+    lines.push("```");
+    lines.push(`${config.projectName}/`);
+    lines.push("├── mix.exs              # Mix project and dependencies");
+    lines.push("├── config/              # Environment configuration");
+    lines.push("├── lib/                 # OTP application source");
+    if (config.elixirWebFramework === "phoenix") {
+      lines.push("│   └── */web/           # Phoenix endpoint, router, and controllers");
+    }
+    if ((config.elixirTesting || []).some((library) => library !== "none")) {
+      lines.push("├── test/                # ExUnit test suite");
+    }
+    lines.push("```");
   }
 
   return lines.join("\n");
@@ -419,6 +444,16 @@ function generateCommandsSection(config: ProjectConfig): string {
     } else {
       lines.push(`- \`javac -d out ${getJavaMainSourcePath(config)}\` - Compile the application`);
       lines.push(`- \`java -cp out ${getJavaMainClass(config)}\` - Run the application`);
+    }
+  } else if (config.ecosystem === "elixir") {
+    lines.push(`- \`mix deps.get\` - Install dependencies`);
+    lines.push(
+      config.elixirWebFramework === "phoenix"
+        ? `- \`mix phx.server\` - Start Phoenix server`
+        : `- \`iex -S mix\` - Start the OTP application in IEx`,
+    );
+    if ((config.elixirTesting || []).includes("exunit")) {
+      lines.push(`- \`mix test\` - Run tests`);
     }
   }
 
@@ -509,6 +544,14 @@ function generateCursorRules(config: ProjectConfig): string {
     } else {
       rules.push(`Use javac/java directly for compile and run steps.`);
     }
+  } else if (config.ecosystem === "elixir") {
+    rules.push(`You are working on an Elixir project.`);
+    rules.push(
+      `Scaffold: ${config.elixirWebFramework === "phoenix" ? "phoenix" : "plain-mix-otp"}`,
+    );
+    if (config.elixirDatabase !== "none") rules.push(`Database: ${config.elixirDatabase}`);
+    const libraries = (config.elixirLibraries || []).filter((library) => library !== "none");
+    if (libraries.length > 0) rules.push(`Libraries: ${libraries.join(", ")}`);
   }
 
   rules.push(``);

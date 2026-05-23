@@ -94,6 +94,10 @@ export function createCliDefaultProjectConfigBase(
     javaAuth: "none",
     javaLibraries: [],
     javaTestingLibraries: ["junit5"],
+    elixirWebFramework: "none",
+    elixirDatabase: "none",
+    elixirLibraries: ["jason"],
+    elixirTesting: ["exunit"],
     aiDocs: ["claude-md"],
   };
 }

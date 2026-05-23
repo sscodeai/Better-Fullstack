@@ -146,6 +146,14 @@ const ECOSYSTEM_CATEGORIES: Record<Ecosystem, SelectCategory[]> = {
     "packageManager",
     "versionChannel",
   ],
+  elixir: [
+    "elixirWebFramework",
+    "elixirDatabase",
+    "elixirLibraries",
+    "elixirTesting",
+    "packageManager",
+    "versionChannel",
+  ],
 };
 
 const BASELINE_CONTROLS: Record<Ecosystem, BaselineControl[]> = {
@@ -196,6 +204,12 @@ const BASELINE_CONTROLS: Record<Ecosystem, BaselineControl[]> = {
     { category: "javaOrm", label: "ORM" },
     { category: "javaAuth", label: "Auth" },
   ],
+  elixir: [
+    { category: "elixirWebFramework", label: "Framework" },
+    { category: "elixirDatabase", label: "Database" },
+    { category: "elixirLibraries", label: "Libraries" },
+    { category: "elixirTesting", label: "Testing" },
+  ],
 };
 
 const MULTI_STACK_KEYS = new Set<SelectCategory>([
@@ -210,6 +224,8 @@ const MULTI_STACK_KEYS = new Set<SelectCategory>([
   "pythonAi",
   "javaLibraries",
   "javaTestingLibraries",
+  "elixirLibraries",
+  "elixirTesting",
 ]);
 
 const categoryToStackKey = (category: SelectCategory): keyof StackState => {

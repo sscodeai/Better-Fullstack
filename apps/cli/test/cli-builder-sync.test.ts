@@ -9,6 +9,10 @@ import { describe, expect, it } from "bun:test";
 import { CreateCommandOptionsSchema } from "../src/create-command-input";
 import { PROMPT_RESOLVER_REGISTRY } from "../src/prompts/prompt-resolver-registry";
 import {
+  resolveElixirLibrariesPrompt,
+  resolveElixirTestingPrompt,
+} from "../src/prompts/elixir-ecosystem";
+import {
   resolveJavaLibrariesPrompt,
   resolveJavaTestingLibrariesPrompt,
 } from "../src/prompts/java-ecosystem";
@@ -276,6 +280,20 @@ describe("CLI prompts vs schemas parity", () => {
     expect(resolution.mode).toBe("multiple");
     expect(resolution.initialValue).toEqual(DEFAULT_CONFIG.javaLibraries);
   });
+
+  it("keeps the Elixir libraries prompt default aligned with CLI defaults", () => {
+    const resolution = resolveElixirLibrariesPrompt();
+
+    expect(resolution.mode).toBe("multiple");
+    expect(resolution.initialValue).toEqual(DEFAULT_CONFIG.elixirLibraries);
+  });
+
+  it("keeps the Elixir testing prompt default aligned with CLI defaults", () => {
+    const resolution = resolveElixirTestingPrompt();
+
+    expect(resolution.mode).toBe("multiple");
+    expect(resolution.initialValue).toEqual(DEFAULT_CONFIG.elixirTesting);
+  });
 });
 
 describe("CLI array exclusivity", () => {
@@ -317,5 +335,21 @@ describe("CLI array exclusivity", () => {
         javaLibraries: ["none", "spring-actuator"],
       }),
     ).toThrow("Cannot combine 'none' with other java libraries.");
+  });
+
+  it("rejects elixirLibraries mixed with none", () => {
+    expect(() =>
+      validateArrayOptions({
+        elixirLibraries: ["none", "jason"],
+      }),
+    ).toThrow("Cannot combine 'none' with other elixir libraries.");
+  });
+
+  it("rejects elixirTesting mixed with none", () => {
+    expect(() =>
+      validateArrayOptions({
+        elixirTesting: ["none", "exunit"],
+      }),
+    ).toThrow("Cannot combine 'none' with other elixir testing libraries.");
   });
 });

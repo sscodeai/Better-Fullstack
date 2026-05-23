@@ -15,6 +15,10 @@ import {
   DATABASE_VALUES,
   EFFECT_VALUES,
   EMAIL_VALUES,
+  ELIXIR_DATABASE_VALUES,
+  ELIXIR_LIBRARIES_VALUES,
+  ELIXIR_TESTING_VALUES,
+  ELIXIR_WEB_FRAMEWORK_VALUES,
   FEATURE_FLAGS_VALUES,
   FILE_STORAGE_VALUES,
   FILE_UPLOAD_VALUES,
@@ -172,7 +176,11 @@ export type OptionCategory =
   | "javaOrm"
   | "javaAuth"
   | "javaLibraries"
-  | "javaTestingLibraries";
+  | "javaTestingLibraries"
+  | "elixirWebFramework"
+  | "elixirDatabase"
+  | "elixirLibraries"
+  | "elixirTesting";
 
 export type OptionSelectionMode = "single" | "multiple";
 
@@ -279,6 +287,8 @@ const MULTI_SELECT_CATEGORIES = new Set<OptionCategory>([
   "pythonAi",
   "javaLibraries",
   "javaTestingLibraries",
+  "elixirLibraries",
+  "elixirTesting",
 ]);
 
 const CATEGORY_VALUE_IDS: Record<OptionCategory, readonly string[]> = {
@@ -372,6 +382,10 @@ const CATEGORY_VALUE_IDS: Record<OptionCategory, readonly string[]> = {
   javaAuth: JAVA_AUTH_VALUES,
   javaLibraries: JAVA_LIBRARIES_VALUES,
   javaTestingLibraries: JAVA_TESTING_LIBRARIES_VALUES,
+  elixirWebFramework: ELIXIR_WEB_FRAMEWORK_VALUES,
+  elixirDatabase: ELIXIR_DATABASE_VALUES,
+  elixirLibraries: ELIXIR_LIBRARIES_VALUES,
+  elixirTesting: ELIXIR_TESTING_VALUES,
 };
 
 const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<string, string>>>> = {
@@ -803,6 +817,25 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     archunit: "ArchUnit",
     jqwik: "jqwik",
   },
+  elixirWebFramework: {
+    phoenix: "Phoenix",
+  },
+  elixirDatabase: {
+    ecto: "Ecto",
+  },
+  elixirLibraries: {
+    jason: "Jason",
+    req: "Req",
+    oban: "Oban",
+    broadway: "Broadway",
+    telemetry: "Telemetry",
+    nx: "Nx",
+  },
+  elixirTesting: {
+    exunit: "ExUnit",
+    mox: "Mox",
+    "stream-data": "StreamData",
+  },
 };
 
 const OPTION_ALIASES: Partial<Record<OptionCategory, Partial<Record<string, readonly string[]>>>> =
@@ -975,6 +1008,10 @@ export const OPTION_CATEGORY_METADATA: Record<OptionCategory, OptionCategoryMeta
   javaAuth: buildCategoryMetadata("javaAuth"),
   javaLibraries: buildCategoryMetadata("javaLibraries"),
   javaTestingLibraries: buildCategoryMetadata("javaTestingLibraries"),
+  elixirWebFramework: buildCategoryMetadata("elixirWebFramework"),
+  elixirDatabase: buildCategoryMetadata("elixirDatabase"),
+  elixirLibraries: buildCategoryMetadata("elixirLibraries"),
+  elixirTesting: buildCategoryMetadata("elixirTesting"),
 };
 
 const OPTION_LOOKUP = Object.fromEntries(

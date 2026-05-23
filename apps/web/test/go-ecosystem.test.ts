@@ -21,7 +21,15 @@ import {
 describe("Go Ecosystem Tab", () => {
   describe("Ecosystem Type", () => {
     it("should have go as a valid ecosystem value", () => {
-      const ecosystems: Ecosystem[] = ["typescript", "react-native", "rust", "python", "go", "java"];
+      const ecosystems: Ecosystem[] = [
+        "typescript",
+        "react-native",
+        "rust",
+        "python",
+        "go",
+        "java",
+        "elixir",
+      ];
       expect(ecosystems).toContain("go");
     });
   });
@@ -35,8 +43,8 @@ describe("Go Ecosystem Tab", () => {
       expect(goEcosystem?.description).toBe("High-performance Go ecosystem");
     });
 
-    it("should have exactly 6 ecosystems", () => {
-      expect(ECOSYSTEMS).toHaveLength(6);
+    it("should have exactly 7 ecosystems", () => {
+      expect(ECOSYSTEMS).toHaveLength(7);
     });
   });
 

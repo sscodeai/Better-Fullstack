@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const EcosystemSchema = z
-  .enum(["typescript", "react-native", "rust", "python", "go", "java"])
-  .describe("Language ecosystem (typescript, react-native, rust, python, go, or java)");
+  .enum(["typescript", "react-native", "rust", "python", "go", "java", "elixir"])
+  .describe("Language ecosystem (typescript, react-native, rust, python, go, java, or elixir)");
 
 export const DatabaseSchema = z
   .enum(["none", "sqlite", "postgres", "mysql", "mongodb", "edgedb", "redis"])
@@ -475,6 +475,23 @@ export const JavaTestingLibrariesSchema = z
   ])
   .describe("Java testing libraries");
 
+// Elixir ecosystem schemas
+export const ElixirWebFrameworkSchema = z
+  .enum(["phoenix", "none"])
+  .describe("Elixir web framework");
+
+export const ElixirDatabaseSchema = z
+  .enum(["ecto", "none"])
+  .describe("Elixir database layer");
+
+export const ElixirLibrariesSchema = z
+  .enum(["jason", "req", "oban", "broadway", "telemetry", "nx", "none"])
+  .describe("Elixir application libraries");
+
+export const ElixirTestingSchema = z
+  .enum(["exunit", "mox", "stream-data", "none"])
+  .describe("Elixir testing libraries");
+
 export const AiDocsSchema = z
   .enum(["claude-md", "agents-md", "cursorrules", "none"])
   .describe("AI documentation files (CLAUDE.md, Agents.md, .cursorrules)");
@@ -684,6 +701,11 @@ export const CreateInputSchema = z.object({
   javaAuth: JavaAuthSchema.optional(),
   javaLibraries: z.array(JavaLibrariesSchema).optional(),
   javaTestingLibraries: z.array(JavaTestingLibrariesSchema).optional(),
+  // Elixir ecosystem options
+  elixirWebFramework: ElixirWebFrameworkSchema.optional(),
+  elixirDatabase: ElixirDatabaseSchema.optional(),
+  elixirLibraries: z.array(ElixirLibrariesSchema).optional(),
+  elixirTesting: z.array(ElixirTestingSchema).optional(),
   // AI documentation files
   aiDocs: z.array(AiDocsSchema).optional(),
 });
@@ -795,6 +817,11 @@ export const ProjectConfigSchema = z.object({
   javaAuth: JavaAuthSchema,
   javaLibraries: z.array(JavaLibrariesSchema),
   javaTestingLibraries: z.array(JavaTestingLibrariesSchema),
+  // Elixir ecosystem options
+  elixirWebFramework: ElixirWebFrameworkSchema,
+  elixirDatabase: ElixirDatabaseSchema,
+  elixirLibraries: z.array(ElixirLibrariesSchema),
+  elixirTesting: z.array(ElixirTestingSchema),
   // AI documentation files
   aiDocs: z.array(AiDocsSchema),
 });
@@ -890,6 +917,11 @@ export const BetterTStackConfigSchema = z.object({
   javaAuth: JavaAuthSchema,
   javaLibraries: z.array(JavaLibrariesSchema),
   javaTestingLibraries: z.array(JavaTestingLibrariesSchema),
+  // Elixir ecosystem options
+  elixirWebFramework: ElixirWebFrameworkSchema,
+  elixirDatabase: ElixirDatabaseSchema,
+  elixirLibraries: z.array(ElixirLibrariesSchema),
+  elixirTesting: z.array(ElixirTestingSchema),
   // AI documentation files
   aiDocs: z.array(AiDocsSchema),
 });
@@ -995,6 +1027,10 @@ export const JAVA_ORM_VALUES = JavaOrmSchema.options;
 export const JAVA_AUTH_VALUES = JavaAuthSchema.options;
 export const JAVA_LIBRARIES_VALUES = JavaLibrariesSchema.options;
 export const JAVA_TESTING_LIBRARIES_VALUES = JavaTestingLibrariesSchema.options;
+export const ELIXIR_WEB_FRAMEWORK_VALUES = ElixirWebFrameworkSchema.options;
+export const ELIXIR_DATABASE_VALUES = ElixirDatabaseSchema.options;
+export const ELIXIR_LIBRARIES_VALUES = ElixirLibrariesSchema.options;
+export const ELIXIR_TESTING_VALUES = ElixirTestingSchema.options;
 export const AI_DOCS_VALUES = AiDocsSchema.options;
 export const SHADCN_BASE_VALUES = ShadcnBaseSchema.options;
 export const SHADCN_STYLE_VALUES = ShadcnStyleSchema.options;
