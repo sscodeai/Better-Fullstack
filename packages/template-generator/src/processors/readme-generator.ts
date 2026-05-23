@@ -83,9 +83,15 @@ export function processReadme(vfs: VirtualFileSystem, config: ProjectConfig): vo
 }
 
 function generateElixirReadmeContent(config: ProjectConfig): string {
+  const hasPhoenix = config.elixirWebFramework !== "none";
+  const hasEcto = config.elixirOrm !== "none";
   const features = [
-    config.elixirWebFramework === "phoenix-live-view" ? "Phoenix LiveView" : "Phoenix",
-    config.elixirOrm !== "none" ? `${config.elixirOrm} with PostgreSQL` : null,
+    hasPhoenix
+      ? config.elixirWebFramework === "phoenix-live-view"
+        ? "Phoenix LiveView"
+        : "Phoenix"
+      : "Plain Elixir",
+    hasEcto ? `${config.elixirOrm} with PostgreSQL` : null,
     config.elixirApi !== "none" ? `API: ${config.elixirApi}` : null,
     config.elixirRealtime !== "none" ? `Realtime: ${config.elixirRealtime}` : null,
     config.elixirJobs !== "none" ? `Jobs: ${config.elixirJobs}` : null,
@@ -95,7 +101,7 @@ function generateElixirReadmeContent(config: ProjectConfig): string {
 
   return `# ${config.projectName}
 
-This project was created with [Better Fullstack](https://github.com/Marve10s/Better-Fullstack) for the Elixir/Phoenix ecosystem.
+This project was created with [Better Fullstack](https://github.com/Marve10s/Better-Fullstack) for the Elixir${hasPhoenix ? "/Phoenix" : ""} ecosystem.
 
 ## Stack
 
@@ -103,24 +109,20 @@ ${features.map((feature) => `- ${feature}`).join("\n")}
 
 ## Getting Started
 
-Make sure Elixir, Erlang/OTP, and PostgreSQL are installed.
+Make sure Elixir and Erlang/OTP${hasEcto ? ", and PostgreSQL" : ""} are installed.
 
 \`\`\`sh
 mix deps.get
-mix ecto.setup
-mix phx.server
+${hasEcto ? "mix ecto.setup\n" : ""}${hasPhoenix ? "mix phx.server" : "iex -S mix"}
 \`\`\`
 
-Open http://localhost:4000.
-
-## Tests
+${hasPhoenix ? "Open http://localhost:4000.\n\n" : ""}## Tests
 
 \`\`\`sh
 mix test
 \`\`\`
 
-Copy \`.env.example\` values into your environment before production release builds.
-`;
+${hasPhoenix || hasEcto ? "Copy `.env.example` values into your environment before production release builds.\n" : ""}`;
 }
 
 function sanitizeJavaPackageSuffix(projectName: string): string {

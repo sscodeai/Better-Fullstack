@@ -142,6 +142,40 @@ describe("Virtual Generator Regressions", () => {
     expect(readTextFromTree(result.tree!, "lib/elixir_no_quantum/scheduler.ex")).toBeUndefined();
   });
 
+  it("scaffolds plain Elixir projects without Phoenix web files", async () => {
+    const result = await createVirtual({
+      projectName: "plain-elixir",
+      ecosystem: "elixir",
+      elixirWebFramework: "none",
+      elixirOrm: "none",
+      elixirAuth: "none",
+      elixirApi: "none",
+      elixirRealtime: "none",
+      elixirJobs: "quantum",
+      elixirHttp: "req",
+      elixirJson: "jason",
+      elixirTesting: "none",
+    });
+
+    expect(result.success).toBe(true);
+
+    const mixProject = readTextFromTree(result.tree!, "mix.exs");
+    const application = readTextFromTree(result.tree!, "lib/plain_elixir/application.ex");
+    const readme = readTextFromTree(result.tree!, "README.md");
+
+    expect(mixProject).toContain("{:quantum");
+    expect(mixProject).toContain("{:req");
+    expect(mixProject).not.toContain("{:phoenix");
+    expect(mixProject).not.toContain("{:plug_cowboy");
+    expect(application).toContain("PlainElixir.Scheduler");
+    expect(application).not.toContain("PlainElixirWeb.Endpoint");
+    expect(readme).toContain("for the Elixir ecosystem");
+    expect(readme).toContain("iex -S mix");
+    expect(readme).not.toContain("mix phx.server");
+    expect(readTextFromTree(result.tree!, "lib/plain_elixir_web/router.ex")).toBeUndefined();
+    expect(readTextFromTree(result.tree!, "test/support/conn_case.ex")).toBeUndefined();
+  });
+
   it("keeps Phoenix LiveView demos self-contained without Ecto", async () => {
     const result = await createVirtual({
       projectName: "elixir-live-no-ecto",

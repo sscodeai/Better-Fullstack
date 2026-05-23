@@ -1617,29 +1617,25 @@ export const analyzeStackCompatibility = (
   if (nextStack.ecosystem === "elixir") {
     if (nextStack.elixirWebFramework === "none") {
       const dependentKeys: Array<keyof CompatibilityInput> = [
-        "elixirOrm",
         "elixirAuth",
         "elixirApi",
         "elixirRealtime",
-        "elixirJobs",
-        "elixirValidation",
-        "elixirHttp",
-        "elixirJson",
-        "elixirEmail",
-        "elixirCaching",
         "elixirObservability",
-        "elixirTesting",
-        "elixirQuality",
-        "elixirDeploy",
       ];
 
       for (const key of dependentKeys) {
-        if (nextStack[key] !== "none") {
+        const value = nextStack[key];
+        const shouldClear =
+          key !== "elixirObservability"
+            ? value !== "none"
+            : value === "phoenix-telemetry";
+
+        if (shouldClear) {
           nextStack[key] = "none" as never;
           changed = true;
           changes.push({
             category: "elixirWebFramework",
-            message: `${getCategoryDisplayName(key)} set to 'None' (no Phoenix project selected)`,
+            message: `${getCategoryDisplayName(key)} set to 'None' (requires Phoenix)`,
           });
         }
       }
@@ -2740,21 +2736,10 @@ export const getDisabledReason = (
     if (currentStack.ecosystem !== "elixir") {
       return "Elixir options only apply when the Elixir ecosystem is selected";
     }
-    if (currentStack.elixirWebFramework === "none") {
-      return "Elixir options require a Phoenix project";
-    }
   }
 
   if (category === "elixirWebFramework" && optionId !== "none" && currentStack.ecosystem !== "elixir") {
-    return "Phoenix is available only in the Elixir ecosystem";
-  }
-
-  if (
-    category === "elixirWebFramework" &&
-    optionId === "none" &&
-    currentStack.ecosystem === "elixir"
-  ) {
-    return "The generated Elixir scaffold currently targets Phoenix projects";
+    return "Elixir web frameworks are available only in the Elixir ecosystem";
   }
 
   const elixirNotYetGenerated: Partial<Record<CompatibilityCategory, Record<string, string>>> = {
@@ -2768,9 +2753,6 @@ export const getDisabledReason = (
     elixirValidation: {
       "nimble-options": "NimbleOptions is not generated yet; use Ecto Changesets or no extra validation",
     },
-    elixirJson: {
-      none: "Phoenix JSON scaffolds require Jason",
-    },
     elixirCaching: {
       nebulex: "Nebulex cache modules are not generated yet; use Cachex or no cache",
     },
@@ -2782,7 +2764,6 @@ export const getDisabledReason = (
       mox: "Mox-specific test boundaries are not generated yet; use ExUnit",
       bypass: "Bypass-specific HTTP tests are not generated yet; use ExUnit",
       wallaby: "Wallaby browser tests are not generated yet; use ExUnit",
-      none: "Generated Phoenix projects include ExUnit tests",
     },
     elixirDeploy: {
       fly: "Fly.io config is not generated yet; use Docker or mix releases",
@@ -2793,6 +2774,30 @@ export const getDisabledReason = (
   const unsupportedElixirReason = elixirNotYetGenerated[category]?.[optionId];
   if (currentStack.ecosystem === "elixir" && unsupportedElixirReason) {
     return unsupportedElixirReason;
+  }
+
+  if (currentStack.ecosystem === "elixir" && currentStack.elixirWebFramework === "none") {
+    if (category === "elixirAuth" && optionId !== "none") {
+      return "Elixir auth scaffolds require Phoenix";
+    }
+    if (category === "elixirApi" && optionId !== "none") {
+      return "Elixir API scaffolds require Phoenix";
+    }
+    if (category === "elixirRealtime" && optionId !== "none") {
+      return "Elixir realtime scaffolds require Phoenix";
+    }
+    if (category === "elixirObservability" && optionId === "phoenix-telemetry") {
+      return "Phoenix telemetry requires Phoenix";
+    }
+  }
+
+  if (
+    category === "elixirJson" &&
+    optionId === "none" &&
+    currentStack.ecosystem === "elixir" &&
+    currentStack.elixirWebFramework !== "none"
+  ) {
+    return "Phoenix JSON scaffolds require Jason";
   }
 
   if (category === "elixirAuth") {

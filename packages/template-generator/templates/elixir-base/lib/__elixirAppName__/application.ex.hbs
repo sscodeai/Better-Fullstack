@@ -7,7 +7,9 @@ defmodule {{elixirModuleName}}.Application do
 {{#if (ne elixirOrm "none")}}
       {{elixirModuleName}}.Repo,
 {{/if}}
+{{#if (ne elixirWebFramework "none")}}
       {Phoenix.PubSub, name: {{elixirModuleName}}.PubSub},
+{{/if}}
 {{#if (eq elixirHttp "finch")}}
       {Finch, name: {{elixirModuleName}}.Finch},
 {{/if}}
@@ -23,7 +25,9 @@ defmodule {{elixirModuleName}}.Application do
 {{#if (eq elixirJobs "quantum")}}
       {{elixirModuleName}}.Scheduler,
 {{/if}}
+{{#if (ne elixirWebFramework "none")}}
       {{elixirModuleName}}Web.Endpoint
+{{/if}}
     ]
 
     opts = [strategy: :one_for_one, name: {{elixirModuleName}}.Supervisor]
@@ -32,7 +36,11 @@ defmodule {{elixirModuleName}}.Application do
 
   @impl true
   def config_change(changed, _new, removed) do
+{{#if (ne elixirWebFramework "none")}}
     {{elixirModuleName}}Web.Endpoint.config_change(changed, removed)
+{{else}}
+    _ = {changed, removed}
+{{/if}}
     :ok
   end
 end

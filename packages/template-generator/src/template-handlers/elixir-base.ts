@@ -18,20 +18,23 @@ export async function processElixirBaseTemplate(
   if (config.ecosystem !== "elixir") return;
 
   const prefix = "elixir-base/";
+  const hasPhoenix = config.elixirWebFramework !== "none";
   const hasLiveView = config.elixirWebFramework === "phoenix-live-view";
   const hasEcto = config.elixirOrm !== "none";
-  const hasAuth = config.elixirAuth === "phx-gen-auth" && hasEcto;
-  const hasChannels = config.elixirRealtime === "channels" || config.elixirRealtime === "presence";
+  const hasAuth = hasPhoenix && config.elixirAuth === "phx-gen-auth" && hasEcto;
+  const hasChannels = hasPhoenix && (config.elixirRealtime === "channels" || config.elixirRealtime === "presence");
   const hasPresence = config.elixirRealtime === "presence";
   const hasOban = config.elixirJobs === "oban";
   const hasQuantum = config.elixirJobs === "quantum";
-  const hasAbsinthe = config.elixirApi === "absinthe" && hasEcto;
+  const hasAbsinthe = hasPhoenix && config.elixirApi === "absinthe" && hasEcto;
   const hasEmail = config.elixirEmail === "swoosh";
   const hasDocker = ["docker", "fly", "gigalixir", "mix-release"].includes(config.elixirDeploy);
   const hasHttpClient = config.elixirHttp !== "none";
 
   for (const [templatePath, content] of templates) {
     if (!templatePath.startsWith(prefix)) continue;
+    if (!hasPhoenix && templatePath.includes("___web")) continue;
+    if (!hasPhoenix && templatePath.includes("test/support/conn_case")) continue;
     if (!hasLiveView && templatePath.includes("/live/")) continue;
     if (!hasEcto && (templatePath.includes("/repo.ex") || templatePath.includes("/migrations/"))) continue;
     if (!hasEcto && (templatePath.includes("/catalog") || templatePath.includes("/item_controller"))) continue;

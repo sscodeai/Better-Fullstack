@@ -1,5 +1,6 @@
 import Config
 
+{{#if (ne elixirWebFramework "none")}}
 config :{{elixirAppName}}, {{elixirModuleName}}Web.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: String.to_integer(System.get_env("PORT") || "4000")],
   check_origin: false,
@@ -7,6 +8,7 @@ config :{{elixirAppName}}, {{elixirModuleName}}Web.Endpoint,
   debug_errors: true,
   secret_key_base: "dev-secret-key-base-replace-before-production",
   watchers: []
+{{/if}}
 
 {{#if (ne elixirOrm "none")}}
 config :{{elixirAppName}}, {{elixirModuleName}}.Repo,
@@ -20,5 +22,7 @@ config :{{elixirAppName}}, {{elixirModuleName}}.Repo,
 {{/if}}
 
 config :logger, :console, format: "[$level] $message\n"
+{{#if (ne elixirWebFramework "none")}}
 config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime
+{{/if}}

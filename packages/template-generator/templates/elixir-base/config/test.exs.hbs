@@ -1,9 +1,11 @@
 import Config
 
+{{#if (ne elixirWebFramework "none")}}
 config :{{elixirAppName}}, {{elixirModuleName}}Web.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "test-secret-key-base-replace-before-production",
   server: false
+{{/if}}
 
 {{#if (ne elixirOrm "none")}}
 config :{{elixirAppName}}, {{elixirModuleName}}.Repo,
