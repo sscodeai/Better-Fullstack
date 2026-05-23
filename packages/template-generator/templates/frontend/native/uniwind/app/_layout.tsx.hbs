@@ -29,6 +29,7 @@ import "@/global.css";
 
 import { Stack } from "expo-router";
 import { HeroUINativeProvider } from "heroui-native";
+import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 {{#if (eq mobilePush "expo-notifications")}}
@@ -72,7 +73,7 @@ export default function Layout() {
   {{#if (eq mobileOTA "expo-updates")}}
   useUpdateCheck();
   {{/if}}
-  React.useEffect(() => {
+  useEffect(() => {
     {{#if (eq mobilePush "expo-notifications")}}
     registerForPushNotificationsAsync().catch(console.warn);
     {{/if}}

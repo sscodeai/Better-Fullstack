@@ -732,11 +732,11 @@ export async function startMcpServer() {
     { instructions: INSTRUCTIONS, capabilities: { logging: {} } },
   );
 
-  const registerTool = server.tool.bind(server) as unknown as (
+  const registerTool = server.tool.bind(server) as unknown as <Input extends Record<string, unknown>>(
     name: string,
     description: string,
     inputSchema: Record<string, unknown>,
-    cb: (input: any) => unknown,
+    cb: (input: Input) => unknown,
   ) => void;
 
   registerTool(

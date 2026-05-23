@@ -2,8 +2,7 @@
 
 import type { Ecosystem } from "@better-fullstack/types";
 
-import { existsSync } from "node:fs";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
