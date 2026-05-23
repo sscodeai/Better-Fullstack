@@ -29,7 +29,9 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
 import { MobileUIProvider } from "@/components/mobile-ui-provider";
+{{#if (eq mobileDeepLinking "expo-linking")}}
 import { linking } from "@/lib/deep-linking";
+{{/if}}
 {{#if (eq api "trpc")}}
 import { queryClient } from "@/utils/trpc";
 {{/if}}
@@ -55,7 +57,11 @@ function AppShell() {
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
         <MobileUIProvider>
+          {{#if (eq mobileDeepLinking "expo-linking")}}
           <NavigationContainer linking={linking}>
+          {{else}}
+          <NavigationContainer>
+          {{/if}}
             <StatusBar style="auto" />
             <RootNavigator />
           </NavigationContainer>

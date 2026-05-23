@@ -1,3 +1,4 @@
+{{#if (eq mobileDeepLinking "expo-linking")}}
 import * as Linking from "expo-linking";
 
 export const appScheme = "{{projectName}}";
@@ -21,3 +22,4 @@ export function getAuthRedirectUri(path = "auth/callback") {
 export function getDeepLinkUrl(path = "") {
   return Linking.createURL(path);
 }
+{{/if}}

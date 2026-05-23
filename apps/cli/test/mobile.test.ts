@@ -91,4 +91,31 @@ describe("mobile native scaffolding", () => {
     expect(pkg.dependencies["expo-router"]).toBe("^55.0.14");
     expect(appConfig.expo.plugins).toContain("expo-router");
   });
+
+  test("omits deep-linking wiring when React Navigation selects no deep linking", async () => {
+    const result = await createVirtual({
+      projectName: "mobile-no-linking",
+      frontend: ["native-bare"],
+      backend: "hono",
+      api: "none",
+      database: "none",
+      orm: "none",
+      auth: "none",
+      mobileNavigation: "react-navigation",
+      mobileDeepLinking: "none",
+    });
+
+    expect(result.success).toBe(true);
+    const root = result.tree!.root;
+    const pkg = JSON.parse(getFile(root, "apps/native/package.json"));
+    const app = getFile(root, "apps/native/App.tsx");
+    const navigation = getFile(root, "apps/native/navigation/native-navigation.tsx");
+
+    expect(pkg.dependencies["expo-linking"]).toBeUndefined();
+    expect(app).toContain("<NavigationContainer>");
+    expect(app).not.toContain("linking={linking}");
+    expect(app).not.toContain("@/lib/deep-linking");
+    expect(navigation).not.toContain("@/lib/deep-linking");
+    expect(findFile(root, "apps/native/lib/deep-linking.ts")).toBeUndefined();
+  });
 });

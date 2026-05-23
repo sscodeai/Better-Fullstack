@@ -33,7 +33,9 @@
     {{/if}}
     "expo-font": "^55.0.7",
     "expo-haptics": "^55.0.14",
+    {{#if (eq mobileDeepLinking "expo-linking")}}
     "expo-linking": "^55.0.15",
+    {{/if}}
     "expo-network": "^55.0.14",
     {{#if (eq mobilePush "expo-notifications")}}
     "expo-notifications": "^56.0.12",

@@ -368,14 +368,17 @@ function buildProjectConfig(
 ): ProjectConfig {
   const projectName = (input.projectName as string) ?? "my-project";
   const ecosystem = (input.ecosystem as ProjectConfig["ecosystem"]) ?? "typescript";
+  const frontend =
+    (input.frontend as ProjectConfig["frontend"]) ??
+    (ecosystem === "react-native" ? ["native-bare"] : ["tanstack-router"]);
+  const hasNativeFrontend = frontend.some((item) => item.startsWith("native-"));
+  const hasMobileProject = ecosystem === "react-native" || hasNativeFrontend;
   return {
     projectName,
     projectDir: overrides?.projectDir ?? "/virtual",
     relativePath: overrides ? `./${projectName}` : "./virtual",
     ecosystem,
-    frontend:
-      (input.frontend as ProjectConfig["frontend"]) ??
-      (ecosystem === "react-native" ? ["native-bare"] : ["tanstack-router"]),
+    frontend,
     backend:
       (input.backend as ProjectConfig["backend"]) ??
       (ecosystem === "react-native" ? "none" : "hono"),
@@ -384,7 +387,7 @@ function buildProjectConfig(
       (ecosystem === "react-native" ? "none" : "bun"),
     database: (input.database as ProjectConfig["database"]) ?? "none",
     orm: (input.orm as ProjectConfig["orm"]) ?? "none",
-    api: (input.api as ProjectConfig["api"]) ?? (ecosystem === "react-native" ? "none" : "none"),
+    api: (input.api as ProjectConfig["api"]) ?? "none",
     auth: (input.auth as ProjectConfig["auth"]) ?? "none",
     payments: (input.payments as ProjectConfig["payments"]) ?? "none",
     email: (input.email as ProjectConfig["email"]) ?? "none",
@@ -413,14 +416,17 @@ function buildProjectConfig(
     observability: (input.observability as ProjectConfig["observability"]) ?? "none",
     featureFlags: (input.featureFlags as ProjectConfig["featureFlags"]) ?? "none",
     analytics: (input.analytics as ProjectConfig["analytics"]) ?? "none",
-    mobileNavigation: (input.mobileNavigation as ProjectConfig["mobileNavigation"]) ?? "expo-router",
+    mobileNavigation:
+      (input.mobileNavigation as ProjectConfig["mobileNavigation"]) ??
+      (hasMobileProject ? "expo-router" : "none"),
     mobileUI: (input.mobileUI as ProjectConfig["mobileUI"]) ?? "none",
     mobileStorage: (input.mobileStorage as ProjectConfig["mobileStorage"]) ?? "none",
     mobileTesting: (input.mobileTesting as ProjectConfig["mobileTesting"]) ?? "none",
     mobilePush: (input.mobilePush as ProjectConfig["mobilePush"]) ?? "none",
     mobileOTA: (input.mobileOTA as ProjectConfig["mobileOTA"]) ?? "none",
     mobileDeepLinking:
-      (input.mobileDeepLinking as ProjectConfig["mobileDeepLinking"]) ?? "expo-linking",
+      (input.mobileDeepLinking as ProjectConfig["mobileDeepLinking"]) ??
+      (hasMobileProject ? "expo-linking" : "none"),
     cms: (input.cms as ProjectConfig["cms"]) ?? "none",
     caching: (input.caching as ProjectConfig["caching"]) ?? "none",
     i18n: (input.i18n as ProjectConfig["i18n"]) ?? "none",
@@ -490,6 +496,8 @@ function buildCompatibilityInput(input: Record<string, unknown>): CompatibilityI
   const webFrontend = (frontend ?? []).filter((item) => !item.startsWith("native-"));
   const nativeFrontend = (frontend ?? []).filter((item) => item.startsWith("native-"));
   const addons = (input.addons as string[] | undefined) ?? [];
+  const ecosystem = (input.ecosystem as CompatibilityInput["ecosystem"]) ?? "typescript";
+  const hasMobileProject = ecosystem === "react-native" || nativeFrontend.length > 0;
 
   const codeQuality = addons.filter((a) =>
     ["biome", "oxlint", "ultracite", "lefthook", "husky", "ruler"].includes(a),
@@ -501,7 +509,7 @@ function buildCompatibilityInput(input: Record<string, unknown>): CompatibilityI
   );
 
   return {
-    ecosystem: (input.ecosystem as CompatibilityInput["ecosystem"]) ?? "typescript",
+    ecosystem,
     projectName: (input.projectName as string) ?? null,
     webFrontend,
     nativeFrontend,
@@ -541,13 +549,15 @@ function buildCompatibilityInput(input: Record<string, unknown>): CompatibilityI
     cms: (input.cms as string) ?? "none",
     search: (input.search as string) ?? "none",
     fileStorage: (input.fileStorage as string) ?? "none",
-    mobileNavigation: (input.mobileNavigation as string) ?? "expo-router",
+    mobileNavigation:
+      (input.mobileNavigation as string) ?? (hasMobileProject ? "expo-router" : "none"),
     mobileUI: (input.mobileUI as string) ?? "none",
     mobileStorage: (input.mobileStorage as string) ?? "none",
     mobileTesting: (input.mobileTesting as string) ?? "none",
     mobilePush: (input.mobilePush as string) ?? "none",
     mobileOTA: (input.mobileOTA as string) ?? "none",
-    mobileDeepLinking: (input.mobileDeepLinking as string) ?? "expo-linking",
+    mobileDeepLinking:
+      (input.mobileDeepLinking as string) ?? (hasMobileProject ? "expo-linking" : "none"),
     codeQuality,
     documentation,
     appPlatforms,

@@ -14,7 +14,9 @@ import { useUpdateCheck } from "@/lib/updates";
 {{#if (eq mobileStorage "mmkv")}}
 import { mobileStorage } from "@/lib/mobile-storage";
 {{/if}}
+{{#if (eq mobileDeepLinking "expo-linking")}}
 import { getAuthRedirectUri } from "@/lib/deep-linking";
+{{/if}}
 import { useEffect } from "react";
 
 type RootStackParamList = {
@@ -55,7 +57,11 @@ function HomeScreen() {
       <Text style={styles.body}>{user ? `Signed in as ${user.primaryEmailAddress?.emailAddress}` : "Auth routes are ready for Clerk."}</Text>
       {{/if}}
       {{#if (eq auth "better-auth")}}
+      {{#if (eq mobileDeepLinking "expo-linking")}}
       <Text style={styles.body}>Use {getAuthRedirectUri()} as the Better Auth mobile callback URL.</Text>
+      {{else}}
+      <Text style={styles.body}>Better Auth mobile routes are ready for your callback URL.</Text>
+      {{/if}}
       {{/if}}
       {{#if (eq mobileOTA "expo-updates")}}
       <Text style={styles.body}>{isChecking ? "Checking for updates..." : isUpdateAvailable ? "An update is ready." : "App is up to date."}</Text>
@@ -68,7 +74,9 @@ function SettingsScreen() {
   return (
     <View style={styles.screen}>
       <Text style={styles.title}>Mobile integrations</Text>
+      {{#if (eq mobileDeepLinking "expo-linking")}}
       <Text style={styles.body}>Deep link redirect URI: {getAuthRedirectUri()}</Text>
+      {{/if}}
       {{#if (eq mobileStorage "mmkv")}}
       <Text style={styles.body}>MMKV is configured in lib/mobile-storage.ts.</Text>
       {{/if}}

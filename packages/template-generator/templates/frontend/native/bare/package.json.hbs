@@ -36,7 +36,9 @@
     "expo-device": "^8.0.9",
     {{/if}}
     "expo-crypto": "^55.0.15",
+    {{#if (eq mobileDeepLinking "expo-linking")}}
     "expo-linking": "^55.0.15",
+    {{/if}}
     "expo-navigation-bar": "^55.0.13",
     "expo-network": "^55.0.14",
     {{#if (eq mobilePush "expo-notifications")}}
