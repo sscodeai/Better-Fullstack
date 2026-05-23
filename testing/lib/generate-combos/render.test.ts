@@ -4,13 +4,14 @@ import { createCliDefaultProjectConfigBase, type ProjectConfig } from "@better-f
 import { buildCommand } from "./render";
 
 describe("smoke combo command rendering", () => {
-  it("includes mobile flags for TypeScript commands", () => {
+  it("includes mobile flags for React Native commands", () => {
     const config: ProjectConfig = {
       ...createCliDefaultProjectConfigBase("bun"),
       projectName: "mobile-smoke",
       relativePath: "mobile-smoke",
       projectDir: "/tmp/mobile-smoke",
-      frontend: ["solid-start", "native-unistyles"],
+      ecosystem: "react-native",
+      frontend: ["native-unistyles"],
       mobileNavigation: "expo-router",
       mobileUI: "unistyles",
       mobileStorage: "none",

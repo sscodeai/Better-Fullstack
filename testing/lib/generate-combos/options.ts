@@ -186,11 +186,6 @@ function sampleTypeScriptFrontends(): CLIInput["frontend"] {
     picked.push(web);
   }
 
-  const native = sampleScalar(NATIVE_FRONTENDS, picked.length === 0 ? 0.85 : 0.95);
-  if (native !== "none") {
-    picked.push(native);
-  }
-
   if (picked.length === 0 && _rng() > 0.25) {
     picked.push(sampleOne(WEB_FRONTENDS.filter((value) => value !== "none")));
   }
