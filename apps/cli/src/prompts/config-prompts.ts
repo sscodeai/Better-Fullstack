@@ -523,7 +523,9 @@ export async function gatherConfig(
         return getLoggingChoice(flags.logging, results.backend);
       },
       observability: ({ results }) => {
-        if (results.ecosystem === "react-native") return Promise.resolve("none" as Observability);
+        if (results.ecosystem === "react-native" || results.ecosystem === "elixir") {
+          return Promise.resolve("none" as Observability);
+        }
         return getObservabilityChoice(
           flags.observability,
           results.backend,
@@ -543,7 +545,9 @@ export async function gatherConfig(
         return getCMSChoice(flags.cms, results.backend);
       },
       caching: ({ results }) => {
-        if (results.ecosystem === "react-native") return Promise.resolve("none" as Caching);
+        if (results.ecosystem === "react-native" || results.ecosystem === "elixir") {
+          return Promise.resolve("none" as Caching);
+        }
         return getCachingChoice(flags.caching, results.backend, results.ecosystem);
       },
       i18n: ({ results }) => {
@@ -551,7 +555,9 @@ export async function gatherConfig(
         return getI18nChoice(flags.i18n, results.frontend);
       },
       search: ({ results }) => {
-        if (results.ecosystem === "react-native") return Promise.resolve("none" as Search);
+        if (results.ecosystem === "react-native" || results.ecosystem === "elixir") {
+          return Promise.resolve("none" as Search);
+        }
         return getSearchChoice(flags.search, results.backend, results.ecosystem);
       },
       fileStorage: ({ results }) => {
