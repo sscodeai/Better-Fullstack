@@ -19,6 +19,7 @@ import {
   TemplateSchema,
   CreateInputSchema,
   ProjectConfigSchema,
+  BetterFullstackConfigSchema,
   BetterTStackConfigSchema,
   InitResultSchema,
   JavaAuthSchema,
@@ -106,6 +107,10 @@ export function getBetterTStackConfigJsonSchema() {
   return z.toJSONSchema(BetterTStackConfigSchema);
 }
 
+export function getBetterFullstackConfigJsonSchema() {
+  return z.toJSONSchema(BetterFullstackConfigSchema);
+}
+
 export function getInitResultJsonSchema() {
   return z.toJSONSchema(InitResultSchema);
 }
@@ -161,6 +166,7 @@ export function getAllJsonSchemas() {
     javaTestingLibraries: getJavaTestingLibrariesJsonSchema(),
     createInput: getCreateInputJsonSchema(),
     projectConfig: getProjectConfigJsonSchema(),
+    betterFullstackConfig: getBetterFullstackConfigJsonSchema(),
     betterTStackConfig: getBetterTStackConfigJsonSchema(),
     initResult: getInitResultJsonSchema(),
   };
