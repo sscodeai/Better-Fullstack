@@ -531,6 +531,48 @@ const SMOKE_TEST_PRESETS: Record<string, PresetDef> = {
       javaTestingLibraries: [],
     },
   },
+
+  // === ELIXIR PRESETS ===
+  "elixir-phoenix-api": {
+    ecosystem: "elixir",
+    overrides: {
+      elixirWebFramework: "phoenix",
+      elixirOrm: "ecto-sql",
+      elixirAuth: "none",
+      elixirApi: "rest",
+      elixirRealtime: "channels",
+      elixirJobs: "none",
+      elixirValidation: "ecto-changesets",
+      elixirHttp: "req",
+      elixirJson: "jason",
+      elixirEmail: "none",
+      elixirCaching: "none",
+      elixirObservability: "telemetry",
+      elixirTesting: "ex_unit",
+      elixirQuality: "credo",
+      elixirDeploy: "none",
+    },
+  },
+  "elixir-plain-worker": {
+    ecosystem: "elixir",
+    overrides: {
+      elixirWebFramework: "none",
+      elixirOrm: "none",
+      elixirAuth: "none",
+      elixirApi: "none",
+      elixirRealtime: "none",
+      elixirJobs: "quantum",
+      elixirValidation: "none",
+      elixirHttp: "req",
+      elixirJson: "jason",
+      elixirEmail: "none",
+      elixirCaching: "cachex",
+      elixirObservability: "none",
+      elixirTesting: "ex_unit",
+      elixirQuality: "credo",
+      elixirDeploy: "mix-release",
+    },
+  },
 };
 
 const PRESET_GROUPS = {
@@ -544,6 +586,7 @@ const PRESET_GROUPS = {
     "python-fastapi-sqlalchemy",
     "go-gin-gorm",
     "java-spring-maven",
+    "elixir-plain-worker",
     "frontend-only-react-vite",
   ],
   "pr-broad": [
@@ -558,6 +601,7 @@ const PRESET_GROUPS = {
     "go-echo-sqlc",
     "java-spring-gradle-jpa",
     "java-plain-cli",
+    "elixir-phoenix-api",
     "react-vite-hono",
     "solid-start-express",
     "angular-fets",

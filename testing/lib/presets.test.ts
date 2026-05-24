@@ -12,6 +12,7 @@ const PR_CORE_PRESET_NAMES = [
   "preset-python-fastapi-sqlalchemy",
   "preset-go-gin-gorm",
   "preset-java-spring-maven",
+  "preset-elixir-plain-worker",
   "preset-frontend-only-react-vite",
 ];
 
@@ -27,6 +28,7 @@ const PR_BROAD_PRESET_NAMES = [
   "preset-go-echo-sqlc",
   "preset-java-spring-gradle-jpa",
   "preset-java-plain-cli",
+  "preset-elixir-phoenix-api",
   "preset-react-vite-hono",
   "preset-solid-start-express",
   "preset-angular-fets",

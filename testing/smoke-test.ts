@@ -24,6 +24,16 @@ import {
 import { getPresetCombos } from "./lib/presets";
 import { getVerifier, type VerifyResult } from "./lib/verify";
 
+const SUPPORTED_SMOKE_ECOSYSTEMS: readonly Ecosystem[] = [
+  "typescript",
+  "react-native",
+  "rust",
+  "python",
+  "go",
+  "java",
+  "elixir",
+];
+
 // ── Types ───────────────────────────────────────────────────────────────
 
 interface SmokeTestArgs {
@@ -67,7 +77,7 @@ function parseArgs(argv: string[]): SmokeTestArgs {
         i++;
         break;
       case "--ecosystem":
-        if (next && ["typescript", "react-native", "rust", "python", "go", "java"].includes(next)) {
+        if (next && SUPPORTED_SMOKE_ECOSYSTEMS.includes(next as Ecosystem)) {
           args.ecosystem = next as Ecosystem;
         }
         i++;
@@ -162,9 +172,7 @@ function generateCombos(args: SmokeTestArgs) {
 
   const generatorArgs: GeneratorArgs = {
     count: args.count,
-    ecosystems: args.ecosystem
-      ? [args.ecosystem]
-      : ["typescript", "react-native", "rust", "python", "go", "java"],
+    ecosystems: args.ecosystem ? [args.ecosystem] : SUPPORTED_SMOKE_ECOSYSTEMS,
     installMode: "no-install",
     rng,
     forceOptions: args.forceOptions,

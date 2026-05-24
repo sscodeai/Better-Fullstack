@@ -63,6 +63,7 @@ const ENVIRONMENT_PATTERNS = [
 
 const TEMPLATE_PATTERNS = [
   /error\[E\d+\]/, // Rust compiler errors
+  /\*\* \(CompileError\)/,
   /SyntaxError/,
   /TypeError/,
   /ReferenceError/,
@@ -480,6 +481,35 @@ export async function verifyJava(
   return wrapResult("java", comboName, projectDir, steps);
 }
 
+export async function verifyElixir(
+  comboName: string,
+  projectDir: string,
+  options?: VerifyOptions,
+): Promise<VerifyResult> {
+  const steps: StepResult[] = [];
+
+  if (!existsSync(join(projectDir, "mix.exs"))) {
+    steps.push(templateFailure("structure", "Expected Elixir project mix.exs"));
+    return wrapResult("elixir", comboName, projectDir, steps);
+  }
+
+  steps.push(await runStep("setup-hex", "mix", ["local.hex", "--force"], projectDir));
+  if (!steps.at(-1)!.success) return wrapResult("elixir", comboName, projectDir, steps);
+
+  steps.push(await runStep("setup-rebar", "mix", ["local.rebar", "--force"], projectDir));
+  if (!steps.at(-1)!.success) return wrapResult("elixir", comboName, projectDir, steps);
+
+  steps.push(await runStep("install", "mix", ["deps.get"], projectDir));
+  if (!steps.at(-1)!.success) return wrapResult("elixir", comboName, projectDir, steps);
+
+  steps.push(await runStep("compile", "mix", ["compile", "--warnings-as-errors"], projectDir));
+  if (!steps.at(-1)!.success) return wrapResult("elixir", comboName, projectDir, steps);
+
+  steps.push(await runStep("test", "mix", ["test"], projectDir));
+
+  return wrapResult("elixir", comboName, projectDir, steps);
+}
+
 export function getVerifier(
   ecosystem: Ecosystem,
 ): (comboName: string, projectDir: string, options?: VerifyOptions) => Promise<VerifyResult> {
@@ -496,5 +526,7 @@ export function getVerifier(
       return verifyGo;
     case "java":
       return verifyJava;
+    case "elixir":
+      return verifyElixir;
   }
 }
