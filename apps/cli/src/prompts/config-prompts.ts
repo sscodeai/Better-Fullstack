@@ -413,7 +413,9 @@ export async function gatherConfig(
         return getPaymentsChoice(flags.payments, results.auth, results.backend, results.frontend);
       },
       email: ({ results }) => {
-        if (results.ecosystem === "react-native") return Promise.resolve("none" as Email);
+        if (results.ecosystem === "react-native" || results.ecosystem === "elixir") {
+          return Promise.resolve("none" as Email);
+        }
         return getEmailChoice(flags.email, results.backend, results.ecosystem);
       },
       effect: ({ results }) => {

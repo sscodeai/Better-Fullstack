@@ -256,6 +256,22 @@ describe("CLI prompts vs schemas parity", () => {
     expect(goResolution.options.map((option) => option.value)).toContain("go-better-auth");
   });
 
+  it("auto-resolves shared email for ecosystems that do not use it", () => {
+    const reactNativeResolution = PROMPT_RESOLVER_REGISTRY.email.resolve({
+      ecosystem: "react-native",
+      backend: "none",
+    });
+    const elixirResolution = PROMPT_RESOLVER_REGISTRY.email.resolve({
+      ecosystem: "elixir",
+      backend: "none",
+    });
+
+    expect(reactNativeResolution.shouldPrompt).toBe(false);
+    expect(reactNativeResolution.autoValue).toBe("none");
+    expect(elixirResolution.shouldPrompt).toBe(false);
+    expect(elixirResolution.autoValue).toBe("none");
+  });
+
   it("keeps the Rust libraries prompt default aligned with CLI defaults", () => {
     const resolution = resolveRustLibrariesPrompt();
 
