@@ -113,6 +113,69 @@ describe("mobile native scaffolding", () => {
     expect(appConfig.expo.plugins).toContain("expo-router");
   });
 
+  test("generates a runnable native shell when navigation is disabled", async () => {
+    const result = await createVirtual({
+      projectName: "mobile-minimal",
+      ecosystem: "react-native",
+      frontend: ["native-bare"],
+      backend: "none",
+      runtime: "none",
+      api: "none",
+      database: "none",
+      orm: "none",
+      auth: "none",
+      mobileNavigation: "none",
+      mobileUI: "none",
+      mobileStorage: "none",
+      mobileTesting: "none",
+      mobilePush: "none",
+      mobileOTA: "none",
+      mobileDeepLinking: "none",
+    });
+
+    expect(result.success).toBe(true);
+    const root = result.tree!.root;
+    const pkg = JSON.parse(getFile(root, "apps/native/package.json"));
+    const app = getFile(root, "apps/native/App.tsx");
+
+    expect(pkg.main).toBe("index.js");
+    expect(getFile(root, "apps/native/index.js")).toContain("registerRootComponent(App)");
+    expect(app).toContain("Better Fullstack Mobile");
+    expect(app).not.toContain("NavigationContainer");
+    expect(findFile(root, "apps/native/navigation/native-navigation.tsx")).toBeUndefined();
+  });
+
+  test("initializes Unistyles before Expo Router starts", async () => {
+    const result = await createVirtual({
+      projectName: "mobile-unistyles",
+      ecosystem: "react-native",
+      frontend: ["native-unistyles"],
+      backend: "none",
+      runtime: "none",
+      api: "none",
+      database: "none",
+      orm: "none",
+      auth: "none",
+      mobileNavigation: "expo-router",
+      mobileUI: "unistyles",
+      mobileStorage: "mmkv",
+      mobileTesting: "react-native-testing-library",
+      mobileOTA: "expo-updates",
+      mobileDeepLinking: "expo-linking",
+    });
+
+    expect(result.success).toBe(true);
+    const root = result.tree!.root;
+    const pkg = JSON.parse(getFile(root, "apps/native/package.json"));
+    const appConfig = JSON.parse(getFile(root, "apps/native/app.json"));
+    const index = getFile(root, "apps/native/index.js");
+
+    expect(pkg.main).toBe("index.js");
+    expect(index.indexOf("import './unistyles'")).toBeLessThan(index.indexOf("expo-router/entry"));
+    expect(appConfig.expo.ios.bundleIdentifier).toBe("com.betterfullstack.mobile.unistyles");
+    expect(appConfig.expo.android.package).toBe("com.betterfullstack.mobile.unistyles");
+  });
+
   test("omits deep-linking wiring when React Navigation selects no deep linking", async () => {
     const result = await createVirtual({
       projectName: "mobile-no-linking",
@@ -138,5 +201,33 @@ describe("mobile native scaffolding", () => {
     expect(app).not.toContain("@/lib/deep-linking");
     expect(navigation).not.toContain("@/lib/deep-linking");
     expect(findFile(root, "apps/native/lib/deep-linking.ts")).toBeUndefined();
+  });
+
+  test("uses generated app ids in Maestro flows", async () => {
+    const result = await createVirtual({
+      projectName: "mobile-maestro",
+      ecosystem: "react-native",
+      frontend: ["native-uniwind"],
+      backend: "none",
+      runtime: "none",
+      api: "none",
+      database: "none",
+      orm: "none",
+      auth: "none",
+      mobileNavigation: "expo-router",
+      mobileUI: "uniwind",
+      mobileTesting: "maestro",
+    });
+
+    expect(result.success).toBe(true);
+    const root = result.tree!.root;
+    const appConfig = JSON.parse(getFile(root, "apps/native/app.json"));
+    const maestro = getFile(root, "apps/native/.maestro/home.yaml");
+
+    expect(appConfig.expo.ios.bundleIdentifier).toBe("com.betterfullstack.mobile.maestro");
+    expect(appConfig.expo.android.package).toBe("com.betterfullstack.mobile.maestro");
+    expect(maestro).toContain("appId: com.betterfullstack.mobile.maestro");
+    expect(maestro).toContain('assertVisible: "Better Fullstack"');
+    expect(getFile(root, "apps/native/tsconfig.json")).toContain("uniwind-types.d.ts");
   });
 });

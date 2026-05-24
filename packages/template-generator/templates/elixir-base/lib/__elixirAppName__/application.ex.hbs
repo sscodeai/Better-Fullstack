@@ -10,6 +10,9 @@ defmodule {{elixirModuleName}}.Application do
 {{#if (ne elixirWebFramework "none")}}
       {Phoenix.PubSub, name: {{elixirModuleName}}.PubSub},
 {{/if}}
+{{#if (eq elixirRealtime "presence")}}
+      {{elixirModuleName}}Web.Presence,
+{{/if}}
 {{#if (eq elixirHttp "finch")}}
       {Finch, name: {{elixirModuleName}}.Finch},
 {{/if}}

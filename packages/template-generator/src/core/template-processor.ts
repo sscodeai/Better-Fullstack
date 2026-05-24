@@ -111,12 +111,38 @@ export function elixirModuleName(projectName?: string): string {
     .join("");
 }
 
+function nativeIdentifierSegment(value: string): string {
+  const normalized = value
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .replace(/_+/g, "_");
+
+  if (!normalized) return "app";
+  return /^[a-z]/.test(normalized) ? normalized : `app_${normalized}`;
+}
+
+export function nativeApplicationId(projectName?: string): string {
+  const rawName = String(projectName ?? "app");
+  const segments = rawName
+    .split(/[^A-Za-z0-9_]+/)
+    .filter(Boolean)
+    .map(nativeIdentifierSegment)
+    .filter(Boolean);
+
+  return `com.betterfullstack.${segments.length > 0 ? segments.join(".") : "app"}`;
+}
+
 Handlebars.registerHelper("elixirAppName", function (this: ProjectConfig) {
   return normalizeElixirAppName(this.projectName);
 });
 
 Handlebars.registerHelper("elixirModuleName", function (this: ProjectConfig) {
   return elixirModuleName(this.projectName);
+});
+
+Handlebars.registerHelper("nativeApplicationId", function (this: ProjectConfig) {
+  return nativeApplicationId(this.projectName);
 });
 
 /** Returns the CSS font-family string for the chosen shadcn font. */

@@ -176,6 +176,84 @@ describe("Virtual Generator Regressions", () => {
     expect(readme).not.toContain("mix phx.server");
     expect(readTextFromTree(result.tree!, "lib/plain_elixir_web/router.ex")).toBeUndefined();
     expect(readTextFromTree(result.tree!, "test/support/conn_case.ex")).toBeUndefined();
+    expect(readTextFromTree(result.tree!, "priv/repo/seeds.exs")).toBeUndefined();
+  });
+
+  it("keeps Elixir Dockerfiles usable before mix.lock exists", async () => {
+    const result = await createVirtual({
+      projectName: "elixir-docker",
+      ecosystem: "elixir",
+      elixirWebFramework: "phoenix",
+      elixirOrm: "ecto-sql",
+      elixirDeploy: "docker",
+    });
+
+    expect(result.success).toBe(true);
+    const dockerfile = readTextFromTree(result.tree!, "Dockerfile");
+    expect(dockerfile).toContain("COPY mix.exs ./");
+    expect(dockerfile).not.toContain("mix.lock*");
+  });
+
+  it("rolls initial Oban migrations all the way back down", async () => {
+    const result = await createVirtual({
+      projectName: "elixir-oban",
+      ecosystem: "elixir",
+      elixirWebFramework: "phoenix",
+      elixirOrm: "ecto-sql",
+      elixirJobs: "oban",
+    });
+
+    expect(result.success).toBe(true);
+    const migration = readTextFromTree(
+      result.tree!,
+      "priv/repo/migrations/20260101000002_add_oban_jobs.exs",
+    );
+    expect(migration).toContain("Oban.Migration.up(version: 12)");
+    expect(migration).toContain("Oban.Migration.down(version: 1)");
+  });
+
+  it("only emits Phoenix sockets when channels or presence are selected", async () => {
+    const pubsubResult = await createVirtual({
+      projectName: "elixir-pubsub",
+      ecosystem: "elixir",
+      elixirWebFramework: "phoenix",
+      elixirOrm: "ecto-sql",
+      elixirRealtime: "pubsub",
+    });
+    const channelsResult = await createVirtual({
+      projectName: "elixir-channels",
+      ecosystem: "elixir",
+      elixirWebFramework: "phoenix",
+      elixirOrm: "ecto-sql",
+      elixirRealtime: "channels",
+    });
+
+    expect(pubsubResult.success).toBe(true);
+    expect(channelsResult.success).toBe(true);
+    expect(
+      readTextFromTree(pubsubResult.tree!, "lib/elixir_pubsub_web/channels/user_socket.ex"),
+    ).toBeUndefined();
+    expect(
+      readTextFromTree(channelsResult.tree!, "lib/elixir_channels_web/channels/user_socket.ex"),
+    ).toContain("RoomChannel");
+    expect(
+      readTextFromTree(channelsResult.tree!, "lib/elixir_channels_web/channels/room_channel.ex"),
+    ).toBeDefined();
+  });
+
+  it("starts Phoenix Presence when presence realtime is selected", async () => {
+    const result = await createVirtual({
+      projectName: "elixir-presence",
+      ecosystem: "elixir",
+      elixirWebFramework: "phoenix",
+      elixirOrm: "ecto-sql",
+      elixirRealtime: "presence",
+    });
+
+    expect(result.success).toBe(true);
+    const application = readTextFromTree(result.tree!, "lib/elixir_presence/application.ex");
+    expect(application).toContain("ElixirPresenceWeb.Presence");
+    expect(readTextFromTree(result.tree!, "lib/elixir_presence_web/channels/presence.ex")).toBeDefined();
   });
 
   it("allows CLI validation for generated plain Elixir worker projects", () => {

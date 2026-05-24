@@ -1,6 +1,6 @@
 {{#if (or (eq mobileTesting "maestro") (eq mobileTesting "maestro-react-native-testing-library"))}}
-appId: com.betterfullstack.app
+appId: {{nativeApplicationId}}
 ---
 - launchApp
-- assertVisible: "Better Fullstack Mobile"
+- assertVisible: "Better Fullstack"
 {{/if}}

@@ -37,10 +37,12 @@ export async function processElixirBaseTemplate(
     if (!hasPhoenix && templatePath.includes("test/support/conn_case")) continue;
     if (!hasLiveView && templatePath.includes("/live/")) continue;
     if (!hasEcto && (templatePath.includes("/repo.ex") || templatePath.includes("/migrations/"))) continue;
+    if (!hasEcto && templatePath.includes("priv/repo/seeds.exs")) continue;
     if (!hasEcto && (templatePath.includes("/catalog") || templatePath.includes("/item_controller"))) continue;
     if (!hasAuth && templatePath.includes("/accounts")) continue;
     if (!hasAuth && templatePath.includes("create_users")) continue;
     if (!hasAuth && templatePath.includes("/user_session_controller")) continue;
+    if (!hasChannels && templatePath.includes("/channels/user_socket")) continue;
     if (!hasChannels && templatePath.includes("/channels/room_channel")) continue;
     if (!hasPresence && templatePath.includes("/channels/presence")) continue;
     if (!hasOban && templatePath.includes("/workers/")) continue;

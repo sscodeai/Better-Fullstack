@@ -1,7 +1,7 @@
 {
   "name": "native",
   "version": "1.0.0",
-  "main": "{{#if (eq mobileNavigation 'react-navigation')}}index.js{{else}}expo-router/entry{{/if}}",
+  "main": "{{#if (eq mobileNavigation 'expo-router')}}expo-router/entry{{else}}index.js{{/if}}",
   "scripts": {
     "dev": "expo start --clear",
     "android": "expo run:android",
