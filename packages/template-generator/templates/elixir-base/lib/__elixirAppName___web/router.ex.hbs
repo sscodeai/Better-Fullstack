@@ -4,7 +4,11 @@ defmodule {{elixirModuleName}}Web.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
+{{#if (eq elixirWebFramework "phoenix-live-view")}}
     plug :fetch_live_flash
+{{else}}
+    plug :fetch_flash
+{{/if}}
     plug :put_root_layout, html: { {{elixirModuleName}}Web.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
