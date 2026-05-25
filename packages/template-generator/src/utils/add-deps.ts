@@ -117,7 +117,7 @@ export const dependencyVersionMap = {
 
   "@hono/node-server": "^2.0.4",
   "@hono/trpc-server": "^0.4.2",
-  hono: "^4.12.23",
+  hono: "^4.12.19",
   "@octokit/rest": "^22.0.1",
   "@vercel/sandbox": "^2.0.0",
   vercel: "^54.4.1",

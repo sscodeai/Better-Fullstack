@@ -482,6 +482,7 @@ describe("Frontend Configurations", () => {
           workspace: ["./apps/web"],
         });
         expect(denoJson).toContain('"fresh": "jsr:@fresh/core@^2.2.0"');
+        expect(denoJson).toContain('"fresh/": "jsr:@fresh/core@^2.2.0/"');
         expect(denoJson).toContain(
           '"build": "deno run --node-modules-dir=auto -A npm:vite build"',
         );
