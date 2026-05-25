@@ -223,11 +223,14 @@ describe("mobile native scaffolding", () => {
     const root = result.tree!.root;
     const appConfig = JSON.parse(getFile(root, "apps/native/app.json"));
     const maestro = getFile(root, "apps/native/.maestro/home.yaml");
+    const tabLayout = getFile(root, "apps/native/app/(drawer)/(tabs)/_layout.tsx");
 
     expect(appConfig.expo.ios.bundleIdentifier).toBe("com.betterfullstack.mobile.maestro");
     expect(appConfig.expo.android.package).toBe("com.betterfullstack.mobile.maestro");
     expect(maestro).toContain("appId: com.betterfullstack.mobile.maestro");
     expect(maestro).toContain('assertVisible: "Better Fullstack"');
     expect(getFile(root, "apps/native/tsconfig.json")).toContain("uniwind-types.d.ts");
+    expect(tabLayout).toContain("tabBarIcon: ({ color, size }) =>");
+    expect(tabLayout).not.toContain("color: string");
   });
 });
