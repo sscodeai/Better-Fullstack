@@ -33,10 +33,6 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://tanstack.com/start/latest",
     githubUrl: "https://github.com/TanStack/router",
   },
-  "tanstack-query": {
-    docsUrl: "https://tanstack.com/query/latest",
-    githubUrl: "https://github.com/TanStack/query",
-  },
   swr: { docsUrl: "https://swr.vercel.app/", githubUrl: "https://github.com/vercel/swr" },
   next: { docsUrl: "https://nextjs.org/docs", githubUrl: "https://github.com/vercel/next.js" },
   vinext: { docsUrl: "https://vinext.io", githubUrl: "https://github.com/cloudflare/vinext" },
