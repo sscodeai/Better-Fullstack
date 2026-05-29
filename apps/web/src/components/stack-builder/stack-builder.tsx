@@ -2100,10 +2100,9 @@ const StackBuilder = () => {
         >
           <div className="relative shrink-0 border-b border-border/60 bg-fd-background">
             <div className="px-3 py-3 sm:px-4">
-              <div
-                role="group"
+              <fieldset
                 aria-label="Creation method"
-                className="relative flex w-full rounded-xl border border-border/60 bg-muted/40 p-1 shadow-sm"
+                className="relative flex w-full min-w-0 rounded-xl border border-border/60 bg-muted/40 p-1 shadow-sm"
               >
                 <button
                   type="button"
@@ -2147,7 +2146,7 @@ const StackBuilder = () => {
                   )}
                   <span className="relative z-10">Multi-Ecosystem</span>
                 </button>
-              </div>
+              </fieldset>
             </div>
 
             {stack.stackMode !== "multi" && (

@@ -651,16 +651,26 @@ export function legacyProjectConfigToStackParts(
   const databasePart = addLegacyPart(parts, "database", "universal", config.database, source);
   const capabilityOwner = backendPart?.id ?? frontendPart?.id ?? databasePart?.id;
 
-  addLegacyPart(parts, "orm", "typescript", config.orm, source, capabilityOwner);
-  addLegacyPart(parts, "api", "typescript", config.api, source, capabilityOwner);
-  addLegacyPart(
-    parts,
-    "auth",
-    config.ecosystem ?? "typescript",
-    config.auth,
-    source,
-    capabilityOwner,
-  );
+  // The generic `orm`/`api`/`auth` fields only describe TypeScript and React Native
+  // stacks. For other ecosystems these are inert TS defaults and the ecosystem-specific
+  // blocks below own the real bindings — mapping the generic fields there would emit
+  // invalid or duplicate capability parts (e.g. `auth:go:better-auth` alongside `goAuth`).
+  if (
+    config.ecosystem === undefined ||
+    config.ecosystem === "typescript" ||
+    config.ecosystem === "react-native"
+  ) {
+    addLegacyPart(parts, "orm", "typescript", config.orm, source, capabilityOwner);
+    addLegacyPart(parts, "api", "typescript", config.api, source, capabilityOwner);
+    addLegacyPart(
+      parts,
+      "auth",
+      config.ecosystem ?? "typescript",
+      config.auth,
+      source,
+      capabilityOwner,
+    );
+  }
   if (config.ecosystem === "rust") {
     addLegacyPart(parts, "orm", "rust", config.rustOrm, source, backendPart?.id);
     addLegacyPart(parts, "api", "rust", config.rustApi, source, backendPart?.id);
