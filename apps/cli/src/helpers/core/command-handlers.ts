@@ -1,3 +1,8 @@
+import {
+  validatePreflightConfig,
+  generateVirtualProject,
+  EMBEDDED_TEMPLATES,
+} from "@better-fullstack/template-generator";
 import { intro, log, outro } from "@clack/prompts";
 import consola from "consola";
 import fs from "fs-extra";
@@ -15,8 +20,10 @@ import { isSilent, runWithContextAsync } from "../../utils/context";
 import { displayConfig } from "../../utils/display-config";
 import { CLIError, UserCancelledError } from "../../utils/errors";
 import { generateReproducibleCommand } from "../../utils/generate-reproducible-command";
+import { displayPreflightWarnings } from "../../utils/preflight-display";
 import { handleDirectoryConflict, setupProjectDirectory } from "../../utils/project-directory";
 import { addToHistory } from "../../utils/project-history";
+import { canPromptInteractively } from "../../utils/prompt-environment";
 import { renderTitle } from "../../utils/render-title";
 import { getTemplateConfig, getTemplateDescription } from "../../utils/templates";
 import {
@@ -25,10 +32,6 @@ import {
   processProvidedFlagsWithoutValidation,
   validateConfigCompatibility,
 } from "../../validation";
-import { validatePreflightConfig, generateVirtualProject, EMBEDDED_TEMPLATES } from "@better-fullstack/template-generator";
-
-import { displayPreflightWarnings } from "../../utils/preflight-display";
-import { canPromptInteractively } from "../../utils/prompt-environment";
 import { createProject } from "./create-project";
 
 export interface CreateHandlerOptions {
@@ -86,7 +89,7 @@ function getYesBaseConfig(flagConfig: Partial<ProjectConfig>): ProjectConfig {
 }
 
 function shouldPromptForVersionChannel(input: CreateInput & { projectName?: string }): boolean {
-  if (input.yes || input.versionChannel !== undefined || isSilent()) {
+  if (input.yes || input.part?.length || input.versionChannel !== undefined || isSilent()) {
     return false;
   }
 
@@ -314,7 +317,7 @@ export async function createProjectHandler(
       }
 
       let config: ProjectConfig;
-      if (cliInput.yes) {
+      if (cliInput.yes || cliInput.part?.length) {
         const flagConfig = processProvidedFlagsWithoutValidation(cliInput, finalBaseName);
 
         config = {

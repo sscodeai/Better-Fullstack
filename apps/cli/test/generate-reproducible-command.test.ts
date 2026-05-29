@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 
 import type { ProjectConfig } from "../src/types";
 
+import { parseStackPartSpecs } from "../src/types";
 import { generateReproducibleCommand } from "../src/utils/generate-reproducible-command";
 
 function makeConfig(overrides: Partial<ProjectConfig> = {}): ProjectConfig {
@@ -268,7 +269,7 @@ describe("generateReproducibleCommand", () => {
       rustCli: "clap",
       rustLogging: "tracing",
       rustErrorHandling: "anyhow-thiserror",
-    rustCaching: "none",
+      rustCaching: "none",
       rustLibraries: ["serde", "validator"],
       aiDocs: [],
     });
@@ -432,5 +433,50 @@ describe("generateReproducibleCommand", () => {
         "--no-install",
     );
     expect(command).not.toContain("--auth ");
+  });
+
+  it("generates canonical --part flags when stackParts are present", () => {
+    const stackParts = parseStackPartSpecs([
+      "frontend:typescript:next",
+      "backend:go:gin",
+      "backend.orm:go:gorm",
+    ]);
+    const command = generateReproducibleCommand(
+      makeConfig({
+        stackParts,
+        frontend: ["next"],
+        backend: "none",
+        goWebFramework: "gin",
+        goOrm: "gorm",
+      }),
+    );
+
+    expect(command).toContain("--part frontend:typescript:next");
+    expect(command).toContain("--part backend:go:gin");
+    expect(command).toContain("--part backend.orm:go:gorm");
+    expect(command).not.toContain("--backend");
+  });
+
+  it("preserves graph section library flags when stackParts are present", () => {
+    const stackParts = parseStackPartSpecs([
+      "frontend:typescript:next",
+      "mobile:react-native:native-bare",
+    ]);
+    const command = generateReproducibleCommand(
+      makeConfig({
+        stackParts,
+        frontend: ["next", "native-bare"],
+        cssFramework: "scss",
+        mobileNavigation: "react-navigation",
+        mobileTesting: "maestro",
+      }),
+    );
+
+    expect(command).toContain("--part frontend:typescript:next");
+    expect(command).toContain("--part mobile:react-native:native-bare");
+    expect(command).toContain("--css-framework scss");
+    expect(command).toContain("--mobile-navigation react-navigation");
+    expect(command).toContain("--mobile-testing maestro");
+    expect(command).not.toContain("--backend");
   });
 });

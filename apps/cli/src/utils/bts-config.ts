@@ -4,11 +4,17 @@ import path from "node:path";
 
 import type { BetterTStackConfig, ProjectConfig } from "../types";
 
+import {
+  compareLegacyConfigToStackParts,
+  legacyProjectConfigToStackParts,
+  stackPartsToLegacyProjectConfigPartial,
+} from "../types";
 import { getLatestCLIVersion } from "./get-latest-cli-version";
 
 const BTS_CONFIG_FILE = "bts.jsonc";
 
 export async function writeBtsConfig(projectConfig: ProjectConfig) {
+  const stackParts = projectConfig.stackParts ?? legacyProjectConfigToStackParts(projectConfig);
   const btsConfig: BetterTStackConfig = {
     version: getLatestCLIVersion(),
     createdAt: new Date().toISOString(),
@@ -104,6 +110,7 @@ export async function writeBtsConfig(projectConfig: ProjectConfig) {
     elixirQuality: projectConfig.elixirQuality,
     elixirDeploy: projectConfig.elixirDeploy,
     aiDocs: projectConfig.aiDocs,
+    stackParts,
   };
 
   const baseContent = {
@@ -202,6 +209,7 @@ export async function writeBtsConfig(projectConfig: ProjectConfig) {
     elixirQuality: btsConfig.elixirQuality,
     elixirDeploy: btsConfig.elixirDeploy,
     aiDocs: btsConfig.aiDocs,
+    stackParts: btsConfig.stackParts,
   };
 
   let configContent = JSON.stringify(baseContent);
@@ -243,7 +251,27 @@ export async function readBtsConfig(projectDir: string) {
       return null;
     }
 
-    return config;
+    if (config.stackParts && config.stackParts.length > 0) {
+      const diagnostics = compareLegacyConfigToStackParts(config, config.stackParts);
+      if (diagnostics.length > 0) {
+        console.warn(
+          `Warning: bts.jsonc legacy fields differ from stackParts; using stackParts for ${diagnostics
+            .map((diagnostic) => diagnostic.path)
+            .filter(Boolean)
+            .join(", ")}.`,
+        );
+      }
+      return {
+        ...config,
+        ...stackPartsToLegacyProjectConfigPartial(config.stackParts),
+        stackParts: config.stackParts,
+      } as BetterTStackConfig;
+    }
+
+    return {
+      ...config,
+      stackParts: legacyProjectConfigToStackParts(config),
+    } as BetterTStackConfig;
   } catch {
     return null;
   }

@@ -26,6 +26,8 @@ function toProjectConfig(selection: StackSelectionInput, install?: boolean) {
 
 describe("stack selection translation", () => {
   it("exports the shared default stack contract", () => {
+    expect(DEFAULT_STACK_SELECTION.stackMode).toBe("solo");
+    expect(DEFAULT_STACK_SELECTION.stackPartSpecs).toEqual([]);
     expect(DEFAULT_STACK_SELECTION.ecosystem).toBe("typescript");
     expect(DEFAULT_STACK_SELECTION.webFrontend).toEqual(["tanstack-router"]);
     expect(DEFAULT_STACK_SELECTION.appPlatforms).toEqual(["turborepo"]);
@@ -53,6 +55,8 @@ describe("stack selection translation", () => {
     const input = normalizeStackSelection({
       ...DEFAULT_SELECTION,
       ecosystem: "python",
+      stackMode: "multi",
+      stackPartSpecs: ["frontend:typescript:next", "backend:go:gin", "backend.orm:go:gorm"],
       projectName: "parity-app",
       webFrontend: ["astro"],
       astroIntegration: "react",
@@ -81,6 +85,57 @@ describe("stack selection translation", () => {
     expect(generateStackSelectionCommand(DEFAULT_SELECTION)).toBe(
       "bun create better-fullstack@latest my-app --yes",
     );
+  });
+
+  it("emits canonical graph --part flags for multi-ecosystem selections", () => {
+    const command = generateStackSelectionCommand({
+      ...DEFAULT_SELECTION,
+      stackMode: "multi",
+      projectName: "graph-app",
+      stackPartSpecs: [
+        "frontend:typescript:next",
+        "backend:go:gin",
+        "backend.orm:go:gorm",
+        "database:universal:postgres",
+        "mobile:react-native:native-bare",
+      ],
+      install: "false",
+    });
+
+    expect(command).toContain("--part frontend:typescript:next");
+    expect(command).toContain("--part backend:go:gin");
+    expect(command).toContain("--part backend.orm:go:gorm");
+    expect(command).toContain("--part database:universal:postgres");
+    expect(command).toContain("--part mobile:react-native:native-bare");
+    expect(command).toContain("--no-install");
+    expect(command).not.toContain("--ecosystem typescript");
+    expect(command).not.toContain("--backend");
+  });
+
+  it("derives ProjectConfig stackParts from graph URL state", () => {
+    const config = toProjectConfig({
+      ...DEFAULT_SELECTION,
+      stackMode: "multi",
+      stackPartSpecs: [
+        "frontend:typescript:next",
+        "backend:go:gin",
+        "backend.orm:go:gorm",
+        "database:universal:postgres",
+      ],
+    });
+
+    expect(config.stackParts?.map((part) => `${part.role}:${part.ecosystem}:${part.toolId}`)).toEqual(
+      expect.arrayContaining([
+        "frontend:typescript:next",
+        "backend:go:gin",
+        "orm:go:gorm",
+        "database:universal:postgres",
+      ]),
+    );
+    expect(config.frontend).toEqual(["next"]);
+    expect(config.goWebFramework).toBe("gin");
+    expect(config.goOrm).toBe("gorm");
+    expect(config.database).toBe("postgres");
   });
 
   it("maps builder aliases into ProjectConfig fields", () => {

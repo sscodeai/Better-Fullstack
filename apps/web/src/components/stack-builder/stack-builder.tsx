@@ -1,5 +1,16 @@
-import { isMultiSelectCategory, type OptionCategory } from "@better-fullstack/types";
 import {
+  getStackPartOptions,
+  isMultiSelectCategory,
+  parseStackPartSpecs,
+  stackPartsToLegacyProjectConfigPartial,
+  type OptionCategory,
+  type StackPartEcosystem,
+  type StackPartOptionContext,
+  type StackPartRole,
+} from "@better-fullstack/types";
+import {
+  ArrowLeft,
+  ArrowRight,
   ArrowUp,
   Bookmark,
   BookOpen,
@@ -97,6 +108,58 @@ type RenderOptionGroup = {
   category: keyof typeof TECH_OPTIONS;
   options: TechOption[];
 };
+type GraphOptionContext = Omit<StackPartOptionContext, "role" | "ecosystem">;
+type GraphFrontendEcosystem = Extract<StackPartEcosystem, "typescript" | "rust">;
+type GraphBackendEcosystem = Extract<
+  StackPartEcosystem,
+  "typescript" | "rust" | "python" | "go" | "java" | "elixir"
+>;
+type GraphSelection = {
+  frontendEcosystem: GraphFrontendEcosystem;
+  frontend: string;
+  mobile: string;
+  backendEcosystem: GraphBackendEcosystem;
+  backend: string;
+  database: string;
+  backendOrm: string;
+  backendApi: string;
+  backendAuth: string;
+};
+type GraphFrontendConfig = {
+  ecosystem: GraphFrontendEcosystem;
+  label: string;
+  frameworkCategory: keyof typeof TECH_OPTIONS;
+  frameworkStackKey: keyof StackState;
+};
+type GraphBackendConfig = {
+  ecosystem: GraphBackendEcosystem;
+  label: string;
+  frameworkCategory: keyof typeof TECH_OPTIONS;
+  ormCategory: keyof typeof TECH_OPTIONS;
+  apiCategory?: keyof typeof TECH_OPTIONS;
+  authCategory?: keyof typeof TECH_OPTIONS;
+  frameworkStackKey: keyof StackState;
+  ormStackKey: keyof StackState;
+  apiStackKey?: keyof StackState;
+  authStackKey?: keyof StackState;
+};
+
+type MultiStackStepId = "frontend" | "backend" | "database" | "mobile" | "finalize";
+
+const GRAPH_FRONTEND_CONFIGS: GraphFrontendConfig[] = [
+  {
+    ecosystem: "typescript",
+    label: "TypeScript",
+    frameworkCategory: "webFrontend",
+    frameworkStackKey: "webFrontend",
+  },
+  {
+    ecosystem: "rust",
+    label: "Rust",
+    frameworkCategory: "rustFrontend",
+    frameworkStackKey: "rustFrontend",
+  },
+];
 
 const APP_PLATFORM_OPTION_GROUPS = [
   {
@@ -116,6 +179,425 @@ const APP_PLATFORM_OPTION_GROUPS = [
     ids: ["tanstack-query", "tanstack-table", "tanstack-virtual", "tanstack-db", "tanstack-pacer"],
   },
 ] as const;
+
+const GRAPH_BACKEND_CONFIGS: GraphBackendConfig[] = [
+  {
+    ecosystem: "typescript",
+    label: "TypeScript",
+    frameworkCategory: "backend",
+    ormCategory: "orm",
+    apiCategory: "api",
+    authCategory: "auth",
+    frameworkStackKey: "backend",
+    ormStackKey: "orm",
+    apiStackKey: "api",
+    authStackKey: "auth",
+  },
+  {
+    ecosystem: "go",
+    label: "Go",
+    frameworkCategory: "goWebFramework",
+    ormCategory: "goOrm",
+    apiCategory: "goApi",
+    authCategory: "goAuth",
+    frameworkStackKey: "goWebFramework",
+    ormStackKey: "goOrm",
+    apiStackKey: "goApi",
+    authStackKey: "goAuth",
+  },
+  {
+    ecosystem: "rust",
+    label: "Rust",
+    frameworkCategory: "rustWebFramework",
+    ormCategory: "rustOrm",
+    apiCategory: "rustApi",
+    authCategory: "rustAuth",
+    frameworkStackKey: "rustWebFramework",
+    ormStackKey: "rustOrm",
+    apiStackKey: "rustApi",
+    authStackKey: "rustAuth",
+  },
+  {
+    ecosystem: "python",
+    label: "Python",
+    frameworkCategory: "pythonWebFramework",
+    ormCategory: "pythonOrm",
+    apiCategory: "pythonApi",
+    authCategory: "pythonAuth",
+    frameworkStackKey: "pythonWebFramework",
+    ormStackKey: "pythonOrm",
+    apiStackKey: "pythonApi",
+    authStackKey: "pythonAuth",
+  },
+  {
+    ecosystem: "java",
+    label: "Java",
+    frameworkCategory: "javaWebFramework",
+    ormCategory: "javaOrm",
+    authCategory: "javaAuth",
+    frameworkStackKey: "javaWebFramework",
+    ormStackKey: "javaOrm",
+    authStackKey: "javaAuth",
+  },
+  {
+    ecosystem: "elixir",
+    label: "Elixir",
+    frameworkCategory: "elixirWebFramework",
+    ormCategory: "elixirOrm",
+    apiCategory: "elixirApi",
+    authCategory: "elixirAuth",
+    frameworkStackKey: "elixirWebFramework",
+    ormStackKey: "elixirOrm",
+    apiStackKey: "elixirApi",
+    authStackKey: "elixirAuth",
+  },
+];
+
+const GRAPH_FRONTEND_CONFIG_BY_ECOSYSTEM = Object.fromEntries(
+  GRAPH_FRONTEND_CONFIGS.map((config) => [config.ecosystem, config]),
+) as Record<GraphFrontendEcosystem, GraphFrontendConfig>;
+
+const GRAPH_BACKEND_CONFIG_BY_ECOSYSTEM = Object.fromEntries(
+  GRAPH_BACKEND_CONFIGS.map((config) => [config.ecosystem, config]),
+) as Record<GraphBackendEcosystem, GraphBackendConfig>;
+
+const MULTI_STACK_STEPS: Array<{
+  id: MultiStackStepId;
+  label: string;
+  description: string;
+}> = [
+  { id: "frontend", label: "Frontend", description: "Web UI language and libraries" },
+  { id: "backend", label: "Backend", description: "Server language, framework, and services" },
+  { id: "database", label: "Database", description: "Standalone data service" },
+  { id: "mobile", label: "Mobile", description: "Native app and mobile libraries" },
+  { id: "finalize", label: "Finalize", description: "Package manager, docs, and version" },
+];
+
+const MULTI_FRONTEND_LIBRARY_GROUPS: Array<{
+  label: string;
+  category: keyof typeof TECH_OPTIONS;
+}> = [
+  { label: "CSS Framework", category: "cssFramework" },
+  { label: "UI Library", category: "uiLibrary" },
+  { label: "State Management", category: "stateManagement" },
+  { label: "Forms", category: "forms" },
+  { label: "Validation", category: "validation" },
+  { label: "Testing", category: "testing" },
+  { label: "Animation", category: "animation" },
+];
+
+const MULTI_MOBILE_LIBRARY_GROUPS: Array<{
+  label: string;
+  category: keyof typeof TECH_OPTIONS;
+}> = [
+  { label: "Navigation", category: "mobileNavigation" },
+  { label: "UI", category: "mobileUI" },
+  { label: "Storage", category: "mobileStorage" },
+  { label: "Testing", category: "mobileTesting" },
+  { label: "Push", category: "mobilePush" },
+  { label: "OTA", category: "mobileOTA" },
+  { label: "Deep Linking", category: "mobileDeepLinking" },
+];
+
+const GRAPH_MANAGED_CATEGORY_SET = new Set<keyof typeof TECH_OPTIONS>([
+  "webFrontend",
+  "rustFrontend",
+  "nativeFrontend",
+  "backend",
+  "database",
+  "orm",
+  "api",
+  "auth",
+  "rustWebFramework",
+  "rustOrm",
+  "rustApi",
+  "rustAuth",
+  "pythonWebFramework",
+  "pythonOrm",
+  "pythonApi",
+  "pythonAuth",
+  "goWebFramework",
+  "goOrm",
+  "goApi",
+  "goAuth",
+  "javaWebFramework",
+  "javaOrm",
+  "javaAuth",
+  "elixirWebFramework",
+  "elixirOrm",
+  "elixirApi",
+  "elixirAuth",
+]);
+
+const GRAPH_COMMON_CATEGORY_SET = new Set<keyof typeof TECH_OPTIONS>([
+  "packageManager",
+  "aiDocs",
+  "versionChannel",
+  "git",
+  "install",
+]);
+
+function isGraphBackendEcosystem(ecosystem: StackPartEcosystem): ecosystem is GraphBackendEcosystem {
+  return ecosystem in GRAPH_BACKEND_CONFIG_BY_ECOSYSTEM;
+}
+
+function isGraphFrontendEcosystem(
+  ecosystem: StackPartEcosystem,
+): ecosystem is GraphFrontendEcosystem {
+  return ecosystem in GRAPH_FRONTEND_CONFIG_BY_ECOSYSTEM;
+}
+
+function getOptionName(category: keyof typeof TECH_OPTIONS, optionId: string) {
+  if (optionId === "none") return "None";
+  return TECH_OPTIONS[category]?.find((option) => option.id === optionId)?.name ?? optionId;
+}
+
+function getStackStringValue(
+  stack: StackState,
+  category: keyof typeof TECH_OPTIONS,
+  fallback = "none",
+) {
+  const value = stack[category as keyof StackState];
+
+  if (Array.isArray(value)) {
+    return getSelectedOptionId(value, fallback);
+  }
+
+  return typeof value === "string" ? value : fallback;
+}
+
+function getGraphToolOptions(
+  category: keyof typeof TECH_OPTIONS,
+  role: StackPartRole,
+  ecosystem: StackPartEcosystem,
+  context: GraphOptionContext = {},
+): TechOption[] {
+  const allowedIds = new Set(getStackPartOptions({ role, ecosystem, ...context }));
+  return (TECH_OPTIONS[category] || []).filter(
+    (option) => option.id === "none" || allowedIds.has(option.id),
+  );
+}
+
+function getSelectedOptionId(values: readonly string[], fallback = "none") {
+  return values.find((value) => value !== "none") ?? fallback;
+}
+
+function getDefaultGraphTool(
+  category: keyof typeof TECH_OPTIONS,
+  role: StackPartRole,
+  ecosystem: StackPartEcosystem,
+  fallback = "none",
+  options: { allowNoneDefault?: boolean } = {},
+  context: GraphOptionContext = {},
+) {
+  const toolOptions = getGraphToolOptions(category, role, ecosystem, context);
+  const defaultOption = toolOptions.find((option) => option.default);
+
+  if (defaultOption && (options.allowNoneDefault || defaultOption.id !== "none")) {
+    return defaultOption.id;
+  }
+
+  return (
+    toolOptions.find((option) => option.id !== "none")?.id ??
+    fallback
+  );
+}
+
+function getSoloBackendSelection(stack: StackState): GraphSelection {
+  const currentEcosystem = isGraphBackendEcosystem(stack.ecosystem)
+    ? stack.ecosystem
+    : "typescript";
+  const backendConfig = GRAPH_BACKEND_CONFIG_BY_ECOSYSTEM[currentEcosystem];
+  const backendValue = stack[backendConfig.frameworkStackKey];
+  const ormValue = stack[backendConfig.ormStackKey];
+  const apiValue = backendConfig.apiStackKey ? stack[backendConfig.apiStackKey] : "none";
+  const authValue = backendConfig.authStackKey ? stack[backendConfig.authStackKey] : "none";
+  const frontendEcosystem =
+    stack.ecosystem === "rust" && stack.rustFrontend !== "none" ? "rust" : "typescript";
+
+  return {
+    frontendEcosystem,
+    frontend:
+      frontendEcosystem === "rust"
+        ? stack.rustFrontend
+        : getSelectedOptionId(stack.webFrontend, "tanstack-router"),
+    mobile: getSelectedOptionId(stack.nativeFrontend),
+    backendEcosystem: currentEcosystem,
+    backend:
+      typeof backendValue === "string" && backendValue !== "none"
+        ? backendValue
+        : getDefaultGraphTool(
+            backendConfig.frameworkCategory,
+            "backend",
+            currentEcosystem,
+            "none",
+          ),
+    database: stack.database !== "none" ? stack.database : "none",
+    backendOrm: typeof ormValue === "string" ? ormValue : "none",
+    backendApi: typeof apiValue === "string" ? apiValue : "none",
+    backendAuth: typeof authValue === "string" ? authValue : "none",
+  };
+}
+
+function getGraphSelection(stack: StackState): GraphSelection {
+  if (stack.stackPartSpecs.length === 0) {
+    return getSoloBackendSelection(stack);
+  }
+
+  try {
+    const parts = parseStackPartSpecs(stack.stackPartSpecs, "selected");
+    const selectedParts = parts.filter((part) => part.source !== "provided");
+    const frontend = selectedParts.find(
+      (part) =>
+        part.role === "frontend" && !part.ownerPartId && isGraphFrontendEcosystem(part.ecosystem),
+    );
+    const frontendEcosystem =
+      frontend && isGraphFrontendEcosystem(frontend.ecosystem)
+        ? frontend.ecosystem
+        : "typescript";
+    const mobile = selectedParts.find((part) => part.role === "mobile" && !part.ownerPartId);
+    const backend = selectedParts.find((part) => part.role === "backend" && !part.ownerPartId);
+    const backendEcosystem =
+      backend && isGraphBackendEcosystem(backend.ecosystem) ? backend.ecosystem : "typescript";
+    const database = selectedParts.find((part) => part.role === "database" && !part.ownerPartId);
+    const backendOrm = backend
+      ? selectedParts.find(
+          (part) => part.role === "orm" && part.ownerPartId === backend.id,
+        )
+      : undefined;
+    const backendApi = backend
+      ? selectedParts.find(
+          (part) => part.role === "api" && part.ownerPartId === backend.id,
+        )
+      : undefined;
+    const backendAuth = backend
+      ? selectedParts.find(
+          (part) => part.role === "auth" && part.ownerPartId === backend.id,
+        )
+      : undefined;
+
+    return {
+      frontendEcosystem,
+      frontend: frontend?.toolId ?? "none",
+      mobile: mobile?.toolId ?? "none",
+      backendEcosystem,
+      backend: backend?.toolId ?? "none",
+      database: database?.toolId ?? "none",
+      backendOrm: backendOrm?.toolId ?? "none",
+      backendApi: backendApi?.toolId ?? "none",
+      backendAuth: backendAuth?.toolId ?? "none",
+    };
+  } catch {
+    return getSoloBackendSelection(stack);
+  }
+}
+
+function graphSelectionToSpecs(selection: GraphSelection): string[] {
+  const specs: string[] = [];
+  if (selection.frontend !== "none") {
+    specs.push(`frontend:${selection.frontendEcosystem}:${selection.frontend}`);
+  }
+  if (selection.mobile !== "none") {
+    specs.push(`mobile:react-native:${selection.mobile}`);
+  }
+  if (selection.backend !== "none") {
+    specs.push(`backend:${selection.backendEcosystem}:${selection.backend}`);
+  }
+  if (selection.backend !== "none" && selection.backendOrm !== "none") {
+    specs.push(`backend.orm:${selection.backendEcosystem}:${selection.backendOrm}`);
+  }
+  if (selection.backend !== "none" && selection.backendApi !== "none") {
+    specs.push(`backend.api:${selection.backendEcosystem}:${selection.backendApi}`);
+  }
+  if (selection.backend !== "none" && selection.backendAuth !== "none") {
+    specs.push(`backend.auth:${selection.backendEcosystem}:${selection.backendAuth}`);
+  }
+  if (selection.database !== "none") {
+    specs.push(`database:universal:${selection.database}`);
+  }
+  return specs;
+}
+
+function stackPatchFromGraphSpecs(specs: string[]): Partial<StackState> {
+  const patch: Partial<StackState> = {
+    stackMode: "multi",
+    stackPartSpecs: specs,
+  };
+
+  try {
+    const parts = parseStackPartSpecs(specs, "selected");
+    const lowered = stackPartsToLegacyProjectConfigPartial(parts);
+    const selectedParts = parts.filter((part) => part.source !== "provided");
+    const frontend = selectedParts.find(
+      (part) => part.role === "frontend" && !part.ownerPartId,
+    );
+    const mobile = selectedParts.find((part) => part.role === "mobile" && !part.ownerPartId);
+    const backend = selectedParts.find((part) => part.role === "backend" && !part.ownerPartId);
+    const database = selectedParts.find((part) => part.role === "database" && !part.ownerPartId);
+
+    patch.ecosystem = (lowered.ecosystem ?? "typescript") as Ecosystem;
+    patch.webFrontend = ["none"];
+    patch.rustFrontend = "none";
+    if (frontend?.ecosystem === "typescript") {
+      patch.webFrontend = [frontend.toolId];
+    }
+    if (frontend?.ecosystem === "rust") {
+      patch.rustFrontend = frontend.toolId;
+    }
+    patch.nativeFrontend = [mobile?.toolId ?? "none"];
+    patch.database = database?.toolId ?? "none";
+    patch.backend = "none";
+    patch.orm = "none";
+    patch.api = "none";
+    patch.auth = "none";
+    patch.rustWebFramework = "none";
+    patch.rustOrm = "none";
+    patch.rustApi = "none";
+    patch.rustAuth = "none";
+    patch.pythonWebFramework = "none";
+    patch.pythonOrm = "none";
+    patch.pythonApi = "none";
+    patch.pythonAuth = "none";
+    patch.goWebFramework = "none";
+    patch.goOrm = "none";
+    patch.goApi = "none";
+    patch.goAuth = "none";
+    patch.javaWebFramework = "none";
+    patch.javaOrm = "none";
+    patch.javaAuth = "none";
+    patch.elixirWebFramework = "none";
+    patch.elixirOrm = "none";
+    patch.elixirApi = "none";
+    patch.elixirAuth = "none";
+
+    if (backend && isGraphBackendEcosystem(backend.ecosystem)) {
+      const backendConfig = GRAPH_BACKEND_CONFIG_BY_ECOSYSTEM[backend.ecosystem];
+      (patch as Record<string, unknown>)[backendConfig.frameworkStackKey] = backend.toolId;
+      const backendOrm = selectedParts.find(
+        (part) => part.role === "orm" && part.ownerPartId === backend.id,
+      );
+      if (backendOrm) {
+        (patch as Record<string, unknown>)[backendConfig.ormStackKey] = backendOrm.toolId;
+      }
+      const backendApi = selectedParts.find(
+        (part) => part.role === "api" && part.ownerPartId === backend.id,
+      );
+      if (backendApi && backendConfig.apiStackKey) {
+        (patch as Record<string, unknown>)[backendConfig.apiStackKey] = backendApi.toolId;
+      }
+      const backendAuth = selectedParts.find(
+        (part) => part.role === "auth" && part.ownerPartId === backend.id,
+      );
+      if (backendAuth && backendConfig.authStackKey) {
+        (patch as Record<string, unknown>)[backendConfig.authStackKey] = backendAuth.toolId;
+      }
+    }
+  } catch {
+    return patch;
+  }
+
+  return patch;
+}
 
 function getCategoryOptionGroups(
   categoryKey: string,
@@ -357,6 +839,773 @@ const PreviewPanel = lazy(async () => {
   return { default: module.PreviewPanel };
 });
 
+function GraphOptionButton({
+  option,
+  selected,
+  testId,
+  disabledReason,
+  onSelect,
+}: {
+  option: TechOption;
+  selected: boolean;
+  testId: string;
+  disabledReason?: string | null;
+  onSelect: () => void;
+}) {
+  const isDisabled = Boolean(disabledReason);
+
+  return (
+    <button
+      type="button"
+      data-testid={testId}
+      aria-pressed={selected}
+      aria-disabled={isDisabled}
+      disabled={isDisabled}
+      title={disabledReason || undefined}
+      onClick={isDisabled ? undefined : onSelect}
+      className={cn(
+        "group flex min-h-[4.5rem] items-start gap-3 rounded-xl border p-3.5 text-left transition-all",
+        selected
+          ? "border-primary/40 bg-primary/5 shadow-sm ring-1 ring-primary/15"
+          : isDisabled
+            ? "cursor-not-allowed border-destructive/30 bg-destructive/5 opacity-60"
+          : "border-border/60 bg-background hover:border-primary/30 hover:bg-muted/30 hover:shadow-sm",
+      )}
+    >
+      {(option.icon !== "" || ICON_REGISTRY[option.id]) && (
+        <span
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors",
+            selected ? "bg-primary/10" : "bg-muted/60 group-hover:bg-muted",
+          )}
+        >
+          <TechIcon techId={option.id} icon={option.icon} name={option.name} className="h-4.5 w-4.5" />
+        </span>
+      )}
+      <span className="min-w-0 flex-1">
+        <span
+          className={cn(
+            "block truncate text-sm font-medium",
+            selected ? "text-primary" : "text-foreground",
+          )}
+        >
+          {option.name}
+        </span>
+        <span className="mt-0.5 line-clamp-2 block text-xs leading-relaxed text-muted-foreground">
+          {option.description}
+        </span>
+        {disabledReason && <DisabledReasonInline compact reason={disabledReason} />}
+      </span>
+    </button>
+  );
+}
+
+function GraphOptionGroup({
+  label,
+  options,
+  selectedId,
+  testIdPrefix,
+  getDisabledReasonForOption,
+  onSelect,
+}: {
+  label: string;
+  options: TechOption[];
+  selectedId: string;
+  testIdPrefix: string;
+  getDisabledReasonForOption?: (optionId: string) => string | null;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <div className="min-w-0">
+      <div className="mb-2.5 flex items-center justify-between gap-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {label}
+        </h3>
+      </div>
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+        {options.map((option) => {
+          const disabledReason = getDisabledReasonForOption?.(option.id) ?? null;
+
+          return (
+            <GraphOptionButton
+              key={option.id}
+              option={option}
+              selected={selectedId === option.id}
+              testId={`${testIdPrefix}-${option.id}`}
+              disabledReason={disabledReason}
+              onSelect={() => onSelect(option.id)}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CreationModeComposer({
+  stack,
+  onChange,
+  activeStep,
+  onActiveStepChange,
+}: {
+  stack: StackState;
+  onChange: (updates: Partial<StackState> | ((prev: StackState) => Partial<StackState>)) => void;
+  activeStep: MultiStackStepId;
+  onActiveStepChange: (stepId: MultiStackStepId) => void;
+}) {
+  const graphSelection = getGraphSelection(stack);
+  const frontendConfig = GRAPH_FRONTEND_CONFIG_BY_ECOSYSTEM[graphSelection.frontendEcosystem];
+  const backendConfig = GRAPH_BACKEND_CONFIG_BY_ECOSYSTEM[graphSelection.backendEcosystem];
+  const primaryToolIdsByRole: GraphOptionContext["primaryToolIdsByRole"] = {
+    frontend: graphSelection.frontend !== "none" ? graphSelection.frontend : undefined,
+    backend: graphSelection.backend !== "none" ? graphSelection.backend : undefined,
+    mobile: graphSelection.mobile !== "none" ? graphSelection.mobile : undefined,
+    database: graphSelection.database !== "none" ? graphSelection.database : undefined,
+  };
+  const backendCapabilityContext: GraphOptionContext = {
+    ownerRole: "backend",
+    ownerToolId: graphSelection.backend !== "none" ? graphSelection.backend : undefined,
+    ownerEcosystem: graphSelection.backendEcosystem,
+    siblingToolIdsByRole: {
+      orm: graphSelection.backendOrm,
+      api: graphSelection.backendApi,
+      auth: graphSelection.backendAuth,
+    },
+    primaryToolIdsByRole,
+  };
+  const frontendOptions = getGraphToolOptions(
+    frontendConfig.frameworkCategory,
+    "frontend",
+    graphSelection.frontendEcosystem,
+  );
+  const mobileOptions = getGraphToolOptions("nativeFrontend", "mobile", "react-native");
+  const backendOptions = getGraphToolOptions(
+    backendConfig.frameworkCategory,
+    "backend",
+    graphSelection.backendEcosystem,
+  );
+  const databaseOptions = getGraphToolOptions("database", "database", "universal");
+  const backendOrmOptions = getGraphToolOptions(
+    backendConfig.ormCategory,
+    "orm",
+    graphSelection.backendEcosystem,
+    backendCapabilityContext,
+  );
+  const backendApiOptions = backendConfig.apiCategory
+    ? getGraphToolOptions(
+        backendConfig.apiCategory,
+        "api",
+        graphSelection.backendEcosystem,
+        backendCapabilityContext,
+      )
+    : [];
+  const backendAuthOptions = backendConfig.authCategory
+    ? getGraphToolOptions(
+        backendConfig.authCategory,
+        "auth",
+        graphSelection.backendEcosystem,
+        backendCapabilityContext,
+      )
+    : [];
+
+  const applyGraphSelection = (nextSelection: GraphSelection) => {
+    const specs = graphSelectionToSpecs(nextSelection);
+    onChange((current) => ({
+      ...stackPatchFromGraphSpecs(specs),
+      projectName: current.projectName,
+    }));
+  };
+
+  const updateGraphSelection = (updates: Partial<GraphSelection>) => {
+    applyGraphSelection({ ...graphSelection, ...updates });
+  };
+
+  const updateStackOption = (category: keyof typeof TECH_OPTIONS, optionId: string) => {
+    onChange({ [category]: optionId } as Partial<StackState>);
+  };
+
+  const getPrimaryToolIdsForSelection = (
+    selection: GraphSelection,
+  ): GraphOptionContext["primaryToolIdsByRole"] => ({
+    frontend: selection.frontend !== "none" ? selection.frontend : undefined,
+    backend: selection.backend !== "none" ? selection.backend : undefined,
+    mobile: selection.mobile !== "none" ? selection.mobile : undefined,
+    database: selection.database !== "none" ? selection.database : undefined,
+  });
+
+  const getBackendContextForSelection = (selection: GraphSelection): GraphOptionContext => ({
+    ownerRole: "backend",
+    ownerToolId: selection.backend !== "none" ? selection.backend : undefined,
+    ownerEcosystem: selection.backendEcosystem,
+    siblingToolIdsByRole: {
+      orm: selection.backendOrm,
+      api: selection.backendApi,
+      auth: selection.backendAuth,
+    },
+    primaryToolIdsByRole: getPrimaryToolIdsForSelection(selection),
+  });
+
+  const getDefaultBackendCapability = (
+    config: GraphBackendConfig,
+    role: Extract<StackPartRole, "api" | "auth">,
+    selection: GraphSelection,
+  ) => {
+    const category = role === "api" ? config.apiCategory : config.authCategory;
+    if (!category) return "none";
+
+    return getDefaultGraphTool(
+      category,
+      role,
+      config.ecosystem,
+      "none",
+      {
+        allowNoneDefault: true,
+      },
+      getBackendContextForSelection(selection),
+    );
+  };
+
+  const reconcileBackendCapabilities = (
+    selection: GraphSelection,
+    config: GraphBackendConfig,
+  ): Pick<GraphSelection, "backendOrm" | "backendApi" | "backendAuth"> => {
+    if (selection.backend === "none") {
+      return { backendOrm: "none", backendApi: "none", backendAuth: "none" };
+    }
+
+    const ormOptions = getGraphToolOptions(
+      config.ormCategory,
+      "orm",
+      config.ecosystem,
+      getBackendContextForSelection(selection),
+    );
+    const backendOrm = ormOptions.some((option) => option.id === selection.backendOrm)
+      ? selection.backendOrm
+      : getDefaultGraphTool(
+          config.ormCategory,
+          "orm",
+          config.ecosystem,
+          "none",
+          {},
+          getBackendContextForSelection(selection),
+        );
+
+    const withOrm = { ...selection, backendOrm };
+    const backendApi = config.apiCategory
+      ? (() => {
+          const apiOptions = getGraphToolOptions(
+            config.apiCategory,
+            "api",
+            config.ecosystem,
+            getBackendContextForSelection(withOrm),
+          );
+          return apiOptions.some((option) => option.id === selection.backendApi)
+            ? selection.backendApi
+            : getDefaultBackendCapability(config, "api", withOrm);
+        })()
+      : "none";
+
+    const withApi = { ...withOrm, backendApi };
+    const backendAuth = config.authCategory
+      ? (() => {
+          const authOptions = getGraphToolOptions(
+            config.authCategory,
+            "auth",
+            config.ecosystem,
+            getBackendContextForSelection(withApi),
+          );
+          return authOptions.some((option) => option.id === selection.backendAuth)
+            ? selection.backendAuth
+            : getDefaultBackendCapability(config, "auth", withApi);
+        })()
+      : "none";
+
+    return { backendOrm, backendApi, backendAuth };
+  };
+
+  const getStepSelection = (
+    stepId: MultiStackStepId,
+  ): { scopeLabel: string; toolId: string; toolName: string } | null => {
+    switch (stepId) {
+      case "frontend":
+        return graphSelection.frontend === "none"
+          ? null
+          : {
+              scopeLabel: frontendConfig.label,
+              toolId: graphSelection.frontend,
+              toolName: getOptionName(frontendConfig.frameworkCategory, graphSelection.frontend),
+            };
+      case "backend":
+        return graphSelection.backend === "none"
+          ? null
+          : {
+              scopeLabel: backendConfig.label,
+              toolId: graphSelection.backend,
+              toolName: getOptionName(backendConfig.frameworkCategory, graphSelection.backend),
+            };
+      case "database":
+        return graphSelection.database === "none"
+          ? null
+          : {
+              scopeLabel: "Universal",
+              toolId: graphSelection.database,
+              toolName: getOptionName("database", graphSelection.database),
+            };
+      case "mobile":
+        return graphSelection.mobile === "none"
+          ? null
+          : {
+              scopeLabel: "React Native",
+              toolId: graphSelection.mobile,
+              toolName: getOptionName("nativeFrontend", graphSelection.mobile),
+            };
+      case "finalize":
+        return null;
+    }
+  };
+
+  const renderLanguageButton = ({
+    selected,
+    testId,
+    label,
+    onClick,
+    iconTechId,
+    icon,
+  }: {
+    selected: boolean;
+    testId: string;
+    label: string;
+    onClick: () => void;
+    iconTechId?: string;
+    icon?: string;
+  }) => {
+    const hasIcon = Boolean(icon) || (iconTechId ? Boolean(ICON_REGISTRY[iconTechId]) : false);
+
+    return (
+      <button
+        type="button"
+        data-testid={testId}
+        aria-pressed={selected}
+        onClick={onClick}
+        className={cn(
+          "group flex min-w-[88px] flex-1 cursor-pointer items-center gap-2.5 rounded-xl border p-2.5 text-left transition-all sm:flex-none",
+          selected
+            ? "border-primary/40 bg-primary/5 shadow-sm ring-1 ring-primary/15"
+            : "border-border/60 bg-background hover:border-primary/30 hover:bg-muted/30 hover:shadow-sm",
+        )}
+      >
+        {hasIcon && (
+          <span
+            className={cn(
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
+              selected ? "bg-primary/10" : "bg-muted/60 group-hover:bg-muted",
+            )}
+          >
+            <TechIcon techId={iconTechId} icon={icon} name={label} className="h-4.5 w-4.5" />
+          </span>
+        )}
+        <span
+          className={cn(
+            "text-[13px] font-medium",
+            selected ? "text-primary" : "text-foreground",
+          )}
+        >
+          {label}
+        </span>
+      </button>
+    );
+  };
+
+  const renderStackOptionGroup = ({
+    label,
+    category,
+    testIdPrefix,
+  }: {
+    label: string;
+    category: keyof typeof TECH_OPTIONS;
+    testIdPrefix: string;
+  }) => (
+    <GraphOptionGroup
+      label={label}
+      options={getVisibleOptions(stack, category, TECH_OPTIONS[category] || [])}
+      selectedId={getStackStringValue(stack, category)}
+      testIdPrefix={testIdPrefix}
+      getDisabledReasonForOption={(optionId) =>
+        isOptionCompatible(stack, category, optionId)
+          ? null
+          : (getDisabledReason(stack, category, optionId) ?? "Not compatible with current stack")
+      }
+      onSelect={(optionId) => {
+        if (!isOptionCompatible(stack, category, optionId)) return;
+        updateStackOption(category, optionId);
+      }}
+    />
+  );
+
+  const renderActiveStep = () => {
+    switch (activeStep) {
+      case "frontend":
+        return (
+          <div className="space-y-5">
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Main Language
+              </h3>
+              <div className="flex flex-wrap gap-2.5">
+                {GRAPH_FRONTEND_CONFIGS.map((config) =>
+                  renderLanguageButton({
+                    selected: graphSelection.frontendEcosystem === config.ecosystem,
+                    testId: `multi-frontend-language-${config.ecosystem}`,
+                    label: config.label,
+                    iconTechId: config.ecosystem,
+                    onClick: () => {
+                      const frontend = getDefaultGraphTool(
+                        config.frameworkCategory,
+                        "frontend",
+                        config.ecosystem,
+                        "none",
+                      );
+                      updateGraphSelection({
+                        frontendEcosystem: config.ecosystem,
+                        frontend,
+                        ...reconcileBackendCapabilities(
+                          { ...graphSelection, frontendEcosystem: config.ecosystem, frontend },
+                          backendConfig,
+                        ),
+                      });
+                    },
+                  }),
+                )}
+              </div>
+            </div>
+
+            <GraphOptionGroup
+              label={`${frontendConfig.label} Frontend`}
+              options={frontendOptions}
+              selectedId={graphSelection.frontend}
+              testIdPrefix="multi-frontend-tool"
+              onSelect={(frontend) =>
+                updateGraphSelection({
+                  frontend,
+                  ...reconcileBackendCapabilities({ ...graphSelection, frontend }, backendConfig),
+                })
+              }
+            />
+
+            {graphSelection.frontendEcosystem === "typescript" &&
+              graphSelection.frontend !== "none" &&
+              MULTI_FRONTEND_LIBRARY_GROUPS.map((group) => (
+                <div key={group.category}>
+                  {renderStackOptionGroup({
+                    label: group.label,
+                    category: group.category,
+                    testIdPrefix: `multi-frontend-${group.category}`,
+                  })}
+                </div>
+              ))}
+          </div>
+        );
+      case "backend":
+        return (
+          <div className="space-y-5">
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Main Language
+              </h3>
+              <div className="flex flex-wrap gap-2.5">
+                {GRAPH_BACKEND_CONFIGS.map((config) =>
+                  renderLanguageButton({
+                    selected: graphSelection.backendEcosystem === config.ecosystem,
+                    testId: `multi-backend-language-${config.ecosystem}`,
+                    label: config.label,
+                    iconTechId: config.ecosystem,
+                    onClick: () => {
+                      const backend = getDefaultGraphTool(
+                        config.frameworkCategory,
+                        "backend",
+                        config.ecosystem,
+                        "none",
+                      );
+                      const nextSelection: GraphSelection = {
+                        ...graphSelection,
+                        backendEcosystem: config.ecosystem,
+                        backend,
+                        backendOrm: "none",
+                        backendApi: "none",
+                        backendAuth: "none",
+                      };
+                      updateGraphSelection({
+                        backendEcosystem: config.ecosystem,
+                        backend,
+                        ...reconcileBackendCapabilities(nextSelection, config),
+                      });
+                    },
+                  }),
+                )}
+              </div>
+            </div>
+
+            <GraphOptionGroup
+              label={`${backendConfig.label} Backend`}
+              options={backendOptions}
+              selectedId={graphSelection.backend}
+              testIdPrefix="multi-backend-tool"
+              onSelect={(backend) => {
+                const nextSelection: GraphSelection = {
+                  ...graphSelection,
+                  backend,
+                  backendOrm: backend === "none" ? "none" : graphSelection.backendOrm,
+                  backendApi: backend === "none" ? "none" : graphSelection.backendApi,
+                  backendAuth: backend === "none" ? "none" : graphSelection.backendAuth,
+                };
+                updateGraphSelection({
+                  backend,
+                  ...reconcileBackendCapabilities(nextSelection, backendConfig),
+                });
+              }}
+            />
+
+            {graphSelection.backend !== "none" && backendOrmOptions.length > 0 && (
+              <GraphOptionGroup
+                label={`${backendConfig.label} ORM`}
+                options={backendOrmOptions}
+                selectedId={graphSelection.backendOrm}
+                testIdPrefix="multi-backend-orm"
+                onSelect={(backendOrm) => {
+                  const nextSelection: GraphSelection = { ...graphSelection, backendOrm };
+                  updateGraphSelection(reconcileBackendCapabilities(nextSelection, backendConfig));
+                }}
+              />
+            )}
+
+            {graphSelection.backend !== "none" && backendApiOptions.length > 0 && (
+              <GraphOptionGroup
+                label={`${backendConfig.label} API`}
+                options={backendApiOptions}
+                selectedId={graphSelection.backendApi}
+                testIdPrefix="multi-backend-api"
+                onSelect={(backendApi) => {
+                  const nextSelection: GraphSelection = { ...graphSelection, backendApi };
+                  updateGraphSelection(reconcileBackendCapabilities(nextSelection, backendConfig));
+                }}
+              />
+            )}
+
+            {graphSelection.backend !== "none" && backendAuthOptions.length > 0 && (
+              <GraphOptionGroup
+                label={`${backendConfig.label} Auth`}
+                options={backendAuthOptions}
+                selectedId={graphSelection.backendAuth}
+                testIdPrefix="multi-backend-auth"
+                onSelect={(backendAuth) => updateGraphSelection({ backendAuth })}
+              />
+            )}
+          </div>
+        );
+      case "database":
+        return (
+          <div className="space-y-5">
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Main Scope
+              </h3>
+              <div className="flex flex-wrap gap-2.5">
+                {renderLanguageButton({
+                  selected: true,
+                  testId: "multi-database-language-universal",
+                  label: "Universal",
+                  onClick: () => undefined,
+                })}
+              </div>
+            </div>
+
+            <GraphOptionGroup
+              label="Standalone Database"
+              options={databaseOptions}
+              selectedId={graphSelection.database}
+              testIdPrefix="multi-database-tool"
+              onSelect={(database) =>
+                updateGraphSelection({
+                  database,
+                  ...reconcileBackendCapabilities({ ...graphSelection, database }, backendConfig),
+                })
+              }
+            />
+          </div>
+        );
+      case "mobile":
+        return (
+          <div className="space-y-5">
+            <div>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Main Ecosystem
+              </h3>
+              <div className="flex flex-wrap gap-2.5">
+                {renderLanguageButton({
+                  selected: true,
+                  testId: "multi-mobile-language-react-native",
+                  label: "React Native",
+                  icon: "https://cdn.simpleicons.org/react/61DAFB",
+                  onClick: () => undefined,
+                })}
+              </div>
+            </div>
+
+            <GraphOptionGroup
+              label="Mobile App"
+              options={mobileOptions}
+              selectedId={graphSelection.mobile}
+              testIdPrefix="multi-mobile-tool"
+              onSelect={(mobile) => updateGraphSelection({ mobile })}
+            />
+
+            {graphSelection.mobile !== "none" &&
+              MULTI_MOBILE_LIBRARY_GROUPS.map((group) => (
+                <div key={group.category}>
+                  {renderStackOptionGroup({
+                    label: group.label,
+                    category: group.category,
+                    testIdPrefix: `multi-mobile-${group.category}`,
+                  })}
+                </div>
+              ))}
+          </div>
+        );
+      case "finalize":
+        return (
+          <div
+            data-testid="multi-finalize-intro"
+            className="flex items-start gap-3 rounded-lg border border-primary/15 bg-primary/5 p-3.5"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              <Check className="h-4.5 w-4.5 text-primary" />
+            </span>
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-foreground">Finalize your project</h3>
+              <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                Pick the package manager, AI docs, version channel, and git options below, then copy
+                the command to scaffold your stack.
+              </p>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  if (stack.stackMode !== "multi") {
+    return null;
+  }
+
+  return (
+    <section
+      data-testid="stack-graph-composer"
+      className="mb-6 rounded-2xl border border-border/60 bg-muted/20 p-4 shadow-sm sm:mb-8 sm:p-5"
+    >
+      <div className="space-y-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {MULTI_STACK_STEPS.map((step, index) => {
+            const selected = activeStep === step.id;
+            const isFinalize = step.id === "finalize";
+            const selection = isFinalize ? null : getStepSelection(step.id);
+            const selectionHasIcon = selection
+              ? Boolean(ICON_REGISTRY[selection.toolId])
+              : false;
+
+            return (
+              <button
+                key={step.id}
+                type="button"
+                data-testid={`multi-step-${step.id}`}
+                aria-pressed={selected}
+                onClick={() => onActiveStepChange(step.id)}
+                className={cn(
+                  "flex cursor-pointer flex-col gap-3 rounded-xl border p-3.5 text-left transition-all",
+                  selected
+                    ? "border-primary/40 bg-primary/5 shadow-sm ring-1 ring-primary/15"
+                    : "border-border/60 bg-background hover:border-primary/30 hover:bg-muted/30 hover:shadow-sm",
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold transition-colors",
+                      selected
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    {index + 1}
+                  </span>
+                  <span className="text-[13px] font-semibold text-foreground">{step.label}</span>
+                </span>
+
+                {isFinalize ? (
+                  <span className="flex min-w-0 items-center gap-2.5 rounded-lg border border-primary/15 bg-background/80 p-2">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                      <Settings className="h-4 w-4 text-primary" />
+                    </span>
+                    <span className="flex min-w-0 flex-col">
+                      <span className="truncate text-[13px] font-medium text-foreground">
+                        Project setup
+                      </span>
+                      <span className="truncate text-[11px] text-muted-foreground">
+                        {step.description}
+                      </span>
+                    </span>
+                  </span>
+                ) : selection ? (
+                  <span className="flex min-w-0 items-center gap-2.5 rounded-lg border border-primary/15 bg-background/80 p-2">
+                    <span
+                      className={cn(
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+                        selectionHasIcon ? "bg-muted/60" : "bg-primary/10",
+                      )}
+                    >
+                      {selectionHasIcon ? (
+                        <TechIcon
+                          techId={selection.toolId}
+                          name={selection.toolName}
+                          className="h-4.5 w-4.5"
+                        />
+                      ) : (
+                        <span className="text-xs font-semibold text-primary">
+                          {selection.toolName.charAt(0)}
+                        </span>
+                      )}
+                    </span>
+                    <span className="flex min-w-0 flex-col">
+                      <span className="truncate text-[13px] font-medium text-foreground">
+                        {selection.toolName}
+                      </span>
+                      <span className="truncate text-[11px] text-muted-foreground">
+                        {selection.scopeLabel}
+                      </span>
+                    </span>
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2 rounded-lg border border-dashed border-border/60 p-2 text-xs text-muted-foreground/70">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/40 text-muted-foreground/50">
+                      —
+                    </span>
+                    <span className="flex min-w-0 flex-col">
+                      <span className="font-medium text-muted-foreground">Skipped</span>
+                      <span className="truncate text-[11px]">{step.description}</span>
+                    </span>
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="space-y-6 rounded-xl border border-border/60 bg-background p-4 sm:p-5">
+          {renderActiveStep()}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 const StackBuilder = () => {
@@ -371,6 +1620,7 @@ const StackBuilder = () => {
   const [isSaveInputVisible, setIsSaveInputVisible] = useState(false);
   const [savePresetName, setSavePresetName] = useState("");
   const [pendingUpdateEntryId, setPendingUpdateEntryId] = useState<string | null>(null);
+  const [multiActiveStep, setMultiActiveStep] = useState<MultiStackStepId>("frontend");
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(() => {
     const initial = new Set(INITIALLY_COLLAPSED_SET);
     for (const cat of INITIALLY_COLLAPSED_SET) {
@@ -404,6 +1654,21 @@ const StackBuilder = () => {
   const categoryOrder = useMemo(() => {
     return getCategoryOrderForEcosystem(stack.ecosystem);
   }, [stack.ecosystem]);
+
+  const displayedCategoryOrder = useMemo(() => {
+    if (stack.stackMode !== "multi") return categoryOrder;
+    return categoryOrder.filter(
+      (categoryKey) =>
+        !GRAPH_MANAGED_CATEGORY_SET.has(categoryKey) &&
+        GRAPH_COMMON_CATEGORY_SET.has(categoryKey),
+    );
+  }, [categoryOrder, stack.stackMode]);
+  const multiActiveStepIndex = Math.max(
+    0,
+    MULTI_STACK_STEPS.findIndex((step) => step.id === multiActiveStep),
+  );
+  const isFinalMultiStep = multiActiveStepIndex >= MULTI_STACK_STEPS.length - 1;
+  const isMultiCreationInProgress = stack.stackMode === "multi" && viewMode === "command";
 
   // ─── URL generation ──────────────────────────────────────────────────────
 
@@ -468,6 +1733,12 @@ const StackBuilder = () => {
     const cmd = generateStackCommand({ ...stackToUse, projectName: formattedProjectName });
     setCommand(cmd);
   }, [stack, adjustedStack]);
+
+  useEffect(() => {
+    if (stack.stackMode !== "multi") {
+      setMultiActiveStep("frontend");
+    }
+  }, [stack.stackMode]);
 
   // ─── Handlers ───────────────────────────────────────────────────────────
 
@@ -561,6 +1832,36 @@ const StackBuilder = () => {
     });
   };
 
+  const handleMultiActiveStepChange = (stepId: MultiStackStepId) => {
+    setMultiActiveStep(stepId);
+  };
+
+  const handleMultiPreviousStep = () => {
+    const previousStep = MULTI_STACK_STEPS[multiActiveStepIndex - 1];
+    if (previousStep) {
+      handleMultiActiveStepChange(previousStep.id);
+    }
+  };
+
+  const handleMultiNextStep = () => {
+    const nextStep = MULTI_STACK_STEPS[multiActiveStepIndex + 1];
+    if (nextStep) {
+      handleMultiActiveStepChange(nextStep.id);
+    }
+  };
+
+  const enableMultiMode = () => {
+    const specs = graphSelectionToSpecs(getGraphSelection(stack));
+    setStack((current) => ({
+      ...stackPatchFromGraphSpecs(specs),
+      projectName: current.projectName,
+    }));
+  };
+
+  const disableMultiMode = () => {
+    setStack({ stackMode: "solo", stackPartSpecs: [] });
+  };
+
   const resetStack = () => {
     startTransition(() => {
       setStack(DEFAULT_STACK);
@@ -605,6 +1906,8 @@ const StackBuilder = () => {
       setStack({
         ...(randomStack as StackState),
         projectName: stack.projectName || "my-app",
+        stackMode: "solo",
+        stackPartSpecs: [],
       });
     });
   };
@@ -727,7 +2030,7 @@ const StackBuilder = () => {
   // Sections shown in the navigation drawer — mirrors the rendered category sections.
   const navSections = useMemo(
     () =>
-      categoryOrder
+      displayedCategoryOrder
         .filter((categoryKey) => {
           if (categoryKey === "astroIntegration") return false;
           if (SHADCN_SUB_CATEGORIES.has(categoryKey)) return false;
@@ -737,7 +2040,7 @@ const StackBuilder = () => {
           );
         })
         .map((categoryKey) => ({ key: categoryKey, name: getCategoryDisplayName(categoryKey) })),
-    [categoryOrder, stack],
+    [displayedCategoryOrder, stack],
   );
 
   const goToSection = (categoryKey: string) => {
@@ -795,61 +2098,116 @@ const StackBuilder = () => {
           }}
           className="flex min-h-0 flex-1 flex-col overflow-y-auto"
         >
-          {/* ─── Ecosystem Header Bar ─────────────────────────────────────── */}
-          <div className="relative shrink-0 border-b border-border bg-fd-background">
-            <div className="grid grid-cols-5">
-              {ECOSYSTEMS.map((eco) => {
-                const isActive = stack.ecosystem === eco.id;
-                return (
-                  <button
-                    key={eco.id}
-                    type="button"
-                    data-testid={`ecosystem-${eco.id}`}
-                    onClick={() => {
-                      startTransition(() => {
-                        setStack({ ecosystem: eco.id as Ecosystem });
-                      });
-                    }}
-                    className={cn(
-                      "group relative flex cursor-pointer items-center justify-center gap-2 px-3 py-3 transition-all sm:gap-2.5 sm:px-4 sm:py-3.5",
-                      isActive
-                        ? "bg-muted/40 text-foreground"
-                        : "text-muted-foreground hover:bg-muted/30 hover:text-foreground",
-                    )}
-                  >
-                    {/* Active underline */}
-                    {isActive && (
-                      <motion.div
-                        layoutId="ecosystem-indicator"
-                        className={cn(
-                          "absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r",
-                          eco.color,
-                        )}
-                        transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
-                      />
-                    )}
-
-                    <TechIcon
-                      techId={eco.id}
-                      icon={eco.icon}
-                      name={eco.name}
-                      className={cn(
-                        "relative h-4.5 w-4.5 transition-all sm:h-5 sm:w-5",
-                        isActive ? "scale-110" : "opacity-50 group-hover:opacity-75",
-                      )}
+          <div className="relative shrink-0 border-b border-border/60 bg-fd-background">
+            <div className="px-3 py-3 sm:px-4">
+              <div
+                role="group"
+                aria-label="Creation method"
+                className="relative flex w-full rounded-xl border border-border/60 bg-muted/40 p-1 shadow-sm"
+              >
+                <button
+                  type="button"
+                  data-testid="stack-mode-solo"
+                  aria-pressed={stack.stackMode !== "multi"}
+                  onClick={disableMultiMode}
+                  className={cn(
+                    "relative flex-1 cursor-pointer rounded-lg px-3 py-2.5 text-center text-[13px] font-medium transition-colors duration-200",
+                    stack.stackMode !== "multi"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {stack.stackMode !== "multi" && (
+                    <motion.span
+                      layoutId="creation-mode-indicator"
+                      className="absolute inset-0 rounded-lg border border-border/60 bg-background shadow-sm"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
                     />
-                    <span
+                  )}
+                  <span className="relative z-10">Solo Ecosystem</span>
+                </button>
+                <button
+                  type="button"
+                  data-testid="stack-mode-multi"
+                  aria-pressed={stack.stackMode === "multi"}
+                  onClick={enableMultiMode}
+                  className={cn(
+                    "relative flex-1 cursor-pointer rounded-lg px-3 py-2.5 text-center text-[13px] font-medium transition-colors duration-200",
+                    stack.stackMode === "multi"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {stack.stackMode === "multi" && (
+                    <motion.span
+                      layoutId="creation-mode-indicator"
+                      className="absolute inset-0 rounded-lg border border-border/60 bg-background shadow-sm"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                    />
+                  )}
+                  <span className="relative z-10">Multi-Ecosystem</span>
+                </button>
+              </div>
+            </div>
+
+            {stack.stackMode !== "multi" && (
+              <div className="grid grid-cols-5 border-t border-border/60">
+                {ECOSYSTEMS.map((eco) => {
+                  const isActive = stack.ecosystem === eco.id;
+                  return (
+                    <button
+                      key={eco.id}
+                      type="button"
+                      data-testid={`ecosystem-${eco.id}`}
+                      onClick={() => {
+                        startTransition(() => {
+                          setStack({
+                            ecosystem: eco.id as Ecosystem,
+                            stackMode: "solo",
+                            stackPartSpecs: [],
+                          });
+                        });
+                      }}
                       className={cn(
-                        "relative hidden font-mono text-[11px] uppercase tracking-wide transition-all min-[480px]:inline sm:text-xs",
-                        isActive ? "font-bold" : "",
+                        "group relative flex cursor-pointer items-center justify-center gap-2 px-3 py-3 transition-all sm:gap-2.5 sm:px-4 sm:py-3.5",
+                        isActive
+                          ? "bg-muted/40 text-foreground"
+                          : "text-muted-foreground hover:bg-muted/30 hover:text-foreground",
                       )}
                     >
-                      {eco.name}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+                      {isActive && (
+                        <motion.div
+                          layoutId="ecosystem-indicator"
+                          className={cn(
+                            "absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r",
+                            eco.color,
+                          )}
+                          transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                        />
+                      )}
+
+                      <TechIcon
+                        techId={eco.id}
+                        icon={eco.icon}
+                        name={eco.name}
+                        className={cn(
+                          "relative h-4.5 w-4.5 transition-all sm:h-5 sm:w-5",
+                          isActive ? "scale-110" : "opacity-50 group-hover:opacity-75",
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          "relative hidden font-mono text-[11px] uppercase tracking-wide transition-all min-[480px]:inline sm:text-xs",
+                          isActive ? "font-bold" : "",
+                        )}
+                      >
+                        {eco.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div
@@ -1144,8 +2502,17 @@ const StackBuilder = () => {
 
               {viewMode === "command" ? (
                 <div className="p-3 pb-24 sm:p-4 sm:pb-28">
-                  {/* Category sections - all options for each category */}
-                  {categoryOrder.map((categoryKey) => {
+                  <CreationModeComposer
+                    stack={stack}
+                    onChange={setStack}
+                    activeStep={multiActiveStep}
+                    onActiveStepChange={handleMultiActiveStepChange}
+                  />
+
+                  {/* Category sections - all options for each category.
+                      In multi mode these general settings are the final "Finalize" step. */}
+                  {(stack.stackMode !== "multi" || multiActiveStep === "finalize") &&
+                    displayedCategoryOrder.map((categoryKey) => {
                     // Skip astroIntegration - rendered conditionally after webFrontend
                     if (categoryKey === "astroIntegration") return null;
 
@@ -1702,23 +3069,82 @@ const StackBuilder = () => {
                 <PanelLeft className="h-4 w-4" />
               </button>
             )}
-            <div className="flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-[14px] border border-transparent bg-[#18181B] pr-1.5 pl-4 font-mono text-[12.5px] text-[#FAFAF7] shadow-[0_1px_0_rgba(24,24,27,0.05),0_6px_18px_rgba(24,24,27,0.06)] dark:border-white/10 dark:bg-[#1a1a1a]">
+            <div
+              className={cn(
+                "flex h-12 min-w-0 flex-1 items-center rounded-[14px] border border-transparent bg-[#18181B] font-mono text-[12.5px] text-[#FAFAF7] shadow-[0_1px_0_rgba(24,24,27,0.05),0_6px_18px_rgba(24,24,27,0.06)] dark:border-white/10 dark:bg-[#1a1a1a]",
+                isMultiCreationInProgress ? "gap-2 pr-1.5 pl-2" : "gap-2.5 pr-1.5 pl-4",
+              )}
+            >
+              {isMultiCreationInProgress && (
+                <>
+                  {multiActiveStepIndex > 0 && (
+                    <button
+                      type="button"
+                      data-testid="multi-step-back"
+                      aria-label="Previous step"
+                      onClick={handleMultiPreviousStep}
+                      className="flex h-9 shrink-0 cursor-pointer items-center gap-1 rounded-[9px] px-2.5 text-[11.5px] font-medium text-[#FAFAF7] transition-colors hover:bg-white/10"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" />
+                      <span className="hidden min-[420px]:inline">Back</span>
+                    </button>
+                  )}
+                  {!isFinalMultiStep && (
+                    <span className="shrink-0 text-[11.5px] font-semibold text-[#C6E853] select-none">
+                      {multiActiveStepIndex + 1}/{MULTI_STACK_STEPS.length}
+                    </span>
+                  )}
+                  <span className="mx-0.5 h-5 w-px shrink-0 bg-white/10" aria-hidden="true" />
+                </>
+              )}
               <span className="shrink-0 font-medium text-[#C6E853] select-none">$</span>
               <code
                 data-testid="command-output"
-                className="no-scrollbar min-w-0 flex-1 overflow-x-auto whitespace-nowrap text-[rgba(250,250,247,0.88)]"
+                className={cn(
+                  "no-scrollbar min-w-0 flex-1 overflow-x-auto whitespace-nowrap",
+                  isMultiCreationInProgress && !isFinalMultiStep
+                    ? "text-[11px] text-[rgba(250,250,247,0.5)]"
+                    : "text-[12.5px] text-[rgba(250,250,247,0.88)]",
+                )}
               >
                 {command}
               </code>
-              <button
-                type="button"
-                onClick={copyToClipboard}
-                aria-label={copied ? "Command copied" : "Copy command"}
-                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[9px] bg-[#C6E853] px-3 font-mono text-[11.5px] font-semibold text-[#2A3303] transition-colors hover:bg-[#d2ee72]"
-              >
-                {copied ? <Check className="h-3 w-3" /> : <ClipboardCopy className="h-3 w-3" />}
-                {copied ? "Copied" : "Copy"}
-              </button>
+              {isMultiCreationInProgress && !isFinalMultiStep ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={copyToClipboard}
+                    aria-label={copied ? "Command copied" : "Copy command"}
+                    title="Copy partial command"
+                    className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-[9px] text-[rgba(250,250,247,0.7)] transition-colors hover:bg-white/10 hover:text-[#FAFAF7]"
+                  >
+                    {copied ? (
+                      <Check className="h-3.5 w-3.5" />
+                    ) : (
+                      <ClipboardCopy className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="multi-step-next"
+                    onClick={handleMultiNextStep}
+                    className="flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-[9px] bg-[#C6E853] px-3.5 text-[11.5px] font-semibold text-[#2A3303] transition-colors hover:bg-[#d2ee72]"
+                  >
+                    <span className="hidden min-[420px]:inline">Next</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={copyToClipboard}
+                  aria-label={copied ? "Command copied" : "Copy command"}
+                  className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[9px] bg-[#C6E853] px-3 text-[11.5px] font-semibold text-[#2A3303] transition-colors hover:bg-[#d2ee72]"
+                >
+                  {copied ? <Check className="h-3 w-3" /> : <ClipboardCopy className="h-3 w-3" />}
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              )}
             </div>
             {viewMode === "command" && (
               <button

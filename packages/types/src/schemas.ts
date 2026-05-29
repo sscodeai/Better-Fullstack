@@ -4,6 +4,62 @@ export const EcosystemSchema = z
   .enum(["typescript", "react-native", "rust", "python", "go", "java", "elixir"])
   .describe("Language ecosystem (typescript, react-native, rust, python, go, java, or elixir)");
 
+export const StackPartEcosystemSchema = z
+  .union([EcosystemSchema, z.literal("universal")])
+  .describe("Ecosystem adapter for a selected stack part");
+
+export const StackPartRoleSchema = z
+  .enum([
+    "frontend",
+    "backend",
+    "mobile",
+    "database",
+    "api",
+    "orm",
+    "auth",
+    "runtime",
+    "deploy",
+    "caching",
+    "observability",
+    "email",
+    "search",
+    "fileStorage",
+    "jobQueue",
+    "testing",
+    "stateManagement",
+    "forms",
+    "validation",
+    "ui",
+    "css",
+    "ai",
+    "payments",
+    "logging",
+    "featureFlags",
+    "analytics",
+    "cms",
+    "i18n",
+    "documentation",
+    "codeQuality",
+    "appPlatform",
+  ])
+  .describe("Role a selected tool plays in the stack graph");
+
+export const StackPartSourceSchema = z
+  .enum(["selected", "defaulted", "provided", "legacy", "adjusted"])
+  .describe("How a stack part entered the stack graph");
+
+export const StackPartSchema = z.object({
+  id: z.string().min(1),
+  role: StackPartRoleSchema,
+  toolId: z.string().min(1),
+  ecosystem: StackPartEcosystemSchema,
+  ownerPartId: z.string().min(1).optional(),
+  source: StackPartSourceSchema,
+  providedByPartId: z.string().min(1).optional(),
+  targetPath: z.string().min(1).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
+});
+
 export const DatabaseSchema = z
   .enum(["none", "sqlite", "postgres", "mysql", "mongodb", "edgedb", "redis"])
   .describe("Database type");
@@ -488,9 +544,7 @@ export const ElixirAuthSchema = z
   .enum(["phx-gen-auth", "ueberauth", "guardian", "none"])
   .describe("Elixir authentication library");
 
-export const ElixirApiSchema = z
-  .enum(["rest", "absinthe", "none"])
-  .describe("Elixir API layer");
+export const ElixirApiSchema = z.enum(["rest", "absinthe", "none"]).describe("Elixir API layer");
 
 export const ElixirRealtimeSchema = z
   .enum(["channels", "presence", "pubsub", "live-view-streams", "none"])
@@ -757,6 +811,7 @@ export const CreateInputSchema = z.object({
   elixirDeploy: ElixirDeploySchema.optional(),
   // AI documentation files
   aiDocs: z.array(AiDocsSchema).optional(),
+  part: z.array(z.string()).optional(),
 });
 
 export const AddInputSchema = z.object({
@@ -884,6 +939,7 @@ export const ProjectConfigSchema = z.object({
   elixirDeploy: ElixirDeploySchema,
   // AI documentation files
   aiDocs: z.array(AiDocsSchema),
+  stackParts: z.array(StackPartSchema).optional(),
 });
 
 export const BetterTStackConfigSchema = z.object({
@@ -995,6 +1051,7 @@ export const BetterTStackConfigSchema = z.object({
   elixirDeploy: ElixirDeploySchema,
   // AI documentation files
   aiDocs: z.array(AiDocsSchema),
+  stackParts: z.array(StackPartSchema).optional(),
 });
 
 export const BetterFullstackConfigSchema = BetterTStackConfigSchema;
@@ -1021,6 +1078,10 @@ export const InitResultSchema = z.object({
   projectDirectory: z.string(),
   relativePath: z.string(),
   error: z.string().optional(),
+  dryRun: z.boolean().optional(),
+  fileCount: z.number().optional(),
+  directoryCount: z.number().optional(),
+  files: z.array(z.string()).optional(),
 });
 
 export const DATABASE_VALUES = DatabaseSchema.options;

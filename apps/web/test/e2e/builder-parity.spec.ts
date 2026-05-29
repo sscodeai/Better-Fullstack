@@ -76,6 +76,26 @@ test.describe("Builder parity", () => {
     await expect(commandOutput(page)).toContainText("--auth go-better-auth");
   });
 
+  test("multi-ecosystem mode emits scoped --part flags", async ({ page }) => {
+    await clickVisibleTestId(page, "stack-mode-multi");
+    await clickVisibleTestId(page, "multi-frontend-tool-next");
+    await clickVisibleTestId(page, "multi-step-next");
+    await clickVisibleTestId(page, "multi-backend-language-go");
+    await clickVisibleTestId(page, "multi-backend-tool-gin");
+    await clickVisibleTestId(page, "multi-backend-orm-gorm");
+    await clickVisibleTestId(page, "multi-step-next");
+    await clickVisibleTestId(page, "multi-database-tool-postgres");
+
+    const command = commandOutput(page);
+    await expect(command).toContainText("--part frontend:typescript:next");
+    await expect(command).toContainText("--part backend:go:gin");
+    await expect(command).toContainText("--part backend.orm:go:gorm");
+    await expect(command).toContainText("--part database:universal:postgres");
+    await expect(command).not.toContainText("--backend hono");
+    await expect(page).toHaveURL(/mode=multi/);
+    await expect(page).toHaveURL(/part=/);
+  });
+
   test("disabled options do not mutate the command output", async ({ page }) => {
     await clickVisibleTestId(page, "category-toggle-cms");
     const command = commandOutput(page);

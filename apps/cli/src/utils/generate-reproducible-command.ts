@@ -1,5 +1,7 @@
 import type { ProjectConfig } from "../types";
 
+import { formatStackPartSpec } from "../types";
+
 function getBaseCommand(packageManager: ProjectConfig["packageManager"]) {
   switch (packageManager) {
     case "bun":
@@ -37,6 +39,53 @@ function appendCommonFlags(flags: string[], config: ProjectConfig) {
     flags.push(`--version-channel ${config.versionChannel}`);
   }
   flags.push(config.install ? "--install" : "--no-install");
+}
+
+function hasGraphPrimaryPart(
+  config: ProjectConfig,
+  role: "frontend" | "backend" | "mobile" | "database",
+  ecosystem?: string,
+) {
+  return config.stackParts?.some(
+    (part) =>
+      part.source !== "provided" &&
+      part.role === role &&
+      !part.ownerPartId &&
+      (!ecosystem || part.ecosystem === ecosystem),
+  );
+}
+
+function appendChangedStringFlag(
+  flags: string[],
+  flag: string,
+  value: string,
+  defaultValue: string,
+) {
+  if (value !== defaultValue) {
+    flags.push(`--${flag} ${value}`);
+  }
+}
+
+function appendGraphExtraFlags(flags: string[], config: ProjectConfig) {
+  if (hasGraphPrimaryPart(config, "frontend", "typescript")) {
+    appendChangedStringFlag(flags, "css-framework", config.cssFramework, "tailwind");
+    appendChangedStringFlag(flags, "ui-library", config.uiLibrary, "shadcn-ui");
+    appendChangedStringFlag(flags, "state-management", config.stateManagement, "none");
+    appendChangedStringFlag(flags, "forms", config.forms, "react-hook-form");
+    appendChangedStringFlag(flags, "validation", config.validation, "zod");
+    appendChangedStringFlag(flags, "testing", config.testing, "vitest");
+    appendChangedStringFlag(flags, "animation", config.animation, "none");
+  }
+
+  if (hasGraphPrimaryPart(config, "mobile")) {
+    appendChangedStringFlag(flags, "mobile-navigation", config.mobileNavigation, "expo-router");
+    appendChangedStringFlag(flags, "mobile-ui", config.mobileUI, "none");
+    appendChangedStringFlag(flags, "mobile-storage", config.mobileStorage, "none");
+    appendChangedStringFlag(flags, "mobile-testing", config.mobileTesting, "none");
+    appendChangedStringFlag(flags, "mobile-push", config.mobilePush, "none");
+    appendChangedStringFlag(flags, "mobile-ota", config.mobileOTA, "none");
+    appendChangedStringFlag(flags, "mobile-deep-linking", config.mobileDeepLinking, "none");
+  }
 }
 
 function appendSharedNonTypeScriptFlags(flags: string[], config: ProjectConfig) {
@@ -247,6 +296,17 @@ function getElixirFlags(config: ProjectConfig) {
 
 export function generateReproducibleCommand(config: ProjectConfig) {
   let flags: string[];
+
+  if (config.stackParts && config.stackParts.length > 0) {
+    flags = config.stackParts
+      .filter((part) => part.source !== "provided")
+      .map((part) => `--part ${formatStackPartSpec(part, config.stackParts ?? [])}`);
+    appendGraphExtraFlags(flags, config);
+    appendCommonFlags(flags, config);
+    const baseCommand = getBaseCommand(config.packageManager);
+    const projectPathArg = config.relativePath ? ` ${config.relativePath}` : "";
+    return `${baseCommand}${projectPathArg} ${flags.join(" ")}`;
+  }
 
   switch (config.ecosystem) {
     case "react-native":

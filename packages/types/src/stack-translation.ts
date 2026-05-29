@@ -1,21 +1,26 @@
-import {
-  analyzeStackCompatibility,
-  type CompatibilityInput,
-} from "./compatibility";
-import {
-  createCliDefaultProjectConfigBase,
-  type CliDefaultProjectConfigBase,
-} from "./defaults";
-import {
-  normalizeOptionId,
-  type OptionCategory,
-} from "./option-metadata";
 import type { CLIInput, ProjectConfig } from "./types";
 
-export type StackSelectionInput = CompatibilityInput;
+import { analyzeStackCompatibility, type CompatibilityInput } from "./compatibility";
+import { createCliDefaultProjectConfigBase, type CliDefaultProjectConfigBase } from "./defaults";
+import { normalizeOptionId, type OptionCategory } from "./option-metadata";
+import {
+  formatStackPartSpec,
+  legacyProjectConfigToStackParts,
+  parseStackPartSpecs,
+  stackPartsToLegacyProjectConfigPartial,
+  validateStackParts,
+} from "./stack-graph";
+
+export type StackSelectionMode = "solo" | "multi";
+export type StackSelectionInput = CompatibilityInput & {
+  stackMode: StackSelectionMode;
+  stackPartSpecs: string[];
+};
 export type StackSelectionState = StackSelectionInput;
 
 export const DEFAULT_STACK_SELECTION: StackSelectionState = {
+  stackMode: "solo",
+  stackPartSpecs: [],
   ecosystem: "typescript",
   projectName: "my-app",
   webFrontend: ["tanstack-router"],
@@ -130,7 +135,13 @@ export type StackSelectionKey = keyof StackSelectionState;
 type StackSelectionUrlValue = string | string[] | null | undefined;
 type StackSelectionUrlRecord = Record<string, StackSelectionUrlValue>;
 
-export const NON_OPTION_STACK_SELECTION_KEYS = ["ecosystem", "projectName", "yolo"] as const;
+export const NON_OPTION_STACK_SELECTION_KEYS = [
+  "stackMode",
+  "stackPartSpecs",
+  "ecosystem",
+  "projectName",
+  "yolo",
+] as const;
 
 export const STACK_SELECTION_OPTION_CATEGORY_BY_KEY: Record<
   Exclude<StackSelectionKey, (typeof NON_OPTION_STACK_SELECTION_KEYS)[number]>,
@@ -257,6 +268,8 @@ export function usesVirtualNoneStackSelection(
 }
 
 export const STACK_SELECTION_URL_KEYS = {
+  stackMode: "mode",
+  stackPartSpecs: "part",
   ecosystem: "eco",
   projectName: "name",
   webFrontend: "fe-w",
@@ -366,9 +379,7 @@ export const STACK_SELECTION_URL_KEYS = {
   elixirDeploy: "edeploy",
 } as const satisfies Record<StackSelectionKey, string>;
 
-export const STACK_SELECTION_KEYS = Object.keys(
-  STACK_SELECTION_URL_KEYS,
-) as StackSelectionKey[];
+export const STACK_SELECTION_KEYS = Object.keys(STACK_SELECTION_URL_KEYS) as StackSelectionKey[];
 
 const stackSelectionArrayKeySet = new Set<StackSelectionKey>(
   STACK_SELECTION_KEYS.filter((key) => Array.isArray(DEFAULT_STACK_SELECTION[key])),
@@ -425,8 +436,13 @@ export function normalizeStackSelectionValue<K extends StackSelectionKey>(
   return value;
 }
 
+function normalizeStackSelectionMode(value: unknown): StackSelectionMode {
+  return value === "multi" || value === "graph" ? "multi" : "solo";
+}
+
 export function normalizeStackSelection(selection: StackSelectionState): StackSelectionState {
   const normalized: Record<string, unknown> = { ...selection };
+  normalized.stackMode = normalizeStackSelectionMode(normalized.stackMode);
 
   for (const key of Object.keys(STACK_SELECTION_OPTION_CATEGORY_BY_KEY) as StackSelectionKey[]) {
     normalized[key] = normalizeStackSelectionValue(
@@ -799,24 +815,71 @@ function formatArrayFlag(flag: string, values: readonly string[]) {
 }
 
 function formatTypeScriptAddonsFlag(selection: StackSelectionInput) {
-  const addons = [
-    ...selection.codeQuality,
-    ...selection.documentation,
-    ...selection.appPlatforms,
-  ];
+  const addons = [...selection.codeQuality, ...selection.documentation, ...selection.appPlatforms];
 
   if (addons.length === 0) return "--addons none";
 
   return `--addons ${addons.filter((addon) => COMMAND_ADDONS.has(addon)).join(" ") || "none"}`;
 }
 
+type StackSelectionStringKey = {
+  [K in keyof StackSelectionState]: StackSelectionState[K] extends string ? K : never;
+}[keyof StackSelectionState];
+
+const GRAPH_TYPESCRIPT_FRONTEND_FLAG_KEYS = [
+  ["cssFramework", "css-framework"],
+  ["uiLibrary", "ui-library"],
+  ["stateManagement", "state-management"],
+  ["forms", "forms"],
+  ["validation", "validation"],
+  ["testing", "testing"],
+  ["animation", "animation"],
+] as const satisfies readonly [StackSelectionStringKey, string][];
+
+const GRAPH_MOBILE_FLAG_KEYS = [
+  ["mobileNavigation", "mobile-navigation"],
+  ["mobileUI", "mobile-ui"],
+  ["mobileStorage", "mobile-storage"],
+  ["mobileTesting", "mobile-testing"],
+  ["mobilePush", "mobile-push"],
+  ["mobileOTA", "mobile-ota"],
+  ["mobileDeepLinking", "mobile-deep-linking"],
+] as const satisfies readonly [StackSelectionStringKey, string][];
+
+function formatChangedStringFlag(
+  selection: StackSelectionInput,
+  key: StackSelectionStringKey,
+  flag: string,
+) {
+  return selection[key] === DEFAULT_STACK_SELECTION[key] ? undefined : `--${flag} ${selection[key]}`;
+}
+
 function mapBackendToCli(backend: string) {
   return SELF_BACKENDS.has(backend) ? "self" : backend;
 }
 
+export function isGraphStackSelection(
+  selection: Pick<StackSelectionInput, "stackMode" | "stackPartSpecs">,
+): boolean {
+  return (
+    (selection.stackMode === "multi" || String(selection.stackMode) === "graph") &&
+    selection.stackPartSpecs.length > 0
+  );
+}
+
+function getGraphStackParts(selection: StackSelectionInput) {
+  const stackParts = parseStackPartSpecs(selection.stackPartSpecs, "selected");
+  const validation = validateStackParts(stackParts);
+  if (validation.issues.length > 0) {
+    throw new Error(validation.issues.map((issue) => issue.message).join("\n"));
+  }
+  return stackParts;
+}
+
 function getAdjustedSelection(selection: StackSelectionInput): StackSelectionInput {
   const compatibility = analyzeStackCompatibility(selection);
-  return compatibility.adjustedStack ?? selection;
+  if (!compatibility.adjustedStack) return selection;
+  return { ...selection, ...compatibility.adjustedStack };
 }
 
 function getProjectName(selection: StackSelectionInput, projectName?: string) {
@@ -831,6 +894,10 @@ function areStringArraysEqual(left: readonly string[], right: readonly string[])
     sortedLeft.length === sortedRight.length &&
     sortedLeft.every((value, index) => value === sortedRight[index])
   );
+}
+
+function isStringArray(value: readonly unknown[]): value is readonly string[] {
+  return value.every((item) => typeof item === "string");
 }
 
 export function isStackSelectionDefault<K extends keyof StackSelectionState>(
@@ -888,6 +955,16 @@ export function cliInputToProjectConfigPartial(
     }
   }
 
+  if (Array.isArray(input.part) && input.part.length > 0) {
+    const stackParts = parseStackPartSpecs(input.part, "selected");
+    Object.assign(config, stackPartsToLegacyProjectConfigPartial(stackParts), { stackParts });
+  } else if (!config.stackParts) {
+    const stackParts = legacyProjectConfigToStackParts(config, "legacy");
+    if (stackParts.length > 0) {
+      config.stackParts = stackParts;
+    }
+  }
+
   return config;
 }
 
@@ -902,8 +979,7 @@ function buildProjectConfigBase(
     ...toUniqueNonNoneArray(stack.webFrontend),
     ...toUniqueNonNoneArray(stack.nativeFrontend),
   ] as ProjectConfig["frontend"];
-
-  return {
+  const baseConfig: CliDefaultProjectConfigBase = {
     projectName,
     relativePath,
     ecosystem: stack.ecosystem as ProjectConfig["ecosystem"],
@@ -1015,6 +1091,26 @@ function buildProjectConfigBase(
     elixirDeploy: stack.elixirDeploy as ProjectConfig["elixirDeploy"],
     aiDocs: toUniqueNonNoneArray(stack.aiDocs) as ProjectConfig["aiDocs"],
   };
+
+  if (!isGraphStackSelection(stack)) {
+    return baseConfig;
+  }
+
+  const stackParts = getGraphStackParts(stack);
+  const loweredGraphConfig = stackPartsToLegacyProjectConfigPartial(stackParts);
+
+  return {
+    ...baseConfig,
+    ...loweredGraphConfig,
+    projectName,
+    relativePath,
+    git: stack.git === "true",
+    packageManager: stack.packageManager as ProjectConfig["packageManager"],
+    versionChannel: stack.versionChannel as ProjectConfig["versionChannel"],
+    install,
+    aiDocs: toUniqueNonNoneArray(stack.aiDocs) as ProjectConfig["aiDocs"],
+    stackParts,
+  };
 }
 
 export function stackSelectionToProjectConfig(
@@ -1034,18 +1130,15 @@ export function stackSelectionToCliComparableConfig(
   selection: StackSelectionInput,
   projectName = getProjectName(selection),
 ): CliDefaultProjectConfigBase {
-  return buildProjectConfigBase(
-    selection,
-    projectName,
-    projectName,
-    selection.install === "true",
-  );
+  return buildProjectConfigBase(selection, projectName, projectName, selection.install === "true");
 }
 
 export function isCliDefaultStackSelection(
   selection: StackSelectionInput,
   projectName = getProjectName(selection),
 ): boolean {
+  if (isGraphStackSelection(selection)) return false;
+
   const comparableConfig = stackSelectionToCliComparableConfig(selection, projectName);
   const cliDefaults = {
     ...createCliDefaultProjectConfigBase(
@@ -1073,7 +1166,12 @@ export function isCliDefaultStackSelection(
     const defaultValue = cliDefaults[key];
 
     if (Array.isArray(currentValue) && Array.isArray(defaultValue)) {
-      return areStringArraysEqual(currentValue, defaultValue);
+      const currentArray: readonly unknown[] = currentValue;
+      const defaultArray: readonly unknown[] = defaultValue;
+      if (isStringArray(currentArray) && isStringArray(defaultArray)) {
+        return areStringArraysEqual(currentArray, defaultArray);
+      }
+      return JSON.stringify(currentValue) === JSON.stringify(defaultValue);
     }
 
     return currentValue === defaultValue;
@@ -1085,6 +1183,44 @@ function getBaseCommand(selection: StackSelectionInput) {
     PACKAGE_MANAGER_COMMANDS[selection.packageManager as keyof typeof PACKAGE_MANAGER_COMMANDS] ??
     PACKAGE_MANAGER_COMMANDS.bun
   );
+}
+
+function generateGraphCommand(selection: StackSelectionInput, projectName: string) {
+  const stackParts = getGraphStackParts(selection);
+  const hasTypeScriptFrontend = stackParts.some(
+    (part) => part.role === "frontend" && part.ecosystem === "typescript" && !part.ownerPartId,
+  );
+  const hasMobile = stackParts.some((part) => part.role === "mobile" && !part.ownerPartId);
+  const flags = [
+    ...stackParts
+      .filter((part) => part.source !== "provided")
+      .map((part) => `--part ${formatStackPartSpec(part, stackParts)}`),
+    ...(hasTypeScriptFrontend
+      ? GRAPH_TYPESCRIPT_FRONTEND_FLAG_KEYS.flatMap(([key, flag]) => {
+          const formattedFlag = formatChangedStringFlag(selection, key, flag);
+          return formattedFlag ? [formattedFlag] : [];
+        })
+      : []),
+    ...(hasMobile
+      ? GRAPH_MOBILE_FLAG_KEYS.flatMap(([key, flag]) => {
+          const formattedFlag = formatChangedStringFlag(selection, key, flag);
+          return formattedFlag ? [formattedFlag] : [];
+        })
+      : []),
+    `--package-manager ${selection.packageManager}`,
+    ...(selection.versionChannel !== "stable"
+      ? [`--version-channel ${selection.versionChannel}`]
+      : []),
+    selection.git === "false" ? "--no-git" : "--git",
+    selection.install === "false" ? "--no-install" : "--install",
+    formatArrayFlag("ai-docs", selection.aiDocs),
+  ];
+
+  if (selection.yolo === "true") {
+    flags.push("--yolo");
+  }
+
+  return `${getBaseCommand(selection)} ${projectName} ${flags.join(" ")}`;
 }
 
 function generateTypeScriptCommand(selection: StackSelectionInput, projectName: string) {
@@ -1323,6 +1459,10 @@ function generateElixirCommand(selection: StackSelectionInput, projectName: stri
 
 export function generateStackSelectionCommand(selection: StackSelectionInput): string {
   const projectName = getProjectName(selection);
+
+  if (isGraphStackSelection(selection)) {
+    return generateGraphCommand(selection, projectName);
+  }
 
   switch (selection.ecosystem) {
     case "react-native":

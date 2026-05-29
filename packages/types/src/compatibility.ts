@@ -11,10 +11,8 @@ import type {
   Runtime,
   UILibrary,
 } from "./types";
-import {
-  getCapabilityDisabledReason,
-  normalizeCapabilitySelection,
-} from "./capabilities";
+
+import { getCapabilityDisabledReason, normalizeCapabilitySelection } from "./capabilities";
 
 export type CompatibilityCategory =
   | "api"
@@ -366,23 +364,41 @@ export function validateProjectName(name: string): string | undefined {
 
 export const hasPWACompatibleFrontend = (webFrontend: string[]) =>
   webFrontend.some((f) =>
-    ["tanstack-router", "react-router", "react-vite", "solid", "next", "vinext", "astro"].includes(f),
+    ["tanstack-router", "react-router", "react-vite", "solid", "next", "vinext", "astro"].includes(
+      f,
+    ),
   );
 
 export const hasTauriCompatibleFrontend = (webFrontend: string[]) =>
   webFrontend.some((f) =>
-    ["tanstack-router", "react-router", "react-vite", "nuxt", "svelte", "solid", "next", "vinext", "astro"].includes(f),
+    [
+      "tanstack-router",
+      "react-router",
+      "react-vite",
+      "nuxt",
+      "svelte",
+      "solid",
+      "next",
+      "vinext",
+      "astro",
+    ].includes(f),
   );
 
 export const hasDockerComposeCompatibleFrontend = (webFrontend: string[]) =>
   webFrontend.some((f) =>
-    ["tanstack-router", "react-router", "react-vite", "solid", "next", "vinext", "astro"].includes(f),
+    ["tanstack-router", "react-router", "react-vite", "solid", "next", "vinext", "astro"].includes(
+      f,
+    ),
   );
 
 const isChatSdkExampleSupported = (stack: CompatibilityInput): boolean => {
   if (stack.ecosystem !== "typescript") return false;
 
-  if (stack.backend === "self-next" || stack.backend === "self-vinext" || stack.backend === "self-tanstack-start") {
+  if (
+    stack.backend === "self-next" ||
+    stack.backend === "self-vinext" ||
+    stack.backend === "self-tanstack-start"
+  ) {
     return true;
   }
 
@@ -610,7 +626,6 @@ export const analyzeStackCompatibility = (
         });
       }
     }
-
   }
 
   if (nextStack.backend === "none") {
@@ -1211,7 +1226,9 @@ export const analyzeStackCompatibility = (
         currentValue.length === value.length &&
         currentValue.every((entry, index) => entry === value[index]);
       if (Array.isArray(value) ? !isSameArray : currentValue !== value) {
-        (nextStack as Record<string, unknown>)[category] = Array.isArray(value) ? [...value] : value;
+        (nextStack as Record<string, unknown>)[category] = Array.isArray(value)
+          ? [...value]
+          : value;
         changed = true;
         changes.push({ category, message });
       }
@@ -1226,19 +1243,6 @@ export const analyzeStackCompatibility = (
         message: "Native frontend set to 'Expo + StyleSheet' (React Native ecosystem)",
       });
     }
-  }
-
-  if (
-    nextStack.ecosystem === "typescript" &&
-    nextStack.nativeFrontend.some((frontend) => frontend !== "none")
-  ) {
-    nextStack.nativeFrontend = ["none"];
-    hasNativeFrontend = false;
-    changed = true;
-    changes.push({
-      category: "nativeFrontend",
-      message: "Native frontend set to 'None' (use React Native ecosystem for Expo apps)",
-    });
   }
 
   if (!hasNativeFrontend) {
@@ -1314,7 +1318,14 @@ export const analyzeStackCompatibility = (
 
   // React-only UI libraries - check frontend compatibility
   const reactOnlyLibraries = ["shadcn-ui", "radix-ui", "chakra-ui", "nextui", "mui", "antd"];
-  const reactFrontends = ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext"];
+  const reactFrontends = [
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "tanstack-start",
+    "next",
+    "vinext",
+  ];
   if (reactOnlyLibraries.includes(nextStack.uiLibrary)) {
     const hasReactFrontend = nextStack.webFrontend.some((f) => reactFrontends.includes(f));
     const hasAstroReact =
@@ -1544,7 +1555,8 @@ export const analyzeStackCompatibility = (
         changed = true;
         changes.push({
           category: "javaBuildTool",
-          message: "Java testing libraries cleared (a build tool is required for test dependencies)",
+          message:
+            "Java testing libraries cleared (a build tool is required for test dependencies)",
         });
       }
     }
@@ -1626,9 +1638,7 @@ export const analyzeStackCompatibility = (
       for (const key of dependentKeys) {
         const value = nextStack[key];
         const shouldClear =
-          key !== "elixirObservability"
-            ? value !== "none"
-            : value === "phoenix-telemetry";
+          key !== "elixirObservability" ? value !== "none" : value === "phoenix-telemetry";
 
         if (shouldClear) {
           nextStack[key] = "none" as never;
@@ -2266,8 +2276,14 @@ export const getDisabledReason = (
   // TanStack AI: React and Solid only (client adapter). Server-side core works anywhere.
   if (category === "ai" && optionId === "tanstack-ai") {
     const compatibleFrontends = [
-      "tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "redwood",
-      "solid", "solid-start",
+      "tanstack-router",
+      "react-router",
+      "react-vite",
+      "tanstack-start",
+      "next",
+      "redwood",
+      "solid",
+      "solid-start",
     ];
     const hasCompatible = currentStack.webFrontend.some((f) => compatibleFrontends.includes(f));
 
@@ -2325,7 +2341,13 @@ export const getDisabledReason = (
       return "TanStack Query is already included via your API layer";
     }
     // TanStack addons with Astro require a UI framework integration
-    const tanstackAddons = ["tanstack-query", "tanstack-table", "tanstack-virtual", "tanstack-db", "tanstack-pacer"];
+    const tanstackAddons = [
+      "tanstack-query",
+      "tanstack-table",
+      "tanstack-virtual",
+      "tanstack-db",
+      "tanstack-pacer",
+    ];
     if (
       tanstackAddons.includes(optionId) &&
       currentStack.webFrontend.length === 1 &&
@@ -2375,7 +2397,11 @@ export const getDisabledReason = (
       ) {
         return "Chat SDK self backend profile supports Next.js, TanStack Start, or Nuxt in v1";
       }
-      if (currentStack.backend === "self-next" || currentStack.backend === "self-vinext" || currentStack.backend === "self-tanstack-start") {
+      if (
+        currentStack.backend === "self-next" ||
+        currentStack.backend === "self-vinext" ||
+        currentStack.backend === "self-tanstack-start"
+      ) {
         return null;
       }
       if (currentStack.backend === "self-nuxt") {
@@ -2499,7 +2525,13 @@ export const getDisabledReason = (
 
     // React-only UI libraries
     const reactOnlyLibraries = ["shadcn-ui", "radix-ui", "chakra-ui", "nextui", "mui", "antd"];
-    const reactFrontends = ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next"];
+    const reactFrontends = [
+      "tanstack-router",
+      "react-router",
+      "react-vite",
+      "tanstack-start",
+      "next",
+    ];
 
     if (reactOnlyLibraries.includes(optionId)) {
       const hasReactFrontend = currentStack.webFrontend.some((f) => reactFrontends.includes(f));
@@ -2573,7 +2605,7 @@ export const getDisabledReason = (
     }
     if (optionId === "vercel") {
       // These frontends don't have Vercel templates
-      if (currentStack.webFrontend.some(f => ["redwood", "fresh"].includes(f))) {
+      if (currentStack.webFrontend.some((f) => ["redwood", "fresh"].includes(f))) {
         return "Vercel deployment is not available for Redwood/Fresh (they have their own deploy systems)";
       }
     }
@@ -2738,7 +2770,11 @@ export const getDisabledReason = (
     }
   }
 
-  if (category === "elixirWebFramework" && optionId !== "none" && currentStack.ecosystem !== "elixir") {
+  if (
+    category === "elixirWebFramework" &&
+    optionId !== "none" &&
+    currentStack.ecosystem !== "elixir"
+  ) {
     return "Elixir web frameworks are available only in the Elixir ecosystem";
   }
 
@@ -2751,13 +2787,15 @@ export const getDisabledReason = (
       guardian: "Guardian JWT wiring is not generated yet; use phx.gen.auth or no auth",
     },
     elixirValidation: {
-      "nimble-options": "NimbleOptions is not generated yet; use Ecto Changesets or no extra validation",
+      "nimble-options":
+        "NimbleOptions is not generated yet; use Ecto Changesets or no extra validation",
     },
     elixirCaching: {
       nebulex: "Nebulex cache modules are not generated yet; use Cachex or no cache",
     },
     elixirObservability: {
-      opentelemetry: "OpenTelemetry setup is not generated yet; use Phoenix telemetry or no extra observability",
+      opentelemetry:
+        "OpenTelemetry setup is not generated yet; use Phoenix telemetry or no extra observability",
       prom_ex: "PromEx setup is not generated yet; use Phoenix telemetry or no extra observability",
     },
     elixirTesting: {
@@ -2804,7 +2842,10 @@ export const getDisabledReason = (
     if (optionId === "phx-gen-auth" && currentStack.elixirOrm === "none") {
       return "phx.gen.auth requires Ecto";
     }
-    if ((optionId === "ueberauth" || optionId === "guardian") && currentStack.elixirWebFramework === "none") {
+    if (
+      (optionId === "ueberauth" || optionId === "guardian") &&
+      currentStack.elixirWebFramework === "none"
+    ) {
       return "Elixir auth libraries require Phoenix";
     }
   }
@@ -2817,7 +2858,11 @@ export const getDisabledReason = (
     return "Absinthe GraphQL requires Ecto in the current Phoenix scaffold";
   }
 
-  if (category === "elixirRealtime" && optionId === "live-view-streams" && currentStack.elixirWebFramework !== "phoenix-live-view") {
+  if (
+    category === "elixirRealtime" &&
+    optionId === "live-view-streams" &&
+    currentStack.elixirWebFramework !== "phoenix-live-view"
+  ) {
     return "LiveView Streams require Phoenix LiveView";
   }
 
@@ -2862,7 +2907,15 @@ const UI_LIBRARY_COMPATIBILITY: Record<
   }
 > = {
   "shadcn-ui": {
-    frontends: ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "astro"],
+    frontends: [
+      "tanstack-router",
+      "react-router",
+      "react-vite",
+      "tanstack-start",
+      "next",
+      "vinext",
+      "astro",
+    ],
     cssFrameworks: ["tailwind"],
   },
   daisyui: {
@@ -2886,11 +2939,28 @@ const UI_LIBRARY_COMPATIBILITY: Record<
     cssFrameworks: ["tailwind"],
   },
   "radix-ui": {
-    frontends: ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "astro"],
+    frontends: [
+      "tanstack-router",
+      "react-router",
+      "react-vite",
+      "tanstack-start",
+      "next",
+      "vinext",
+      "astro",
+    ],
     cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
   },
   "headless-ui": {
-    frontends: ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "nuxt", "astro"],
+    frontends: [
+      "tanstack-router",
+      "react-router",
+      "react-vite",
+      "tanstack-start",
+      "next",
+      "vinext",
+      "nuxt",
+      "astro",
+    ],
     cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
   },
   "park-ui": {
@@ -2909,15 +2979,39 @@ const UI_LIBRARY_COMPATIBILITY: Record<
     cssFrameworks: ["tailwind", "scss", "less", "postcss-only"],
   },
   "chakra-ui": {
-    frontends: ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "astro"],
+    frontends: [
+      "tanstack-router",
+      "react-router",
+      "react-vite",
+      "tanstack-start",
+      "next",
+      "vinext",
+      "astro",
+    ],
     cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
   },
   nextui: {
-    frontends: ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "astro"],
+    frontends: [
+      "tanstack-router",
+      "react-router",
+      "react-vite",
+      "tanstack-start",
+      "next",
+      "vinext",
+      "astro",
+    ],
     cssFrameworks: ["tailwind"],
   },
   mantine: {
-    frontends: ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "astro"],
+    frontends: [
+      "tanstack-router",
+      "react-router",
+      "react-vite",
+      "tanstack-start",
+      "next",
+      "vinext",
+      "astro",
+    ],
     cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
   },
   mui: {
@@ -2929,7 +3023,15 @@ const UI_LIBRARY_COMPATIBILITY: Record<
     cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
   },
   "base-ui": {
-    frontends: ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "astro"],
+    frontends: [
+      "tanstack-router",
+      "react-router",
+      "react-vite",
+      "tanstack-start",
+      "next",
+      "vinext",
+      "astro",
+    ],
     cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
   },
   "ark-ui": {
@@ -2948,7 +3050,15 @@ const UI_LIBRARY_COMPATIBILITY: Record<
     cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
   },
   "react-aria": {
-    frontends: ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "astro"],
+    frontends: [
+      "tanstack-router",
+      "react-router",
+      "react-vite",
+      "tanstack-start",
+      "next",
+      "vinext",
+      "astro",
+    ],
     cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
   },
   none: {
@@ -3001,24 +3111,73 @@ const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
   msw: [],
   storybook: ["tanstack-router", "react-router", "react-vite", "next", "nuxt", "svelte", "solid"],
   "tanstack-query": [
-    "tanstack-router", "react-router", "react-vite", "tanstack-start", "next",
-    "nuxt", "svelte", "solid", "solid-start", "angular", "astro", "redwood",
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "tanstack-start",
+    "next",
+    "nuxt",
+    "svelte",
+    "solid",
+    "solid-start",
+    "angular",
+    "astro",
+    "redwood",
   ],
   "tanstack-table": [
-    "tanstack-router", "react-router", "react-vite", "tanstack-start", "next",
-    "nuxt", "svelte", "solid", "solid-start", "angular", "astro", "redwood",
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "tanstack-start",
+    "next",
+    "nuxt",
+    "svelte",
+    "solid",
+    "solid-start",
+    "angular",
+    "astro",
+    "redwood",
   ],
   "tanstack-virtual": [
-    "tanstack-router", "react-router", "react-vite", "tanstack-start", "next",
-    "nuxt", "svelte", "solid", "solid-start", "angular", "astro", "redwood",
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "tanstack-start",
+    "next",
+    "nuxt",
+    "svelte",
+    "solid",
+    "solid-start",
+    "angular",
+    "astro",
+    "redwood",
   ],
   "tanstack-db": [
-    "tanstack-router", "react-router", "react-vite", "tanstack-start", "next",
-    "nuxt", "svelte", "solid", "solid-start", "astro", "redwood",
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "tanstack-start",
+    "next",
+    "nuxt",
+    "svelte",
+    "solid",
+    "solid-start",
+    "astro",
+    "redwood",
   ],
   "tanstack-pacer": [
-    "tanstack-router", "react-router", "react-vite", "tanstack-start", "next",
-    "nuxt", "svelte", "solid", "solid-start", "angular", "astro", "redwood",
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "tanstack-start",
+    "next",
+    "nuxt",
+    "svelte",
+    "solid",
+    "solid-start",
+    "angular",
+    "astro",
+    "redwood",
   ],
   "docker-compose": [],
   none: [],
@@ -3093,10 +3252,7 @@ export function getApiFrontendCompatibilityIssue(
   const includesSolidStart = frontends.includes("solid-start");
   const isReactOnlyApi = api === "trpc" || api === "ts-rest" || api === "garph";
 
-  if (
-    (includesNuxt || includesSvelte || includesSolid || includesSolidStart) &&
-    isReactOnlyApi
-  ) {
+  if ((includesNuxt || includesSvelte || includesSolid || includesSolidStart) && isReactOnlyApi) {
     const incompatibleFrontend = includesNuxt
       ? "nuxt"
       : includesSvelte
@@ -3163,12 +3319,7 @@ export function getApiFrontendCompatibilityIssue(
     };
   }
 
-  if (
-    includesAstro &&
-    astroIntegration &&
-    astroIntegration !== "react" &&
-    isReactOnlyApi
-  ) {
+  if (includesAstro && astroIntegration && astroIntegration !== "react" && isReactOnlyApi) {
     return {
       code: "ASTRO_API_REQUIRES_REACT_INTEGRATION",
       message: `${getReactOnlyApiDisplayName(api)} API requires React integration with Astro.`,
@@ -3193,8 +3344,14 @@ export function getAIFrontendCompatibilityIssue(
   if (!ai || ai !== "tanstack-ai") return undefined;
 
   const compatibleFrontends = new Set<Frontend>([
-    "tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "redwood",
-    "solid", "solid-start",
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "tanstack-start",
+    "next",
+    "redwood",
+    "solid",
+    "solid-start",
   ]);
   const hasCompatible = frontends.some((frontend) => compatibleFrontends.has(frontend));
 
@@ -3360,7 +3517,14 @@ export function getCompatibleUILibraries(
     if (webFrontend === "astro") {
       if (astroIntegration === "react") {
         return compatibility.frontends.some((f) =>
-          ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "astro"].includes(f),
+          [
+            "tanstack-router",
+            "react-router",
+            "react-vite",
+            "tanstack-start",
+            "next",
+            "astro",
+          ].includes(f),
         );
       }
       return compatibility.frontends.some((f) =>
@@ -3433,7 +3597,7 @@ export function evaluateCompatibility(input: CompatibilityInput): CompatibilityE
     ["stateManagement", input.stateManagement],
     ["animation", input.animation],
     ["pythonApi", input.pythonApi],
-   ["javaWebFramework", input.javaWebFramework],
+    ["javaWebFramework", input.javaWebFramework],
     ["javaBuildTool", input.javaBuildTool],
     ["javaOrm", input.javaOrm],
     ["javaAuth", input.javaAuth],

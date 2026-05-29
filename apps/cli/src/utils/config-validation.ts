@@ -3,6 +3,7 @@ import pc from "picocolors";
 
 import type { CLIInput, Database, DatabaseSetup, ProjectConfig, Runtime } from "../types";
 
+import { normalizeCapabilitySelection, validateStackParts } from "../types";
 import {
   ensureSingleWebAndNative,
   isWebFrontend,
@@ -22,7 +23,6 @@ import { isSilent } from "./context";
 import { constraintError, incompatibilityError, missingRequirementError } from "./error-formatter";
 import { exitWithError } from "./errors";
 import { validatePeerDependencies } from "./peer-dependency-validator";
-import { normalizeCapabilitySelection } from "../types";
 
 export function validateDatabaseOrmAuth(cfg: Partial<ProjectConfig>, flags?: Set<string>) {
   const db = cfg.database;
@@ -373,7 +373,6 @@ export function validateConvexConstraints(
       suggestions: ["Remove --server-deploy flag", "Set --server-deploy none"],
     });
   }
-
 }
 
 export function validateBackendNoneConstraints(
@@ -603,9 +602,7 @@ export function validateJavaConstraints(
     (library) => library !== "none",
   );
   const hasSpringOnlyFeatures =
-    config.javaOrm !== "none" ||
-    config.javaAuth !== "none" ||
-    hasJavaLibraries;
+    config.javaOrm !== "none" || config.javaAuth !== "none" || hasJavaLibraries;
 
   if (hasNoBuildTool && hasJavaWebFramework) {
     incompatibilityError({
@@ -798,7 +795,10 @@ export function validateElixirConstraints(config: Partial<ProjectConfig>) {
         "elixir-realtime": "live-view-streams",
         "elixir-web-framework": config.elixirWebFramework ?? "none",
       },
-      suggestions: ["Use --elixir-web-framework phoenix-live-view", "Use --elixir-realtime channels"],
+      suggestions: [
+        "Use --elixir-web-framework phoenix-live-view",
+        "Use --elixir-realtime channels",
+      ],
     });
   }
 
@@ -823,11 +823,7 @@ export function validateEmailConstraints(config: Partial<ProjectConfig>) {
       suggestions: ["Use --email resend", "Use --email none"],
     });
   }
-  if (
-    config.ecosystem === "java" &&
-    config.email === "resend" &&
-    config.javaBuildTool === "none"
-  ) {
+  if (config.ecosystem === "java" && config.email === "resend" && config.javaBuildTool === "none") {
     incompatibilityError({
       message: "Resend email for Java requires Maven or Gradle to manage the SDK dependency.",
       provided: { "java-build-tool": "none", email: "resend" },
@@ -854,7 +850,8 @@ export function validateObservabilityConstraints(config: Partial<ProjectConfig>)
     config.javaBuildTool === "none"
   ) {
     incompatibilityError({
-      message: "Sentry observability for Java requires Maven or Gradle to manage the SDK dependency.",
+      message:
+        "Sentry observability for Java requires Maven or Gradle to manage the SDK dependency.",
       provided: { "java-build-tool": "none", observability: "sentry" },
       suggestions: ["Use --java-build-tool maven", "Use --java-build-tool gradle"],
     });
@@ -876,7 +873,8 @@ export function validateCachingConstraints(config: Partial<ProjectConfig>) {
     config.javaBuildTool === "none"
   ) {
     incompatibilityError({
-      message: "Upstash Redis caching for Java requires Maven or Gradle to manage the Redis client dependency.",
+      message:
+        "Upstash Redis caching for Java requires Maven or Gradle to manage the Redis client dependency.",
       provided: { "java-build-tool": "none", caching: "upstash-redis" },
       suggestions: ["Use --java-build-tool maven", "Use --java-build-tool gradle"],
     });
@@ -967,6 +965,13 @@ export function validateFullConfig(
   providedFlags: Set<string>,
   options: CLIInput,
 ) {
+  if (config.stackParts && !options.yolo) {
+    const graphValidation = validateStackParts(config.stackParts);
+    if (graphValidation.issues.length > 0) {
+      exitWithError(graphValidation.issues.map((issue) => issue.message).join("\n"));
+    }
+  }
+
   validateEcosystemAuthCompatibility(config, providedFlags);
   validateDatabaseOrmAuth(config, providedFlags);
   validateDatabaseSetup(config, providedFlags);
@@ -1011,7 +1016,10 @@ export function validateFullConfig(
   }
 
   // Vercel serverDeploy incompatible with persistent backends
-  if (config.serverDeploy === "vercel" && ["nestjs", "adonisjs", "encore"].includes(config.backend!)) {
+  if (
+    config.serverDeploy === "vercel" &&
+    ["nestjs", "adonisjs", "encore"].includes(config.backend!)
+  ) {
     incompatibilityError({
       message: "Vercel serverless functions cannot host persistent-process backends",
       provided: { backend: config.backend!, serverDeploy: config.serverDeploy },
@@ -1068,6 +1076,13 @@ export function validateFullConfig(
 
 export function validateConfigForProgrammaticUse(config: Partial<ProjectConfig>) {
   try {
+    if (config.stackParts) {
+      const graphValidation = validateStackParts(config.stackParts);
+      if (graphValidation.issues.length > 0) {
+        throw new Error(graphValidation.issues.map((issue) => issue.message).join("\n"));
+      }
+    }
+
     validateEcosystemAuthCompatibility(config);
     validateDatabaseOrmAuth(config);
 

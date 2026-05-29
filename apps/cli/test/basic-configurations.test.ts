@@ -61,6 +61,79 @@ describe("Basic Configurations", () => {
       expect(result.result?.projectConfig.runtime).toBe("none");
       expect(result.result?.projectConfig.frontend).toEqual(["next"]);
     });
+
+    it("should accept graph part bindings without prompting", async () => {
+      const result = await runTRPCTest({
+        projectName: "graph-parts",
+        part: [
+          "frontend:typescript:next",
+          "mobile:react-native:native-bare",
+          "backend:go:gin",
+          "backend.orm:go:gorm",
+          "database:universal:postgres",
+        ],
+        dryRun: true,
+        install: false,
+      });
+
+      expectSuccess(result);
+      expect(result.result?.projectConfig.stackParts?.map((part) => part.role)).toContain(
+        "backend",
+      );
+      expect(result.result?.projectConfig.goWebFramework).toBe("gin");
+      expect(result.result?.projectConfig.database).toBe("postgres");
+      expect(result.result?.files).toContain("apps/native/package.json");
+      expect(result.result?.files).toContain("apps/server/go.mod");
+      expect(result.result?.files).toContain("packages/database/README.md");
+    });
+
+    it("should reject invalid graph part role bindings", async () => {
+      const result = await runTRPCTest({
+        projectName: "bad-graph-parts",
+        part: ["frontend:typescript:hono"],
+        dryRun: true,
+        install: false,
+        expectError: true,
+      });
+
+      expectError(result, "not a valid typescript tool for role 'frontend'");
+    });
+
+    it("should reject graph capabilities from a different owner ecosystem", async () => {
+      const result = await runTRPCTest({
+        projectName: "bad-graph-owner-ecosystem",
+        part: ["backend:go:gin", "backend.orm:typescript:drizzle"],
+        dryRun: true,
+        install: false,
+        expectError: true,
+      });
+
+      expectError(result, "uses the typescript adapter but its owner uses go");
+    });
+
+    it("should reject graph capabilities that do not support the owning framework", async () => {
+      const result = await runTRPCTest({
+        projectName: "bad-graph-owner-tool",
+        part: ["backend:python:fastapi", "backend.api:python:django-rest-framework"],
+        dryRun: true,
+        install: false,
+        expectError: true,
+      });
+
+      expectError(result, "can only be selected for a Django backend");
+    });
+
+    it("should reject graph capabilities that the selected framework cannot generate", async () => {
+      const result = await runTRPCTest({
+        projectName: "bad-graph-elixir-live-view",
+        part: ["backend:elixir:phoenix", "backend.api:elixir:live-view-streams"],
+        dryRun: true,
+        install: false,
+        expectError: true,
+      });
+
+      expectError(result, "can only be selected for a Phoenix LiveView backend");
+    });
   });
 
   describe("Package Managers", () => {
