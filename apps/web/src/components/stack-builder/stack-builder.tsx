@@ -34,7 +34,16 @@ import {
   Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { Suspense, lazy, startTransition, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  Suspense,
+  lazy,
+  startTransition,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 
 import type { Ecosystem } from "@/lib/types";
@@ -55,6 +64,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { clearBuilderMode, publishBuilderMode } from "@/lib/builder-mode-bridge";
 import {
   DEFAULT_STACK,
   ECOSYSTEMS,
@@ -337,7 +347,9 @@ const GRAPH_COMMON_CATEGORY_SET = new Set<keyof typeof TECH_OPTIONS>([
   "install",
 ]);
 
-function isGraphBackendEcosystem(ecosystem: StackPartEcosystem): ecosystem is GraphBackendEcosystem {
+function isGraphBackendEcosystem(
+  ecosystem: StackPartEcosystem,
+): ecosystem is GraphBackendEcosystem {
   return ecosystem in GRAPH_BACKEND_CONFIG_BY_ECOSYSTEM;
 }
 
@@ -397,10 +409,7 @@ function getDefaultGraphTool(
     return defaultOption.id;
   }
 
-  return (
-    toolOptions.find((option) => option.id !== "none")?.id ??
-    fallback
-  );
+  return toolOptions.find((option) => option.id !== "none")?.id ?? fallback;
 }
 
 function getSoloBackendSelection(stack: StackState): GraphSelection {
@@ -426,12 +435,7 @@ function getSoloBackendSelection(stack: StackState): GraphSelection {
     backend:
       typeof backendValue === "string" && backendValue !== "none"
         ? backendValue
-        : getDefaultGraphTool(
-            backendConfig.frameworkCategory,
-            "backend",
-            currentEcosystem,
-            "none",
-          ),
+        : getDefaultGraphTool(backendConfig.frameworkCategory, "backend", currentEcosystem, "none"),
     database: stack.database !== "none" ? stack.database : "none",
     backendOrm: typeof ormValue === "string" ? ormValue : "none",
     backendApi: typeof apiValue === "string" ? apiValue : "none",
@@ -452,28 +456,20 @@ function getGraphSelection(stack: StackState): GraphSelection {
         part.role === "frontend" && !part.ownerPartId && isGraphFrontendEcosystem(part.ecosystem),
     );
     const frontendEcosystem =
-      frontend && isGraphFrontendEcosystem(frontend.ecosystem)
-        ? frontend.ecosystem
-        : "typescript";
+      frontend && isGraphFrontendEcosystem(frontend.ecosystem) ? frontend.ecosystem : "typescript";
     const mobile = selectedParts.find((part) => part.role === "mobile" && !part.ownerPartId);
     const backend = selectedParts.find((part) => part.role === "backend" && !part.ownerPartId);
     const backendEcosystem =
       backend && isGraphBackendEcosystem(backend.ecosystem) ? backend.ecosystem : "typescript";
     const database = selectedParts.find((part) => part.role === "database" && !part.ownerPartId);
     const backendOrm = backend
-      ? selectedParts.find(
-          (part) => part.role === "orm" && part.ownerPartId === backend.id,
-        )
+      ? selectedParts.find((part) => part.role === "orm" && part.ownerPartId === backend.id)
       : undefined;
     const backendApi = backend
-      ? selectedParts.find(
-          (part) => part.role === "api" && part.ownerPartId === backend.id,
-        )
+      ? selectedParts.find((part) => part.role === "api" && part.ownerPartId === backend.id)
       : undefined;
     const backendAuth = backend
-      ? selectedParts.find(
-          (part) => part.role === "auth" && part.ownerPartId === backend.id,
-        )
+      ? selectedParts.find((part) => part.role === "auth" && part.ownerPartId === backend.id)
       : undefined;
 
     return {
@@ -528,9 +524,7 @@ function stackPatchFromGraphSpecs(specs: string[]): Partial<StackState> {
     const parts = parseStackPartSpecs(specs, "selected");
     const lowered = stackPartsToLegacyProjectConfigPartial(parts);
     const selectedParts = parts.filter((part) => part.source !== "provided");
-    const frontend = selectedParts.find(
-      (part) => part.role === "frontend" && !part.ownerPartId,
-    );
+    const frontend = selectedParts.find((part) => part.role === "frontend" && !part.ownerPartId);
     const mobile = selectedParts.find((part) => part.role === "mobile" && !part.ownerPartId);
     const backend = selectedParts.find((part) => part.role === "backend" && !part.ownerPartId);
     const database = selectedParts.find((part) => part.role === "database" && !part.ownerPartId);
@@ -864,38 +858,45 @@ function GraphOptionButton({
       title={disabledReason || undefined}
       onClick={isDisabled ? undefined : onSelect}
       className={cn(
-        "group flex min-h-[4.5rem] items-start gap-3 rounded-xl border p-3.5 text-left transition-all",
+        "group relative cursor-pointer rounded-lg border p-3 text-left transition-all sm:p-4",
         selected
-          ? "border-primary/40 bg-primary/5 shadow-sm ring-1 ring-primary/15"
+          ? "border-primary bg-primary/5 ring-1 ring-primary/20"
           : isDisabled
-            ? "cursor-not-allowed border-destructive/30 bg-destructive/5 opacity-60"
-          : "border-border/60 bg-background hover:border-primary/30 hover:bg-muted/30 hover:shadow-sm",
+            ? "cursor-not-allowed border-destructive/30 bg-destructive/5 opacity-50 hover:opacity-75"
+            : "border-border bg-fd-background hover:border-primary/40 hover:bg-gradient-to-br hover:from-primary/6 hover:to-transparent hover:shadow-[0_0_10px_0px_hsl(var(--primary)/0.10)]",
       )}
     >
-      {(option.icon !== "" || ICON_REGISTRY[option.id]) && (
-        <span
-          className={cn(
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors",
-            selected ? "bg-primary/10" : "bg-muted/60 group-hover:bg-muted",
-          )}
-        >
-          <TechIcon techId={option.id} icon={option.icon} name={option.name} className="h-4.5 w-4.5" />
-        </span>
-      )}
-      <span className="min-w-0 flex-1">
-        <span
-          className={cn(
-            "block truncate text-sm font-medium",
-            selected ? "text-primary" : "text-foreground",
-          )}
-        >
-          {option.name}
-        </span>
-        <span className="mt-0.5 line-clamp-2 block text-xs leading-relaxed text-muted-foreground">
-          {option.description}
-        </span>
-        {disabledReason && <DisabledReasonInline compact reason={disabledReason} />}
-      </span>
+      <div className="flex items-start gap-3">
+        {(option.icon !== "" || ICON_REGISTRY[option.id]) && (
+          <div
+            className={cn(
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors",
+              selected ? "bg-primary/10" : "bg-muted/50 group-hover:bg-muted",
+            )}
+          >
+            <TechIcon
+              techId={option.id}
+              icon={option.icon}
+              name={option.name}
+              className="h-5 w-5"
+            />
+          </div>
+        )}
+        <div className="min-w-0 flex-1 pt-0.5">
+          <span
+            className={cn(
+              "block font-semibold text-sm",
+              selected ? "text-primary" : "text-foreground",
+            )}
+          >
+            {option.name}
+          </span>
+          <p className="mt-0.5 line-clamp-2 text-muted-foreground text-xs leading-relaxed">
+            {option.description}
+          </p>
+          {disabledReason && <DisabledReasonInline reason={disabledReason} />}
+        </div>
+      </div>
     </button>
   );
 }
@@ -905,6 +906,7 @@ function GraphOptionGroup({
   options,
   selectedId,
   testIdPrefix,
+  defaultCollapsed = false,
   getDisabledReasonForOption,
   onSelect,
 }: {
@@ -912,33 +914,62 @@ function GraphOptionGroup({
   options: TechOption[];
   selectedId: string;
   testIdPrefix: string;
+  defaultCollapsed?: boolean;
   getDisabledReasonForOption?: (optionId: string) => string | null;
   onSelect: (id: string) => void;
 }) {
-  return (
-    <div className="min-w-0">
-      <div className="mb-2.5 flex items-center justify-between gap-2">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          {label}
-        </h3>
-      </div>
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
-        {options.map((option) => {
-          const disabledReason = getDisabledReasonForOption?.(option.id) ?? null;
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const hasSelection = Boolean(selectedId) && selectedId !== "none";
 
-          return (
-            <GraphOptionButton
-              key={option.id}
-              option={option}
-              selected={selectedId === option.id}
-              testId={`${testIdPrefix}-${option.id}`}
-              disabledReason={disabledReason}
-              onSelect={() => onSelect(option.id)}
-            />
-          );
-        })}
-      </div>
-    </div>
+  return (
+    <section className="min-w-0">
+      <button
+        type="button"
+        onClick={() => setCollapsed((prev) => !prev)}
+        data-testid={`${testIdPrefix}-toggle`}
+        aria-expanded={!collapsed}
+        className="mb-3 flex w-full cursor-pointer items-center gap-2 border-b border-border pb-2 text-left transition-opacity hover:opacity-80"
+      >
+        <Terminal className="h-4 w-4 shrink-0 text-muted-foreground sm:h-5 sm:w-5" />
+        <h2 className="flex-1 font-mono text-foreground text-sm sm:text-base">{label}</h2>
+        {collapsed && hasSelection && (
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 font-mono text-[10px] font-semibold text-primary-foreground">
+            1
+          </span>
+        )}
+        <motion.div animate={{ rotate: collapsed ? 0 : 180 }} transition={{ duration: 0.2 }}>
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        </motion.div>
+      </button>
+      <AnimatePresence initial={false}>
+        {!collapsed && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 2xl:grid-cols-4">
+              {options.map((option) => {
+                const disabledReason = getDisabledReasonForOption?.(option.id) ?? null;
+
+                return (
+                  <GraphOptionButton
+                    key={option.id}
+                    option={option}
+                    selected={selectedId === option.id}
+                    testId={`${testIdPrefix}-${option.id}`}
+                    disabledReason={disabledReason}
+                    onSelect={() => onSelect(option.id)}
+                  />
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
   );
 }
 
@@ -1205,10 +1236,7 @@ function CreationModeComposer({
           </span>
         )}
         <span
-          className={cn(
-            "text-[13px] font-medium",
-            selected ? "text-primary" : "text-foreground",
-          )}
+          className={cn("text-[13px] font-medium", selected ? "text-primary" : "text-foreground")}
         >
           {label}
         </span>
@@ -1502,98 +1530,55 @@ function CreationModeComposer({
       className="mb-6 rounded-2xl border border-border/60 bg-muted/20 p-4 shadow-sm sm:mb-8 sm:p-5"
     >
       <div className="space-y-5">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="flex items-start overflow-x-auto pb-1">
           {MULTI_STACK_STEPS.map((step, index) => {
             const selected = activeStep === step.id;
             const isFinalize = step.id === "finalize";
+            const isLast = index === MULTI_STACK_STEPS.length - 1;
             const selection = isFinalize ? null : getStepSelection(step.id);
-            const selectionHasIcon = selection
-              ? Boolean(ICON_REGISTRY[selection.toolId])
-              : false;
+            const subLabel = isFinalize ? "setup" : (selection?.toolName ?? "None");
+            const stepNumber = String(index + 1).padStart(2, "0");
 
             return (
-              <button
-                key={step.id}
-                type="button"
-                data-testid={`multi-step-${step.id}`}
-                aria-pressed={selected}
-                onClick={() => onActiveStepChange(step.id)}
-                className={cn(
-                  "flex cursor-pointer flex-col gap-3 rounded-xl border p-3.5 text-left transition-all",
-                  selected
-                    ? "border-primary/40 bg-primary/5 shadow-sm ring-1 ring-primary/15"
-                    : "border-border/60 bg-background hover:border-primary/30 hover:bg-muted/30 hover:shadow-sm",
-                )}
-              >
-                <span className="flex items-center gap-2">
+              <Fragment key={step.id}>
+                <button
+                  type="button"
+                  data-testid={`multi-step-${step.id}`}
+                  aria-pressed={selected}
+                  onClick={() => onActiveStepChange(step.id)}
+                  className="group flex shrink-0 cursor-pointer flex-col items-start gap-2.5 text-left"
+                >
                   <span
                     className={cn(
-                      "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold transition-colors",
+                      "flex h-12 w-12 items-center justify-center rounded-full border font-mono text-sm font-semibold transition-all",
                       selected
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground",
+                        ? "border-2 border-[#C6E853] text-[#C6E853]"
+                        : "border-border/60 bg-muted/40 text-muted-foreground group-hover:border-[#C6E853]/40 group-hover:text-foreground",
                     )}
                   >
-                    {index + 1}
+                    {stepNumber}
                   </span>
-                  <span className="text-[13px] font-semibold text-foreground">{step.label}</span>
-                </span>
-
-                {isFinalize ? (
-                  <span className="flex min-w-0 items-center gap-2.5 rounded-lg border border-primary/15 bg-background/80 p-2">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                      <Settings className="h-4 w-4 text-primary" />
-                    </span>
-                    <span className="flex min-w-0 flex-col">
-                      <span className="truncate text-[13px] font-medium text-foreground">
-                        Project setup
-                      </span>
-                      <span className="truncate text-[11px] text-muted-foreground">
-                        {step.description}
-                      </span>
-                    </span>
-                  </span>
-                ) : selection ? (
-                  <span className="flex min-w-0 items-center gap-2.5 rounded-lg border border-primary/15 bg-background/80 p-2">
+                  <span className="flex max-w-[140px] flex-col">
                     <span
                       className={cn(
-                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
-                        selectionHasIcon ? "bg-muted/60" : "bg-primary/10",
+                        "truncate text-[13px] transition-colors",
+                        selected
+                          ? "font-semibold text-foreground"
+                          : "font-medium text-muted-foreground group-hover:text-foreground",
                       )}
                     >
-                      {selectionHasIcon ? (
-                        <TechIcon
-                          techId={selection.toolId}
-                          name={selection.toolName}
-                          className="h-4.5 w-4.5"
-                        />
-                      ) : (
-                        <span className="text-xs font-semibold text-primary">
-                          {selection.toolName.charAt(0)}
-                        </span>
-                      )}
+                      {step.label}
                     </span>
-                    <span className="flex min-w-0 flex-col">
-                      <span className="truncate text-[13px] font-medium text-foreground">
-                        {selection.toolName}
-                      </span>
-                      <span className="truncate text-[11px] text-muted-foreground">
-                        {selection.scopeLabel}
-                      </span>
+                    <span className="truncate text-[11px] text-muted-foreground/70">
+                      {subLabel}
                     </span>
                   </span>
-                ) : (
-                  <span className="flex items-center gap-2 rounded-lg border border-dashed border-border/60 p-2 text-xs text-muted-foreground/70">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/40 text-muted-foreground/50">
-                      —
-                    </span>
-                    <span className="flex min-w-0 flex-col">
-                      <span className="font-medium text-muted-foreground">Skipped</span>
-                      <span className="truncate text-[11px]">{step.description}</span>
-                    </span>
-                  </span>
+                </button>
+
+                {!isLast && (
+                  <div aria-hidden="true" className="mt-6 h-px min-w-8 flex-1 bg-border/60" />
                 )}
-              </button>
+              </Fragment>
             );
           })}
         </div>
@@ -1659,8 +1644,7 @@ const StackBuilder = () => {
     if (stack.stackMode !== "multi") return categoryOrder;
     return categoryOrder.filter(
       (categoryKey) =>
-        !GRAPH_MANAGED_CATEGORY_SET.has(categoryKey) &&
-        GRAPH_COMMON_CATEGORY_SET.has(categoryKey),
+        !GRAPH_MANAGED_CATEGORY_SET.has(categoryKey) && GRAPH_COMMON_CATEGORY_SET.has(categoryKey),
     );
   }, [categoryOrder, stack.stackMode]);
   const multiActiveStepIndex = Math.max(
@@ -1703,10 +1687,7 @@ const StackBuilder = () => {
 
       if (lastAppliedStackString.current !== adjustedStackString) {
         startTransition(() => {
-          if (
-            !suppressCompatibilityToastRef.current &&
-            compatibilityAnalysis.changes.length > 0
-          ) {
+          if (!suppressCompatibilityToastRef.current && compatibilityAnalysis.changes.length > 0) {
             if (compatibilityAnalysis.changes.length === 1) {
               toast.info(compatibilityAnalysis.changes[0].message, { duration: 4000 });
             } else if (compatibilityAnalysis.changes.length > 1) {
@@ -1861,6 +1842,26 @@ const StackBuilder = () => {
   const disableMultiMode = () => {
     setStack({ stackMode: "solo", stackPartSpecs: [] });
   };
+
+  // Publish the creation mode to the global Navbar (which renders the
+  // Solo / Multi-Ecosystem toggle in the header) and clear it on unmount.
+  // Handlers are read through refs so the toggle always acts on the latest
+  // stack, while we only re-publish when the mode itself changes.
+  const enableMultiModeRef = useRef(enableMultiMode);
+  const disableMultiModeRef = useRef(disableMultiMode);
+  enableMultiModeRef.current = enableMultiMode;
+  disableMultiModeRef.current = disableMultiMode;
+
+  useEffect(() => {
+    publishBuilderMode(stack.stackMode === "multi" ? "multi" : "solo", (mode) => {
+      if (mode === "multi") {
+        enableMultiModeRef.current();
+      } else {
+        disableMultiModeRef.current();
+      }
+    });
+    return () => clearBuilderMode();
+  }, [stack.stackMode]);
 
   const resetStack = () => {
     startTransition(() => {
@@ -2098,59 +2099,9 @@ const StackBuilder = () => {
           }}
           className="flex min-h-0 flex-1 flex-col overflow-y-auto"
         >
-          <div className="relative shrink-0 border-b border-border/60 bg-fd-background">
-            <div className="px-3 py-3 sm:px-4">
-              <fieldset
-                aria-label="Creation method"
-                className="relative flex w-full min-w-0 rounded-xl border border-border/60 bg-muted/40 p-1 shadow-sm"
-              >
-                <button
-                  type="button"
-                  data-testid="stack-mode-solo"
-                  aria-pressed={stack.stackMode !== "multi"}
-                  onClick={disableMultiMode}
-                  className={cn(
-                    "relative flex-1 cursor-pointer rounded-lg px-3 py-2.5 text-center text-[13px] font-medium transition-colors duration-200",
-                    stack.stackMode !== "multi"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {stack.stackMode !== "multi" && (
-                    <motion.span
-                      layoutId="creation-mode-indicator"
-                      className="absolute inset-0 rounded-lg border border-border/60 bg-background shadow-sm"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-                    />
-                  )}
-                  <span className="relative z-10">Solo Ecosystem</span>
-                </button>
-                <button
-                  type="button"
-                  data-testid="stack-mode-multi"
-                  aria-pressed={stack.stackMode === "multi"}
-                  onClick={enableMultiMode}
-                  className={cn(
-                    "relative flex-1 cursor-pointer rounded-lg px-3 py-2.5 text-center text-[13px] font-medium transition-colors duration-200",
-                    stack.stackMode === "multi"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {stack.stackMode === "multi" && (
-                    <motion.span
-                      layoutId="creation-mode-indicator"
-                      className="absolute inset-0 rounded-lg border border-border/60 bg-background shadow-sm"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-                    />
-                  )}
-                  <span className="relative z-10">Multi-Ecosystem</span>
-                </button>
-              </fieldset>
-            </div>
-
-            {stack.stackMode !== "multi" && (
-              <div className="grid grid-cols-5 border-t border-border/60">
+          {stack.stackMode !== "multi" && (
+            <div className="relative shrink-0 border-b border-border/60 bg-fd-background">
+              <div className="grid grid-cols-5">
                 {ECOSYSTEMS.map((eco) => {
                   const isActive = stack.ecosystem === eco.id;
                   return (
@@ -2206,8 +2157,8 @@ const StackBuilder = () => {
                   );
                 })}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <div
             className={cn("flex", viewMode === "command" ? "" : "min-h-0 flex-1 overflow-hidden")}
@@ -2512,329 +2463,311 @@ const StackBuilder = () => {
                       In multi mode these general settings are the final "Finalize" step. */}
                   {(stack.stackMode !== "multi" || multiActiveStep === "finalize") &&
                     displayedCategoryOrder.map((categoryKey) => {
-                    // Skip astroIntegration - rendered conditionally after webFrontend
-                    if (categoryKey === "astroIntegration") return null;
+                      // Skip astroIntegration - rendered conditionally after webFrontend
+                      if (categoryKey === "astroIntegration") return null;
 
-                    // Skip shadcn sub-categories - rendered conditionally after uiLibrary
-                    if (SHADCN_SUB_CATEGORIES.has(categoryKey)) return null;
+                      // Skip shadcn sub-categories - rendered conditionally after uiLibrary
+                      if (SHADCN_SUB_CATEGORIES.has(categoryKey)) return null;
 
-                    if (stack.ecosystem === "go" && categoryKey === "auth") return null;
+                      if (stack.ecosystem === "go" && categoryKey === "auth") return null;
 
-                    const categoryOptionGroups = getCategoryRenderGroups(
-                      stack,
-                      categoryKey as keyof typeof TECH_OPTIONS,
-                    );
-                    const categoryDisplayName = getCategoryDisplayName(categoryKey);
-                    const sectionCompatibilityNotes =
-                      stack.ecosystem === "go" && categoryKey === "goAuth"
-                        ? mergeCompatibilityNotes(
-                            compatibilityAnalysis.notes.goAuth,
-                            compatibilityAnalysis.notes.auth,
-                          )
-                        : compatibilityAnalysis.notes[categoryKey];
+                      const categoryOptionGroups = getCategoryRenderGroups(
+                        stack,
+                        categoryKey as keyof typeof TECH_OPTIONS,
+                      );
+                      const categoryDisplayName = getCategoryDisplayName(categoryKey);
+                      const sectionCompatibilityNotes =
+                        stack.ecosystem === "go" && categoryKey === "goAuth"
+                          ? mergeCompatibilityNotes(
+                              compatibilityAnalysis.notes.goAuth,
+                              compatibilityAnalysis.notes.auth,
+                            )
+                          : compatibilityAnalysis.notes[categoryKey];
 
-                    if (categoryOptionGroups.length === 0) return null;
+                      if (categoryOptionGroups.length === 0) return null;
 
-                    const isSectionCollapsed = collapsedSections.has(categoryKey);
-                    const sectionSelectedCount = getSelectedCount(
-                      categoryKey as keyof typeof TECH_OPTIONS,
-                      stack,
-                    );
+                      const isSectionCollapsed = collapsedSections.has(categoryKey);
+                      const sectionSelectedCount = getSelectedCount(
+                        categoryKey as keyof typeof TECH_OPTIONS,
+                        stack,
+                      );
 
-                    return (
-                      <div key={categoryKey}>
-                        <section
-                          ref={(el) => {
-                            sectionRefs.current[categoryKey] = el;
-                          }}
-                          id={`section-${categoryKey}`}
-                          data-testid={`category-${categoryKey}`}
-                          className="mb-6 scroll-mt-4 sm:mb-8"
-                        >
-                          <button
-                            type="button"
-                            onClick={() => toggleSection(categoryKey)}
-                            data-testid={`category-toggle-${categoryKey}`}
-                            className="mb-3 flex w-full items-center gap-2 border-b border-border pb-2 text-left transition-opacity hover:opacity-80"
+                      return (
+                        <div key={categoryKey}>
+                          <section
+                            ref={(el) => {
+                              sectionRefs.current[categoryKey] = el;
+                            }}
+                            id={`section-${categoryKey}`}
+                            data-testid={`category-${categoryKey}`}
+                            className="mb-6 scroll-mt-4 sm:mb-8"
                           >
-                            <Terminal className="h-4 w-4 shrink-0 text-muted-foreground sm:h-5 sm:w-5" />
-                            <h2 className="flex-1 font-mono text-foreground text-sm sm:text-base">
-                              {categoryDisplayName}
-                            </h2>
-                            {sectionCompatibilityNotes?.hasIssue && (
-                              <InfoIcon className="h-4 w-4 shrink-0 text-amber-500" />
-                            )}
-                            {isSectionCollapsed && sectionSelectedCount > 0 && (
-                              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 font-mono text-[10px] font-semibold text-primary-foreground">
-                                {sectionSelectedCount}
-                              </span>
-                            )}
-                            <motion.div
-                              animate={{ rotate: isSectionCollapsed ? 0 : 180 }}
-                              transition={{ duration: 0.2 }}
+                            <button
+                              type="button"
+                              onClick={() => toggleSection(categoryKey)}
+                              data-testid={`category-toggle-${categoryKey}`}
+                              className="mb-3 flex w-full cursor-pointer items-center gap-2 border-b border-border pb-2 text-left transition-opacity hover:opacity-80"
                             >
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            </motion.div>
-                          </button>
-                          <AnimatePresence initial={false}>
-                            {!isSectionCollapsed && (
+                              <Terminal className="h-4 w-4 shrink-0 text-muted-foreground sm:h-5 sm:w-5" />
+                              <h2 className="flex-1 font-mono text-foreground text-sm sm:text-base">
+                                {categoryDisplayName}
+                              </h2>
+                              {sectionCompatibilityNotes?.hasIssue && (
+                                <InfoIcon className="h-4 w-4 shrink-0 text-amber-500" />
+                              )}
+                              {isSectionCollapsed && sectionSelectedCount > 0 && (
+                                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 font-mono text-[10px] font-semibold text-primary-foreground">
+                                  {sectionSelectedCount}
+                                </span>
+                              )}
                               <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.25, ease: "easeInOut" }}
-                                className="overflow-hidden"
+                                animate={{ rotate: isSectionCollapsed ? 0 : 180 }}
+                                transition={{ duration: 0.2 }}
                               >
-                                <CategoryHint categoryKey={categoryKey} />
-                                <div className="space-y-4">
-                                  {categoryOptionGroups.map((group) => (
-                                    <div key={group.key}>
-                                      {group.heading && (
-                                        <h3 className="mb-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                                          {group.heading}
-                                        </h3>
-                                      )}
-                                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 2xl:grid-cols-4">
-                                        {group.options.map((tech) => {
-                                          const isSelected = isSelectedCheck(
-                                            stack,
-                                            group.category,
-                                            tech.id,
-                                          );
-                                          const isDisabled = !isOptionCompatible(
-                                            stack,
-                                            group.category,
-                                            tech.id,
-                                          );
-                                          const disabledReason = isDisabled
-                                            ? getDisabledReason(stack, group.category, tech.id)
-                                            : null;
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                              </motion.div>
+                            </button>
+                            <AnimatePresence initial={false}>
+                              {!isSectionCollapsed && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                                  className="overflow-hidden"
+                                >
+                                  <CategoryHint categoryKey={categoryKey} />
+                                  <div className="space-y-4">
+                                    {categoryOptionGroups.map((group) => (
+                                      <div key={group.key}>
+                                        {group.heading && (
+                                          <h3 className="mb-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                                            {group.heading}
+                                          </h3>
+                                        )}
+                                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 2xl:grid-cols-4">
+                                          {group.options.map((tech) => {
+                                            const isSelected = isSelectedCheck(
+                                              stack,
+                                              group.category,
+                                              tech.id,
+                                            );
+                                            const isDisabled = !isOptionCompatible(
+                                              stack,
+                                              group.category,
+                                              tech.id,
+                                            );
+                                            const disabledReason = isDisabled
+                                              ? getDisabledReason(stack, group.category, tech.id)
+                                              : null;
 
-                                          return (
-                                            <motion.div
-                                              key={tech.id}
-                                              data-testid={`option-${group.category}-${tech.id}`}
-                                              className={cn(
-                                                "group relative cursor-pointer rounded-lg border p-3 transition-all sm:p-4",
-                                                isSelected
-                                                  ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                                                  : isDisabled
-                                                    ? "border-destructive/30 bg-destructive/5 opacity-50 hover:opacity-75"
-                                                    : "border-border bg-fd-background hover:border-primary/40 hover:bg-gradient-to-br hover:from-primary/6 hover:to-transparent hover:shadow-[0_0_10px_0px_hsl(var(--primary)/0.10)]",
-                                              )}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleTechSelect(group.category, tech.id);
-                                              }}
-                                              title={disabledReason || undefined}
-                                            >
-                                              <div className="absolute top-2 right-2 flex items-center gap-1">
-                                                <TechResourceButtons
-                                                  category={group.category}
-                                                  techId={tech.id}
-                                                />
-                                                {tech.default && !isSelected && (
-                                                  <span className="rounded-full bg-muted px-2 py-0.5 font-medium text-[10px] text-muted-foreground">
-                                                    Default
-                                                  </span>
+                                            return (
+                                              <motion.div
+                                                key={tech.id}
+                                                data-testid={`option-${group.category}-${tech.id}`}
+                                                className={cn(
+                                                  "group relative cursor-pointer rounded-lg border p-3 transition-all sm:p-4",
+                                                  isSelected
+                                                    ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                                                    : isDisabled
+                                                      ? "border-destructive/30 bg-destructive/5 opacity-50 hover:opacity-75"
+                                                      : "border-border bg-fd-background hover:border-primary/40 hover:bg-gradient-to-br hover:from-primary/6 hover:to-transparent hover:shadow-[0_0_10px_0px_hsl(var(--primary)/0.10)]",
                                                 )}
-                                                {tech.legacy && (
-                                                  <Tooltip>
-                                                    <TooltipTrigger
-                                                      onClick={(e) => e.stopPropagation()}
-                                                      className="cursor-default"
-                                                    >
-                                                      <span className="rounded-sm border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] text-amber-500 dark:text-amber-400">
-                                                        Legacy
-                                                      </span>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                      No longer actively maintained
-                                                    </TooltipContent>
-                                                  </Tooltip>
-                                                )}
-                                              </div>
-                                              <div className="flex items-start gap-3">
-                                                {(tech.icon !== "" || ICON_REGISTRY[tech.id]) && (
-                                                  <div className="flex shrink-0 flex-col items-center gap-1">
-                                                    <div
-                                                      className={cn(
-                                                        "flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
-                                                        isSelected
-                                                          ? "bg-primary/10"
-                                                          : "bg-muted/50 group-hover:bg-muted",
-                                                      )}
-                                                    >
-                                                      <TechIcon
-                                                        techId={tech.id}
-                                                        icon={tech.icon}
-                                                        name={tech.name}
-                                                        className="h-5 w-5"
-                                                      />
-                                                    </div>
-                                                  </div>
-                                                )}
-                                                <div className="min-w-0 flex-1 pt-0.5">
-                                                  <span
-                                                    className={cn(
-                                                      "block font-semibold text-sm",
-                                                      isSelected
-                                                        ? "text-primary"
-                                                        : "text-foreground",
-                                                    )}
-                                                  >
-                                                    {tech.name}
-                                                  </span>
-                                                  <p className="mt-0.5 line-clamp-2 text-muted-foreground text-xs leading-relaxed">
-                                                    {tech.description}
-                                                  </p>
-                                                  {isDisabled && disabledReason && (
-                                                    <DisabledReasonInline reason={disabledReason} />
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handleTechSelect(group.category, tech.id);
+                                                }}
+                                                title={disabledReason || undefined}
+                                              >
+                                                <div className="absolute top-2 right-2 flex items-center gap-1">
+                                                  <TechResourceButtons
+                                                    category={group.category}
+                                                    techId={tech.id}
+                                                  />
+                                                  {tech.default && !isSelected && (
+                                                    <span className="rounded-full bg-muted px-2 py-0.5 font-medium text-[10px] text-muted-foreground">
+                                                      Default
+                                                    </span>
+                                                  )}
+                                                  {tech.legacy && (
+                                                    <Tooltip>
+                                                      <TooltipTrigger
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="cursor-default"
+                                                      >
+                                                        <span className="rounded-sm border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] text-amber-500 dark:text-amber-400">
+                                                          Legacy
+                                                        </span>
+                                                      </TooltipTrigger>
+                                                      <TooltipContent>
+                                                        No longer actively maintained
+                                                      </TooltipContent>
+                                                    </Tooltip>
                                                   )}
                                                 </div>
-                                              </div>
-                                            </motion.div>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </section>
-
-                        {/* shadcn/ui Configuration - shown only when shadcn-ui is selected */}
-                        {categoryKey === "uiLibrary" && (
-                          <AnimatePresence>
-                            {stack.uiLibrary === "shadcn-ui" && (
-                              <motion.section
-                                ref={(el) => {
-                                  sectionRefs.current.shadcnBase = el;
-                                }}
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3, ease: "easeInOut" }}
-                                data-testid="category-shadcnBase"
-                                className="mb-6 scroll-mt-4 sm:mb-8 overflow-hidden"
-                              >
-                                <button
-                                  type="button"
-                                  onClick={() => toggleSection("shadcnBase")}
-                                  data-testid="category-toggle-shadcnBase"
-                                  className="mb-3 flex w-full items-center gap-2 border-b border-border pb-2 text-left transition-opacity hover:opacity-80"
-                                >
-                                  <Terminal className="h-4 w-4 shrink-0 text-muted-foreground sm:h-5 sm:w-5" />
-                                  <h2 className="flex-1 font-mono text-foreground text-sm sm:text-base">
-                                    shadcn/ui Configuration
-                                  </h2>
-                                  <motion.div
-                                    animate={{
-                                      rotate: collapsedSections.has("shadcnBase") ? 0 : 180,
-                                    }}
-                                    transition={{ duration: 0.2 }}
-                                  >
-                                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                                  </motion.div>
-                                </button>
-                                <AnimatePresence initial={false}>
-                                  {!collapsedSections.has("shadcnBase") && (
-                                    <motion.div
-                                      initial={{ height: 0, opacity: 0 }}
-                                      animate={{ height: "auto", opacity: 1 }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      transition={{ duration: 0.25, ease: "easeInOut" }}
-                                      className="overflow-hidden"
-                                    >
-                                      <div className="space-y-4">
-                                        {(
-                                          [
-                                            {
-                                              key: "shadcnBase" as const,
-                                              label: "Base Library",
-                                            },
-                                            {
-                                              key: "shadcnStyle" as const,
-                                              label: "Visual Style",
-                                            },
-                                            {
-                                              key: "shadcnIconLibrary" as const,
-                                              label: "Icon Library",
-                                            },
-                                            {
-                                              key: "shadcnColorTheme" as const,
-                                              label: "Color Theme",
-                                            },
-                                            {
-                                              key: "shadcnBaseColor" as const,
-                                              label: "Base Color",
-                                            },
-                                            { key: "shadcnFont" as const, label: "Font" },
-                                            {
-                                              key: "shadcnRadius" as const,
-                                              label: "Border Radius",
-                                            },
-                                          ] as const
-                                        ).map(({ key, label }) => (
-                                          <div key={key}>
-                                            <h3 className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                                              {label}
-                                            </h3>
-                                            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 2xl:grid-cols-5">
-                                              {(TECH_OPTIONS[key] || []).map((tech) => {
-                                                const isSelected =
-                                                  stack[key as keyof StackState] === tech.id;
-                                                return (
-                                                  <motion.div
-                                                    key={tech.id}
-                                                    data-testid={`option-${key}-${tech.id}`}
-                                                    className={cn(
-                                                      "group relative cursor-pointer rounded-lg border p-2.5 transition-all sm:p-3",
-                                                      isSelected
-                                                        ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                                                        : "border-border bg-fd-background hover:border-primary/40 hover:bg-gradient-to-br hover:from-primary/6 hover:to-transparent hover:shadow-[0_0_10px_0px_hsl(var(--primary)/0.10)]",
-                                                    )}
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      handleTechSelect(key, tech.id);
-                                                    }}
-                                                  >
-                                                    <div className="absolute top-1.5 right-1.5 flex items-center gap-1">
-                                                      <TechResourceButtons
-                                                        category={key}
-                                                        techId={tech.id}
-                                                      />
-                                                      {tech.default && !isSelected && (
-                                                        <span className="rounded-full bg-muted px-1.5 py-0.5 font-medium text-[9px] text-muted-foreground">
-                                                          Default
-                                                        </span>
-                                                      )}
+                                                <div className="flex items-start gap-3">
+                                                  {(tech.icon !== "" || ICON_REGISTRY[tech.id]) && (
+                                                    <div className="flex shrink-0 flex-col items-center gap-1">
+                                                      <div
+                                                        className={cn(
+                                                          "flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+                                                          isSelected
+                                                            ? "bg-primary/10"
+                                                            : "bg-muted/50 group-hover:bg-muted",
+                                                        )}
+                                                      >
+                                                        <TechIcon
+                                                          techId={tech.id}
+                                                          icon={tech.icon}
+                                                          name={tech.name}
+                                                          className="h-5 w-5"
+                                                        />
+                                                      </div>
                                                     </div>
-                                                    <div className="flex items-start gap-2.5">
-                                                      {key === "shadcnColorTheme" ||
-                                                      key === "shadcnBaseColor" ? (
-                                                        <div className="flex shrink-0 flex-col items-center gap-1">
-                                                          <div
-                                                            className={cn(
-                                                              "flex h-8 w-8 items-center justify-center rounded-md transition-colors",
-                                                              isSelected
-                                                                ? "bg-primary/10"
-                                                                : "bg-muted/50 group-hover:bg-muted",
-                                                            )}
-                                                          >
-                                                            <div
-                                                              className={cn(
-                                                                "h-4 w-4 rounded-full bg-gradient-to-br",
-                                                                tech.color,
-                                                              )}
-                                                            />
-                                                          </div>
-                                                        </div>
-                                                      ) : (
-                                                        (tech.icon !== "" ||
-                                                          ICON_REGISTRY[tech.id]) && (
+                                                  )}
+                                                  <div className="min-w-0 flex-1 pt-0.5">
+                                                    <span
+                                                      className={cn(
+                                                        "block font-semibold text-sm",
+                                                        isSelected
+                                                          ? "text-primary"
+                                                          : "text-foreground",
+                                                      )}
+                                                    >
+                                                      {tech.name}
+                                                    </span>
+                                                    <p className="mt-0.5 line-clamp-2 text-muted-foreground text-xs leading-relaxed">
+                                                      {tech.description}
+                                                    </p>
+                                                    {isDisabled && disabledReason && (
+                                                      <DisabledReasonInline
+                                                        reason={disabledReason}
+                                                      />
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              </motion.div>
+                                            );
+                                          })}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </section>
+
+                          {/* shadcn/ui Configuration - shown only when shadcn-ui is selected */}
+                          {categoryKey === "uiLibrary" && (
+                            <AnimatePresence>
+                              {stack.uiLibrary === "shadcn-ui" && (
+                                <motion.section
+                                  ref={(el) => {
+                                    sectionRefs.current.shadcnBase = el;
+                                  }}
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                                  data-testid="category-shadcnBase"
+                                  className="mb-6 scroll-mt-4 sm:mb-8 overflow-hidden"
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleSection("shadcnBase")}
+                                    data-testid="category-toggle-shadcnBase"
+                                    className="mb-3 flex w-full items-center gap-2 border-b border-border pb-2 text-left transition-opacity hover:opacity-80"
+                                  >
+                                    <Terminal className="h-4 w-4 shrink-0 text-muted-foreground sm:h-5 sm:w-5" />
+                                    <h2 className="flex-1 font-mono text-foreground text-sm sm:text-base">
+                                      shadcn/ui Configuration
+                                    </h2>
+                                    <motion.div
+                                      animate={{
+                                        rotate: collapsedSections.has("shadcnBase") ? 0 : 180,
+                                      }}
+                                      transition={{ duration: 0.2 }}
+                                    >
+                                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                    </motion.div>
+                                  </button>
+                                  <AnimatePresence initial={false}>
+                                    {!collapsedSections.has("shadcnBase") && (
+                                      <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: "auto", opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.25, ease: "easeInOut" }}
+                                        className="overflow-hidden"
+                                      >
+                                        <div className="space-y-4">
+                                          {(
+                                            [
+                                              {
+                                                key: "shadcnBase" as const,
+                                                label: "Base Library",
+                                              },
+                                              {
+                                                key: "shadcnStyle" as const,
+                                                label: "Visual Style",
+                                              },
+                                              {
+                                                key: "shadcnIconLibrary" as const,
+                                                label: "Icon Library",
+                                              },
+                                              {
+                                                key: "shadcnColorTheme" as const,
+                                                label: "Color Theme",
+                                              },
+                                              {
+                                                key: "shadcnBaseColor" as const,
+                                                label: "Base Color",
+                                              },
+                                              { key: "shadcnFont" as const, label: "Font" },
+                                              {
+                                                key: "shadcnRadius" as const,
+                                                label: "Border Radius",
+                                              },
+                                            ] as const
+                                          ).map(({ key, label }) => (
+                                            <div key={key}>
+                                              <h3 className="mb-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                                                {label}
+                                              </h3>
+                                              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4 2xl:grid-cols-5">
+                                                {(TECH_OPTIONS[key] || []).map((tech) => {
+                                                  const isSelected =
+                                                    stack[key as keyof StackState] === tech.id;
+                                                  return (
+                                                    <motion.div
+                                                      key={tech.id}
+                                                      data-testid={`option-${key}-${tech.id}`}
+                                                      className={cn(
+                                                        "group relative cursor-pointer rounded-lg border p-2.5 transition-all sm:p-3",
+                                                        isSelected
+                                                          ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                                                          : "border-border bg-fd-background hover:border-primary/40 hover:bg-gradient-to-br hover:from-primary/6 hover:to-transparent hover:shadow-[0_0_10px_0px_hsl(var(--primary)/0.10)]",
+                                                      )}
+                                                      onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleTechSelect(key, tech.id);
+                                                      }}
+                                                    >
+                                                      <div className="absolute top-1.5 right-1.5 flex items-center gap-1">
+                                                        <TechResourceButtons
+                                                          category={key}
+                                                          techId={tech.id}
+                                                        />
+                                                        {tech.default && !isSelected && (
+                                                          <span className="rounded-full bg-muted px-1.5 py-0.5 font-medium text-[9px] text-muted-foreground">
+                                                            Default
+                                                          </span>
+                                                        )}
+                                                      </div>
+                                                      <div className="flex items-start gap-2.5">
+                                                        {key === "shadcnColorTheme" ||
+                                                        key === "shadcnBaseColor" ? (
                                                           <div className="flex shrink-0 flex-col items-center gap-1">
                                                             <div
                                                               className={cn(
@@ -2844,168 +2777,188 @@ const StackBuilder = () => {
                                                                   : "bg-muted/50 group-hover:bg-muted",
                                                               )}
                                                             >
-                                                              <TechIcon
-                                                                techId={tech.id}
-                                                                icon={tech.icon}
-                                                                name={tech.name}
-                                                                className="h-4 w-4"
+                                                              <div
+                                                                className={cn(
+                                                                  "h-4 w-4 rounded-full bg-gradient-to-br",
+                                                                  tech.color,
+                                                                )}
                                                               />
                                                             </div>
                                                           </div>
-                                                        )
-                                                      )}
-                                                      <div className="min-w-0 flex-1">
-                                                        <span
-                                                          className={cn(
-                                                            "block font-semibold text-xs sm:text-sm",
-                                                            isSelected
-                                                              ? "text-primary"
-                                                              : "text-foreground",
-                                                          )}
-                                                        >
-                                                          {tech.name}
-                                                        </span>
-                                                        <p className="mt-0.5 line-clamp-1 text-muted-foreground text-[10px] sm:text-xs leading-relaxed">
-                                                          {tech.description}
-                                                        </p>
+                                                        ) : (
+                                                          (tech.icon !== "" ||
+                                                            ICON_REGISTRY[tech.id]) && (
+                                                            <div className="flex shrink-0 flex-col items-center gap-1">
+                                                              <div
+                                                                className={cn(
+                                                                  "flex h-8 w-8 items-center justify-center rounded-md transition-colors",
+                                                                  isSelected
+                                                                    ? "bg-primary/10"
+                                                                    : "bg-muted/50 group-hover:bg-muted",
+                                                                )}
+                                                              >
+                                                                <TechIcon
+                                                                  techId={tech.id}
+                                                                  icon={tech.icon}
+                                                                  name={tech.name}
+                                                                  className="h-4 w-4"
+                                                                />
+                                                              </div>
+                                                            </div>
+                                                          )
+                                                        )}
+                                                        <div className="min-w-0 flex-1">
+                                                          <span
+                                                            className={cn(
+                                                              "block font-semibold text-xs sm:text-sm",
+                                                              isSelected
+                                                                ? "text-primary"
+                                                                : "text-foreground",
+                                                            )}
+                                                          >
+                                                            {tech.name}
+                                                          </span>
+                                                          <p className="mt-0.5 line-clamp-1 text-muted-foreground text-[10px] sm:text-xs leading-relaxed">
+                                                            {tech.description}
+                                                          </p>
+                                                        </div>
                                                       </div>
-                                                    </div>
-                                                  </motion.div>
-                                                );
-                                              })}
-                                            </div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </motion.section>
-                            )}
-                          </AnimatePresence>
-                        )}
-
-                        {/* Astro Integration - shown only when Astro is selected, right after webFrontend */}
-                        {categoryKey === "webFrontend" && (
-                          <AnimatePresence>
-                            {stack.webFrontend.includes("astro") && (
-                              <motion.section
-                                ref={(el) => {
-                                  sectionRefs.current.astroIntegration = el;
-                                }}
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3, ease: "easeInOut" }}
-                                data-testid="category-astroIntegration"
-                                className="mb-6 scroll-mt-4 sm:mb-8 overflow-hidden"
-                              >
-                                <div className="mb-3 flex items-center gap-2 border-border border-b pb-2">
-                                  <Terminal className="h-4 w-4 shrink-0 text-muted-foreground sm:h-5 sm:w-5" />
-                                  <h2 className="font-mono text-foreground text-sm sm:text-base">
-                                    Astro Integration
-                                  </h2>
-                                </div>
-                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 2xl:grid-cols-4">
-                                  {(TECH_OPTIONS.astroIntegration || []).map((tech) => {
-                                    const isSelected = stack.astroIntegration === tech.id;
-                                    const isDisabled = !isOptionCompatible(
-                                      stack,
-                                      "astroIntegration",
-                                      tech.id,
-                                    );
-                                    const disabledReason = isDisabled
-                                      ? getDisabledReason(stack, "astroIntegration", tech.id)
-                                      : null;
-
-                                    return (
-                                      <motion.div
-                                        key={tech.id}
-                                        data-testid={`option-astroIntegration-${tech.id}`}
-                                        className={cn(
-                                          "group relative cursor-pointer rounded-lg border p-3 transition-all sm:p-4",
-                                          isSelected
-                                            ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                                            : isDisabled
-                                              ? "border-destructive/30 bg-destructive/5 opacity-50 hover:opacity-75"
-                                              : "border-border bg-fd-background hover:border-primary/40 hover:bg-gradient-to-br hover:from-primary/6 hover:to-transparent hover:shadow-[0_0_10px_0px_hsl(var(--primary)/0.10)]",
-                                        )}
-                                        whileHover={{ scale: 1.01 }}
-                                        whileTap={{ scale: 0.99 }}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleTechSelect("astroIntegration", tech.id);
-                                        }}
-                                        title={disabledReason || undefined}
-                                      >
-                                        {tech.default && !isSelected && (
-                                          <span className="absolute top-2 right-2 rounded-full bg-muted px-2 py-0.5 font-medium text-[10px] text-muted-foreground">
-                                            Default
-                                          </span>
-                                        )}
-                                        {tech.legacy && (
-                                          <Tooltip>
-                                            <TooltipTrigger
-                                              onClick={(e) => e.stopPropagation()}
-                                              className="absolute top-2 right-2 cursor-default"
-                                            >
-                                              <span className="rounded-sm border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] text-amber-500 dark:text-amber-400">
-                                                Legacy
-                                              </span>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                              No longer actively maintained
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        )}
-                                        <div className="flex items-start gap-3">
-                                          {(tech.icon !== "" || ICON_REGISTRY[tech.id]) && (
-                                            <div className="flex shrink-0 flex-col items-center gap-1">
-                                              <div
-                                                className={cn(
-                                                  "flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
-                                                  isSelected
-                                                    ? "bg-primary/10"
-                                                    : "bg-muted/50 group-hover:bg-muted",
-                                                )}
-                                              >
-                                                <TechIcon
-                                                  techId={tech.id}
-                                                  icon={tech.icon}
-                                                  name={tech.name}
-                                                  className="h-5 w-5"
-                                                />
+                                                    </motion.div>
+                                                  );
+                                                })}
                                               </div>
                                             </div>
-                                          )}
-                                          <div className="min-w-0 flex-1 pt-0.5">
-                                            <span
-                                              className={cn(
-                                                "block font-semibold text-sm",
-                                                isSelected ? "text-primary" : "text-foreground",
-                                              )}
-                                            >
-                                              {tech.name}
-                                            </span>
-                                            <p className="mt-0.5 line-clamp-2 text-muted-foreground text-xs leading-relaxed">
-                                              {tech.description}
-                                            </p>
-                                            {isDisabled && disabledReason && (
-                                              <DisabledReasonInline reason={disabledReason} />
-                                            )}
-                                          </div>
+                                          ))}
                                         </div>
                                       </motion.div>
-                                    );
-                                  })}
-                                </div>
-                              </motion.section>
-                            )}
-                          </AnimatePresence>
-                        )}
-                      </div>
-                    );
-                  })}
+                                    )}
+                                  </AnimatePresence>
+                                </motion.section>
+                              )}
+                            </AnimatePresence>
+                          )}
+
+                          {/* Astro Integration - shown only when Astro is selected, right after webFrontend */}
+                          {categoryKey === "webFrontend" && (
+                            <AnimatePresence>
+                              {stack.webFrontend.includes("astro") && (
+                                <motion.section
+                                  ref={(el) => {
+                                    sectionRefs.current.astroIntegration = el;
+                                  }}
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                                  data-testid="category-astroIntegration"
+                                  className="mb-6 scroll-mt-4 sm:mb-8 overflow-hidden"
+                                >
+                                  <div className="mb-3 flex items-center gap-2 border-border border-b pb-2">
+                                    <Terminal className="h-4 w-4 shrink-0 text-muted-foreground sm:h-5 sm:w-5" />
+                                    <h2 className="font-mono text-foreground text-sm sm:text-base">
+                                      Astro Integration
+                                    </h2>
+                                  </div>
+                                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 2xl:grid-cols-4">
+                                    {(TECH_OPTIONS.astroIntegration || []).map((tech) => {
+                                      const isSelected = stack.astroIntegration === tech.id;
+                                      const isDisabled = !isOptionCompatible(
+                                        stack,
+                                        "astroIntegration",
+                                        tech.id,
+                                      );
+                                      const disabledReason = isDisabled
+                                        ? getDisabledReason(stack, "astroIntegration", tech.id)
+                                        : null;
+
+                                      return (
+                                        <motion.div
+                                          key={tech.id}
+                                          data-testid={`option-astroIntegration-${tech.id}`}
+                                          className={cn(
+                                            "group relative cursor-pointer rounded-lg border p-3 transition-all sm:p-4",
+                                            isSelected
+                                              ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                                              : isDisabled
+                                                ? "border-destructive/30 bg-destructive/5 opacity-50 hover:opacity-75"
+                                                : "border-border bg-fd-background hover:border-primary/40 hover:bg-gradient-to-br hover:from-primary/6 hover:to-transparent hover:shadow-[0_0_10px_0px_hsl(var(--primary)/0.10)]",
+                                          )}
+                                          whileHover={{ scale: 1.01 }}
+                                          whileTap={{ scale: 0.99 }}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleTechSelect("astroIntegration", tech.id);
+                                          }}
+                                          title={disabledReason || undefined}
+                                        >
+                                          {tech.default && !isSelected && (
+                                            <span className="absolute top-2 right-2 rounded-full bg-muted px-2 py-0.5 font-medium text-[10px] text-muted-foreground">
+                                              Default
+                                            </span>
+                                          )}
+                                          {tech.legacy && (
+                                            <Tooltip>
+                                              <TooltipTrigger
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="absolute top-2 right-2 cursor-default"
+                                              >
+                                                <span className="rounded-sm border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] text-amber-500 dark:text-amber-400">
+                                                  Legacy
+                                                </span>
+                                              </TooltipTrigger>
+                                              <TooltipContent>
+                                                No longer actively maintained
+                                              </TooltipContent>
+                                            </Tooltip>
+                                          )}
+                                          <div className="flex items-start gap-3">
+                                            {(tech.icon !== "" || ICON_REGISTRY[tech.id]) && (
+                                              <div className="flex shrink-0 flex-col items-center gap-1">
+                                                <div
+                                                  className={cn(
+                                                    "flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+                                                    isSelected
+                                                      ? "bg-primary/10"
+                                                      : "bg-muted/50 group-hover:bg-muted",
+                                                  )}
+                                                >
+                                                  <TechIcon
+                                                    techId={tech.id}
+                                                    icon={tech.icon}
+                                                    name={tech.name}
+                                                    className="h-5 w-5"
+                                                  />
+                                                </div>
+                                              </div>
+                                            )}
+                                            <div className="min-w-0 flex-1 pt-0.5">
+                                              <span
+                                                className={cn(
+                                                  "block font-semibold text-sm",
+                                                  isSelected ? "text-primary" : "text-foreground",
+                                                )}
+                                              >
+                                                {tech.name}
+                                              </span>
+                                              <p className="mt-0.5 line-clamp-2 text-muted-foreground text-xs leading-relaxed">
+                                                {tech.description}
+                                              </p>
+                                              {isDisabled && disabledReason && (
+                                                <DisabledReasonInline reason={disabledReason} />
+                                              )}
+                                            </div>
+                                          </div>
+                                        </motion.div>
+                                      );
+                                    })}
+                                  </div>
+                                </motion.section>
+                              )}
+                            </AnimatePresence>
+                          )}
+                        </div>
+                      );
+                    })}
 
                   <div className="h-10" />
                 </div>

@@ -1,10 +1,13 @@
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import { ArrowRight, Check, ClipboardCopy, Github } from "lucide-react";
+import { motion } from "motion/react";
 import { useState } from "react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
+import { type BuilderMode, useBuilderMode } from "@/lib/builder-mode-bridge";
 import { parseStackFromUrlRecord } from "@/lib/stack-url-state.shared";
 import { generateStackCommand } from "@/lib/stack-utils";
+import { cn } from "@/lib/utils";
 
 const BUILDER_COMMAND_SEARCH = { view: "command", file: "" } as const;
 const BUILDER_PRESETS_SEARCH = { view: "presets", file: "" } as const;
@@ -55,13 +58,63 @@ function HeaderCopyButton() {
   );
 }
 
+// The builder's creation-mode switch, rendered in the header on the builder
+// page. State lives in the StackBuilder and is bridged here via useBuilderMode.
+function StackModeToggle({
+  mode,
+  onChange,
+}: {
+  mode: BuilderMode;
+  onChange: (mode: BuilderMode) => void;
+}) {
+  const options: Array<{ value: BuilderMode; label: string }> = [
+    { value: "solo", label: "Solo" },
+    { value: "multi", label: "Multi-Ecosystem" },
+  ];
+
+  return (
+    <fieldset
+      aria-label="Creation method"
+      className="relative inline-flex rounded-lg border border-border/60 bg-muted/40 p-0.5 shadow-sm"
+    >
+      {options.map((option) => {
+        const active = mode === option.value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            data-testid={`stack-mode-${option.value}`}
+            aria-pressed={active}
+            onClick={() => onChange(option.value)}
+            className={cn(
+              "relative cursor-pointer rounded-[7px] px-3.5 py-1.5 text-center text-xs font-medium transition-colors duration-200",
+              active ? "text-[#0c0c0e]" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {active && (
+              <motion.span
+                layoutId="creation-mode-indicator"
+                className="absolute inset-0 rounded-[7px] bg-[#C6E853] shadow-sm"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+              />
+            )}
+            <span className="relative z-10">{option.label}</span>
+          </button>
+        );
+      })}
+    </fieldset>
+  );
+}
+
 export function Navbar() {
   const matchRoute = useMatchRoute();
   const onBuilder = Boolean(matchRoute({ to: "/new" }));
+  const builderMode = useBuilderMode();
+  const showModeToggle = onBuilder && builderMode.active;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
-      <nav className="container mx-auto flex h-14 items-center justify-between gap-3 px-4 sm:px-6">
+      <nav className="container relative mx-auto flex h-14 items-center justify-between gap-3 px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-5 sm:gap-7">
           <Link
             to="/"
@@ -75,37 +128,47 @@ export function Navbar() {
               better<span className="text-muted-foreground">/</span>fullstack
             </span>
           </Link>
-          <span className="hidden h-4 w-px bg-border sm:block" aria-hidden />
-          <div className="hidden items-center gap-5 sm:flex sm:gap-7">
-            <Link
-              to="/new"
-              search={BUILDER_COMMAND_SEARCH}
-              className={NAV_LINK_CLASS}
-              activeProps={DOCS_ACTIVE_PROPS}
-            >
-              Builder
-            </Link>
-            <Link
-              to="/new"
-              search={BUILDER_PRESETS_SEARCH}
-              className={NAV_LINK_CLASS}
-              activeProps={DOCS_ACTIVE_PROPS}
-            >
-              Presets
-            </Link>
-            <Link to="/mcp" className={NAV_LINK_CLASS} activeProps={DOCS_ACTIVE_PROPS}>
-              MCP
-            </Link>
-            <Link
-              to="/docs"
-              activeOptions={DOCS_ACTIVE_OPTIONS}
-              className={NAV_LINK_CLASS}
-              activeProps={DOCS_ACTIVE_PROPS}
-            >
-              Docs
-            </Link>
-          </div>
+          {!onBuilder && (
+            <>
+              <span className="hidden h-4 w-px bg-border sm:block" aria-hidden />
+              <div className="hidden items-center gap-5 sm:flex sm:gap-7">
+                <Link
+                  to="/new"
+                  search={BUILDER_COMMAND_SEARCH}
+                  className={NAV_LINK_CLASS}
+                  activeProps={DOCS_ACTIVE_PROPS}
+                >
+                  Builder
+                </Link>
+                <Link
+                  to="/new"
+                  search={BUILDER_PRESETS_SEARCH}
+                  className={NAV_LINK_CLASS}
+                  activeProps={DOCS_ACTIVE_PROPS}
+                >
+                  Presets
+                </Link>
+                <Link to="/mcp" className={NAV_LINK_CLASS} activeProps={DOCS_ACTIVE_PROPS}>
+                  MCP
+                </Link>
+                <Link
+                  to="/docs"
+                  activeOptions={DOCS_ACTIVE_OPTIONS}
+                  className={NAV_LINK_CLASS}
+                  activeProps={DOCS_ACTIVE_PROPS}
+                >
+                  Docs
+                </Link>
+              </div>
+            </>
+          )}
         </div>
+
+        {showModeToggle && (
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <StackModeToggle mode={builderMode.mode} onChange={builderMode.setMode} />
+          </div>
+        )}
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <a
