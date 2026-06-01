@@ -8,13 +8,11 @@ type PackageJson = {
   name?: string;
   scripts?: Record<string, string>;
   workspaces?: string[] | { packages?: string[]; catalog?: Record<string, string> };
-  packageManager?: string;
-  exports?: Record<string, string>;
   overrides?: Record<string, string>;
   resolutions?: Record<string, string>;
-  pnpm?: {
-    overrides?: Record<string, string>;
-  };
+  pnpm?: { overrides?: Record<string, string> };
+  packageManager?: string;
+  exports?: Record<string, string>;
 };
 
 describe("processPackageConfigs", () => {

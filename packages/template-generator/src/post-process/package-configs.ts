@@ -14,13 +14,13 @@ type PackageJson = {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   workspaces?: string[] | { packages?: string[]; catalog?: Record<string, string> };
-  packageManager?: string;
   overrides?: Record<string, string>;
   resolutions?: Record<string, string>;
   pnpm?: {
     overrides?: Record<string, string>;
     [key: string]: unknown;
   };
+  packageManager?: string;
   [key: string]: unknown;
 };
 
@@ -37,6 +37,8 @@ const VIRTUAL_PACKAGE_MANAGER_VERSIONS: Record<ProjectConfig["packageManager"], 
   bun: "1.3.5",
   yarn: "4.12.0",
 };
+
+const BETTER_AUTH_KYSELY_OVERRIDE = "0.28.17";
 
 /**
  * Update all package.json files with proper names, scripts, and workspaces
@@ -186,27 +188,25 @@ function applyBetterAuthKyselyOverride(pkgJson: PackageJson, config: ProjectConf
 
   // Better Auth 1.6.x imports migration exports removed in Kysely 0.29.
   // Pin the transitive peer until Better Auth supports the newer Kysely API.
-  const kyselyVersion = "0.28.17";
-
   switch (config.packageManager) {
     case "pnpm":
       pkgJson.pnpm = pkgJson.pnpm || {};
       pkgJson.pnpm.overrides = {
         ...pkgJson.pnpm.overrides,
-        kysely: kyselyVersion,
+        kysely: BETTER_AUTH_KYSELY_OVERRIDE,
       };
       break;
     case "yarn":
       pkgJson.resolutions = {
         ...pkgJson.resolutions,
-        kysely: kyselyVersion,
+        kysely: BETTER_AUTH_KYSELY_OVERRIDE,
       };
       break;
     case "bun":
     case "npm":
       pkgJson.overrides = {
         ...pkgJson.overrides,
-        kysely: kyselyVersion,
+        kysely: BETTER_AUTH_KYSELY_OVERRIDE,
       };
       break;
     default: {
