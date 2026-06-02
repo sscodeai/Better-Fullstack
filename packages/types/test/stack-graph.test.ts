@@ -36,6 +36,23 @@ describe("stack graph", () => {
     expect(lowered.database).toBe("postgres");
   });
 
+  it("lowers scoped graph capability parts through their legacy categories", () => {
+    const stackParts = parseStackPartSpecs([
+      "backend:elixir:phoenix",
+      "backend.email:elixir:swoosh",
+      "backend.caching:elixir:cachex",
+      "backend.observability:elixir:telemetry",
+    ]);
+    const result = validateStackParts(stackParts);
+    const lowered = stackPartsToLegacyProjectConfigPartial(stackParts);
+
+    expect(result.issues).toEqual([]);
+    expect(lowered.elixirWebFramework).toBe("phoenix");
+    expect(lowered.elixirEmail).toBe("swoosh");
+    expect(lowered.elixirCaching).toBe("cachex");
+    expect(lowered.elixirObservability).toBe("telemetry");
+  });
+
   it("filters options by role and ecosystem so backend tools do not leak into frontend discovery", () => {
     expect(getStackPartOptions({ role: "frontend", ecosystem: "typescript" })).toContain("next");
     expect(getStackPartOptions({ role: "frontend", ecosystem: "typescript" })).not.toContain(

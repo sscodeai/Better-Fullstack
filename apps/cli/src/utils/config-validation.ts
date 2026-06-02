@@ -28,6 +28,9 @@ export function validateDatabaseOrmAuth(cfg: Partial<ProjectConfig>, flags?: Set
   const db = cfg.database;
   const orm = cfg.orm;
   const has = (k: string) => (flags ? flags.has(k) : true);
+  const hasGraphOrm = cfg.stackParts?.some(
+    (part) => part.role === "orm" && part.source !== "provided",
+  );
 
   if (has("orm") && has("database") && orm === "mongoose" && db !== "mongodb") {
     incompatibilityError({
@@ -118,7 +121,8 @@ export function validateDatabaseOrmAuth(cfg: Partial<ProjectConfig>, flags?: Set
     db !== "none" &&
     db !== "edgedb" &&
     db !== "redis" &&
-    orm === "none"
+    orm === "none" &&
+    !hasGraphOrm
   ) {
     missingRequirementError({
       message: "Database selection requires an ORM.",
@@ -380,8 +384,17 @@ export function validateBackendNoneConstraints(
   providedFlags: Set<string>,
 ) {
   const { backend } = config;
+  const hasGraphBackend = config.stackParts?.some(
+    (part) =>
+      part.role === "backend" &&
+      !part.ownerPartId &&
+      part.source !== "provided" &&
+      part.ecosystem !== "typescript" &&
+      part.ecosystem !== "react-native" &&
+      part.ecosystem !== "universal",
+  );
 
-  if (backend !== "none") {
+  if (backend !== "none" || hasGraphBackend) {
     return;
   }
 
@@ -994,7 +1007,30 @@ export function validateFullConfig(
   validateJavaConstraints(config, providedFlags);
   validateElixirConstraints(config);
 
-  validateServerDeployRequiresBackend(config.serverDeploy, config.backend);
+  const hasGraphBackend = config.stackParts?.some(
+    (part) =>
+      part.role === "backend" &&
+      !part.ownerPartId &&
+      part.source !== "provided" &&
+      part.ecosystem !== "typescript" &&
+      part.ecosystem !== "react-native" &&
+      part.ecosystem !== "universal",
+  );
+  const shouldDeferInteractiveServerDeployValidation =
+    providedFlags.has("serverDeploy") &&
+    !options.yes &&
+    !options.part?.length &&
+    options.ecosystem === undefined &&
+    options.backend === undefined &&
+    config.stackParts === undefined;
+
+  if (!shouldDeferInteractiveServerDeployValidation) {
+    validateServerDeployRequiresBackend(
+      config.serverDeploy,
+      config.backend,
+      Boolean(hasGraphBackend),
+    );
+  }
 
   validateSelfBackendCompatibility(providedFlags, options, config);
   validateWorkersCompatibility(providedFlags, options, config);

@@ -757,6 +757,12 @@ export function stackPartsToLegacyProjectConfigPartial(
       continue;
     }
 
+    const definition = findDefinition(part);
+    if (definition?.legacyCategory) {
+      (config as Record<string, unknown>)[definition.legacyCategory] = part.toolId;
+      continue;
+    }
+
     if (part.role === "orm") {
       if (part.ecosystem === "typescript") config.orm = part.toolId as ProjectConfig["orm"];
       if (part.ecosystem === "rust") config.rustOrm = part.toolId as ProjectConfig["rustOrm"];

@@ -340,13 +340,128 @@ const GRAPH_MANAGED_CATEGORY_SET = new Set<keyof typeof TECH_OPTIONS>([
   "elixirAuth",
 ]);
 
-const GRAPH_COMMON_CATEGORY_SET = new Set<keyof typeof TECH_OPTIONS>([
+const GRAPH_TYPESCRIPT_BACKEND_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
+  "payments",
+  "email",
+  "fileUpload",
+  "backendLibraries",
+  "ai",
+  "realtime",
+  "jobQueue",
+  "logging",
+  "observability",
+  "featureFlags",
+  "caching",
+  "i18n",
+  "cms",
+  "search",
+  "fileStorage",
+];
+
+const GRAPH_RUST_BACKEND_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
+  "rustCli",
+  "rustLibraries",
+  "rustLogging",
+  "rustErrorHandling",
+  "rustCaching",
+  "email",
+  "observability",
+  "caching",
+  "search",
+];
+
+const GRAPH_PYTHON_BACKEND_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
+  "pythonValidation",
+  "pythonAi",
+  "pythonTaskQueue",
+  "pythonGraphql",
+  "pythonQuality",
+  "email",
+  "observability",
+  "caching",
+  "search",
+];
+
+const GRAPH_GO_BACKEND_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
+  "goCli",
+  "goLogging",
+  "email",
+  "observability",
+  "caching",
+  "search",
+];
+
+const GRAPH_JAVA_BACKEND_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
+  "javaBuildTool",
+  "javaLibraries",
+  "javaTestingLibraries",
+  "email",
+  "observability",
+  "caching",
+  "search",
+];
+
+const GRAPH_ELIXIR_BACKEND_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
+  "elixirRealtime",
+  "elixirJobs",
+  "elixirValidation",
+  "elixirHttp",
+  "elixirJson",
+  "elixirEmail",
+  "elixirCaching",
+  "elixirObservability",
+  "elixirTesting",
+  "elixirQuality",
+  "elixirDeploy",
+];
+
+const GRAPH_COMMON_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
+  "codeQuality",
+  "documentation",
+  "appPlatforms",
+  "examples",
+  "dbSetup",
+  "webDeploy",
+  "serverDeploy",
   "packageManager",
   "aiDocs",
   "versionChannel",
   "git",
   "install",
-]);
+];
+
+const GRAPH_BACKEND_ADVANCED_STACK_KEYS_BY_ECOSYSTEM = {
+  typescript: [
+    "payments",
+    "fileUpload",
+    "backendLibraries",
+    "aiSdk",
+    "realtime",
+    "jobQueue",
+    "logging",
+    "featureFlags",
+    "i18n",
+    "cms",
+    "fileStorage",
+  ],
+  rust: ["rustCli", "rustLibraries", "rustLogging", "rustErrorHandling", "rustCaching"],
+  python: ["pythonValidation", "pythonAi", "pythonTaskQueue", "pythonGraphql", "pythonQuality"],
+  go: ["goCli", "goLogging"],
+  java: ["javaBuildTool", "javaLibraries", "javaTestingLibraries"],
+  elixir: [
+    "elixirRealtime",
+    "elixirJobs",
+    "elixirValidation",
+    "elixirHttp",
+    "elixirJson",
+    "elixirEmail",
+    "elixirCaching",
+    "elixirObservability",
+    "elixirTesting",
+    "elixirQuality",
+    "elixirDeploy",
+  ],
+} as const satisfies Record<GraphBackendEcosystem, readonly (keyof StackState)[]>;
 
 function isGraphBackendEcosystem(
   ecosystem: StackPartEcosystem,
@@ -520,6 +635,52 @@ function graphSelectionToSpecs(selection: GraphSelection): string[] {
   return specs;
 }
 
+function getGraphBackendAdvancedCategoryOrder(
+  ecosystem: GraphBackendEcosystem,
+): Array<keyof typeof TECH_OPTIONS> {
+  switch (ecosystem) {
+    case "typescript":
+      return GRAPH_TYPESCRIPT_BACKEND_CATEGORY_ORDER;
+    case "rust":
+      return GRAPH_RUST_BACKEND_CATEGORY_ORDER;
+    case "python":
+      return GRAPH_PYTHON_BACKEND_CATEGORY_ORDER;
+    case "go":
+      return GRAPH_GO_BACKEND_CATEGORY_ORDER;
+    case "java":
+      return GRAPH_JAVA_BACKEND_CATEGORY_ORDER;
+    case "elixir":
+      return GRAPH_ELIXIR_BACKEND_CATEGORY_ORDER;
+  }
+}
+
+function getMultiFinalizeCategoryOrder(
+  selection: GraphSelection,
+): Array<keyof typeof TECH_OPTIONS> {
+  const backendCategories =
+    selection.backend === "none"
+      ? []
+      : getGraphBackendAdvancedCategoryOrder(selection.backendEcosystem);
+
+  return [...new Set([...backendCategories, ...GRAPH_COMMON_CATEGORY_ORDER])];
+}
+
+function getGraphBackendAdvancedResetPatch(
+  selectedBackendEcosystem: GraphBackendEcosystem | undefined,
+): Partial<StackState> {
+  const patch: Partial<StackState> = {};
+
+  for (const [ecosystem, keys] of Object.entries(GRAPH_BACKEND_ADVANCED_STACK_KEYS_BY_ECOSYSTEM)) {
+    if (ecosystem === selectedBackendEcosystem) continue;
+
+    for (const key of keys) {
+      patch[key] = DEFAULT_STACK[key] as never;
+    }
+  }
+
+  return patch;
+}
+
 function stackPatchFromGraphSpecs(specs: string[]): Partial<StackState> {
   const patch: Partial<StackState> = {
     stackMode: "multi",
@@ -592,6 +753,13 @@ function stackPatchFromGraphSpecs(specs: string[]): Partial<StackState> {
         (patch as Record<string, unknown>)[backendConfig.authStackKey] = backendAuth.toolId;
       }
     }
+
+    Object.assign(
+      patch,
+      getGraphBackendAdvancedResetPatch(
+        backend && isGraphBackendEcosystem(backend.ecosystem) ? backend.ecosystem : undefined,
+      ),
+    );
   } catch {
     return patch;
   }
@@ -1651,14 +1819,14 @@ const StackBuilder = ({ initialStack }: { initialStack?: StackState }) => {
   const categoryOrder = useMemo(() => {
     return getCategoryOrderForEcosystem(stack.ecosystem);
   }, [stack.ecosystem]);
+  const graphSelection = useMemo(() => getGraphSelection(stack), [stack]);
 
   const displayedCategoryOrder = useMemo(() => {
     if (stack.stackMode !== "multi") return categoryOrder;
-    return categoryOrder.filter(
-      (categoryKey) =>
-        !GRAPH_MANAGED_CATEGORY_SET.has(categoryKey) && GRAPH_COMMON_CATEGORY_SET.has(categoryKey),
+    return getMultiFinalizeCategoryOrder(graphSelection).filter(
+      (categoryKey) => !GRAPH_MANAGED_CATEGORY_SET.has(categoryKey),
     );
-  }, [categoryOrder, stack.stackMode]);
+  }, [categoryOrder, graphSelection, stack.stackMode]);
   const multiActiveStepIndex = Math.max(
     0,
     MULTI_STACK_STEPS.findIndex((step) => step.id === multiActiveStep),
@@ -1748,8 +1916,26 @@ const StackBuilder = ({ initialStack }: { initialStack?: StackState }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const getCompatibilityStackForCategory = (category: keyof typeof TECH_OPTIONS): StackState => {
+    if (stack.stackMode !== "multi" || multiActiveStep !== "finalize") return stack;
+    if (graphSelection.backend === "none") return stack;
+
+    const backendCategories = getGraphBackendAdvancedCategoryOrder(graphSelection.backendEcosystem);
+    const stackWithGraphBackend = {
+      ...stack,
+      backend: stack.backend === "none" ? ("hono" as StackState["backend"]) : stack.backend,
+    };
+
+    if (!backendCategories.includes(category)) return stackWithGraphBackend;
+
+    return {
+      ...stackWithGraphBackend,
+      ecosystem: graphSelection.backendEcosystem as Ecosystem,
+    };
+  };
+
   const handleTechSelect = (category: keyof typeof TECH_OPTIONS, techId: string) => {
-    if (!isOptionCompatible(stack, category, techId)) return;
+    if (!isOptionCompatible(getCompatibilityStackForCategory(category), category, techId)) return;
 
     startTransition(() => {
       setStack((currentStack: StackState) => {
@@ -2120,7 +2306,7 @@ const StackBuilder = ({ initialStack }: { initialStack?: StackState }) => {
         >
           {stack.stackMode !== "multi" && (
             <div className="relative shrink-0 border-b border-border/60 bg-fd-background">
-              <div className="grid grid-cols-5">
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7">
                 {ECOSYSTEMS.map((eco) => {
                   const isActive = stack.ecosystem === eco.id;
                   return (
@@ -2580,18 +2766,24 @@ const StackBuilder = ({ initialStack }: { initialStack?: StackState }) => {
                                         )}
                                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 2xl:grid-cols-4">
                                           {group.options.map((tech) => {
+                                            const compatibilityStack =
+                                              getCompatibilityStackForCategory(group.category);
                                             const isSelected = isSelectedCheck(
                                               stack,
                                               group.category,
                                               tech.id,
                                             );
                                             const isDisabled = !isOptionCompatible(
-                                              stack,
+                                              compatibilityStack,
                                               group.category,
                                               tech.id,
                                             );
                                             const disabledReason = isDisabled
-                                              ? getDisabledReason(stack, group.category, tech.id)
+                                              ? getDisabledReason(
+                                                  compatibilityStack,
+                                                  group.category,
+                                                  tech.id,
+                                                )
                                               : null;
 
                                             return (

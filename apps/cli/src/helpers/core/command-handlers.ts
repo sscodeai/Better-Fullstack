@@ -20,6 +20,7 @@ import { isSilent, runWithContextAsync } from "../../utils/context";
 import { displayConfig } from "../../utils/display-config";
 import { CLIError, UserCancelledError } from "../../utils/errors";
 import { generateReproducibleCommand } from "../../utils/generate-reproducible-command";
+import { runGeneratedChecks } from "../../utils/generated-checks";
 import { displayPreflightWarnings } from "../../utils/preflight-display";
 import { handleDirectoryConflict, setupProjectDirectory } from "../../utils/project-directory";
 import { addToHistory } from "../../utils/project-history";
@@ -357,6 +358,7 @@ export async function createProjectHandler(
           currentPathInput,
         );
         config = { ...gatheredConfig, versionChannel };
+        validateConfigCompatibility(config, providedFlags, cliInput);
       }
 
       const preflight = validatePreflightConfig(config);
@@ -438,6 +440,10 @@ export async function createProjectHandler(
       await createProject(config, {
         manualDb: cliInput.manualDb ?? input.manualDb,
       });
+
+      if (cliInput.verify ?? input.verify) {
+        await runGeneratedChecks(config);
+      }
 
       const reproducibleCommand = generateReproducibleCommand(config);
       if (!isSilent()) {

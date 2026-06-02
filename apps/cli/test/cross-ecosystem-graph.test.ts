@@ -268,6 +268,13 @@ describe("Cross-ecosystem graph generation", () => {
     expect(fileContent(goGin.tree!.root, "apps/server/cmd/server/main.go")).toContain(
       'Access-Control-Allow-Origin", "*"',
     );
+    expect(
+      (
+        JSON.parse(fileContent(goGin.tree!.root, "package.json")) as {
+          scripts?: Record<string, string>;
+        }
+      ).scripts?.["setup:server"],
+    ).toBe("cd apps/server && go mod tidy");
 
     const spring = await createVirtual({
       projectName: "cors-spring",

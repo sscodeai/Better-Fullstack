@@ -837,6 +837,16 @@ const GRAPH_TYPESCRIPT_FRONTEND_FLAG_KEYS = [
   ["animation", "animation"],
 ] as const satisfies readonly [StackSelectionStringKey, string][];
 
+const GRAPH_SHADCN_FLAG_KEYS = [
+  ["shadcnBase", "shadcn-base"],
+  ["shadcnStyle", "shadcn-style"],
+  ["shadcnIconLibrary", "shadcn-icon-library"],
+  ["shadcnColorTheme", "shadcn-color-theme"],
+  ["shadcnBaseColor", "shadcn-base-color"],
+  ["shadcnFont", "shadcn-font"],
+  ["shadcnRadius", "shadcn-radius"],
+] as const satisfies readonly [StackSelectionStringKey, string][];
+
 const GRAPH_MOBILE_FLAG_KEYS = [
   ["mobileNavigation", "mobile-navigation"],
   ["mobileUI", "mobile-ui"],
@@ -847,12 +857,119 @@ const GRAPH_MOBILE_FLAG_KEYS = [
   ["mobileDeepLinking", "mobile-deep-linking"],
 ] as const satisfies readonly [StackSelectionStringKey, string][];
 
+const GRAPH_GLOBAL_FLAG_KEYS = [
+  ["dbSetup", "db-setup"],
+  ["webDeploy", "web-deploy"],
+  ["serverDeploy", "server-deploy"],
+] as const satisfies readonly [StackSelectionStringKey, string][];
+
+const GRAPH_TYPESCRIPT_BACKEND_FLAG_KEYS = [
+  ["payments", "payments"],
+  ["email", "email"],
+  ["fileUpload", "file-upload"],
+  ["backendLibraries", "effect"],
+  ["aiSdk", "ai"],
+  ["realtime", "realtime"],
+  ["jobQueue", "job-queue"],
+  ["logging", "logging"],
+  ["observability", "observability"],
+  ["featureFlags", "feature-flags"],
+  ["caching", "caching"],
+  ["i18n", "i18n"],
+  ["cms", "cms"],
+  ["search", "search"],
+  ["fileStorage", "file-storage"],
+] as const satisfies readonly [StackSelectionStringKey, string][];
+
+const GRAPH_SHARED_BACKEND_FLAG_KEYS = [
+  ["email", "email"],
+  ["observability", "observability"],
+  ["caching", "caching"],
+  ["search", "search"],
+] as const satisfies readonly [StackSelectionStringKey, string][];
+
+const GRAPH_RUST_BACKEND_FLAG_KEYS = [
+  ["rustCli", "rust-cli"],
+  ["rustLogging", "rust-logging"],
+  ["rustErrorHandling", "rust-error-handling"],
+  ["rustCaching", "rust-caching"],
+] as const satisfies readonly [StackSelectionStringKey, string][];
+
+const GRAPH_PYTHON_BACKEND_FLAG_KEYS = [
+  ["pythonValidation", "python-validation"],
+  ["pythonTaskQueue", "python-task-queue"],
+  ["pythonGraphql", "python-graphql"],
+  ["pythonQuality", "python-quality"],
+] as const satisfies readonly [StackSelectionStringKey, string][];
+
+const GRAPH_GO_BACKEND_FLAG_KEYS = [
+  ["goCli", "go-cli"],
+  ["goLogging", "go-logging"],
+] as const satisfies readonly [StackSelectionStringKey, string][];
+
+const GRAPH_JAVA_BACKEND_FLAG_KEYS = [
+  ["javaBuildTool", "java-build-tool"],
+] as const satisfies readonly [StackSelectionStringKey, string][];
+
+const GRAPH_ELIXIR_BACKEND_FLAG_KEYS = [
+  ["elixirRealtime", "elixir-realtime"],
+  ["elixirJobs", "elixir-jobs"],
+  ["elixirValidation", "elixir-validation"],
+  ["elixirHttp", "elixir-http"],
+  ["elixirJson", "elixir-json"],
+  ["elixirEmail", "elixir-email"],
+  ["elixirCaching", "elixir-caching"],
+  ["elixirObservability", "elixir-observability"],
+  ["elixirTesting", "elixir-testing"],
+  ["elixirQuality", "elixir-quality"],
+  ["elixirDeploy", "elixir-deploy"],
+] as const satisfies readonly [StackSelectionStringKey, string][];
+
 function formatChangedStringFlag(
   selection: StackSelectionInput,
   key: StackSelectionStringKey,
   flag: string,
 ) {
   return selection[key] === DEFAULT_STACK_SELECTION[key] ? undefined : `--${flag} ${selection[key]}`;
+}
+
+type StackSelectionArrayKey = {
+  [K in keyof StackSelectionState]: StackSelectionState[K] extends string[] ? K : never;
+}[keyof StackSelectionState];
+
+function formatChangedArraySelectionFlag(
+  selection: StackSelectionInput,
+  key: StackSelectionArrayKey,
+  flag: string,
+) {
+  return areStringArraysEqual(selection[key], DEFAULT_STACK_SELECTION[key])
+    ? undefined
+    : formatArrayFlag(flag, selection[key]);
+}
+
+function formatChangedStringFlags(
+  selection: StackSelectionInput,
+  keys: readonly [StackSelectionStringKey, string][],
+) {
+  return keys.flatMap(([key, flag]) => {
+    const formattedFlag = formatChangedStringFlag(selection, key, flag);
+    return formattedFlag ? [formattedFlag] : [];
+  });
+}
+
+function hasGraphPrimaryPart(
+  parts: readonly { role: string; ecosystem: string; toolId?: string; ownerPartId?: string }[],
+  role: "frontend" | "backend" | "mobile" | "database",
+  ecosystem?: string,
+  toolId?: string,
+) {
+  return parts.some(
+    (part) =>
+      part.role === role &&
+      !part.ownerPartId &&
+      (!ecosystem || part.ecosystem === ecosystem) &&
+      (!toolId || part.toolId === toolId),
+  );
 }
 
 function mapBackendToCli(backend: string) {
@@ -1183,26 +1300,76 @@ function getBaseCommand(selection: StackSelectionInput) {
 
 function generateGraphCommand(selection: StackSelectionInput, projectName: string) {
   const stackParts = getGraphStackParts(selection);
-  const hasTypeScriptFrontend = stackParts.some(
-    (part) => part.role === "frontend" && part.ecosystem === "typescript" && !part.ownerPartId,
-  );
-  const hasMobile = stackParts.some((part) => part.role === "mobile" && !part.ownerPartId);
+  const hasTypeScriptFrontend = hasGraphPrimaryPart(stackParts, "frontend", "typescript");
+  const hasAstroFrontend = hasGraphPrimaryPart(stackParts, "frontend", "typescript", "astro");
+  const hasTypeScriptBackend = hasGraphPrimaryPart(stackParts, "backend", "typescript");
+  const hasRustBackend = hasGraphPrimaryPart(stackParts, "backend", "rust");
+  const hasPythonBackend = hasGraphPrimaryPart(stackParts, "backend", "python");
+  const hasGoBackend = hasGraphPrimaryPart(stackParts, "backend", "go");
+  const hasJavaBackend = hasGraphPrimaryPart(stackParts, "backend", "java");
+  const hasElixirBackend = hasGraphPrimaryPart(stackParts, "backend", "elixir");
+  const hasNonTypeScriptBackend =
+    hasRustBackend || hasPythonBackend || hasGoBackend || hasJavaBackend || hasElixirBackend;
+  const hasMobile = hasGraphPrimaryPart(stackParts, "mobile");
   const flags = [
     ...stackParts
       .filter((part) => part.source !== "provided")
       .map((part) => `--part ${formatStackPartSpec(part, stackParts)}`),
     ...(hasTypeScriptFrontend
-      ? GRAPH_TYPESCRIPT_FRONTEND_FLAG_KEYS.flatMap(([key, flag]) => {
-          const formattedFlag = formatChangedStringFlag(selection, key, flag);
-          return formattedFlag ? [formattedFlag] : [];
-        })
+      ? formatChangedStringFlags(selection, GRAPH_TYPESCRIPT_FRONTEND_FLAG_KEYS)
+      : []),
+    ...(hasAstroFrontend && selection.astroIntegration !== "none"
+      ? [`--astro-integration ${selection.astroIntegration}`]
+      : []),
+    ...(hasTypeScriptFrontend && selection.uiLibrary === "shadcn-ui"
+      ? formatChangedStringFlags(selection, GRAPH_SHADCN_FLAG_KEYS)
+      : []),
+    ...(hasTypeScriptBackend
+      ? formatChangedStringFlags(selection, GRAPH_TYPESCRIPT_BACKEND_FLAG_KEYS)
+      : []),
+    ...(hasNonTypeScriptBackend
+      ? formatChangedStringFlags(selection, GRAPH_SHARED_BACKEND_FLAG_KEYS)
+      : []),
+    ...(hasRustBackend
+      ? [
+          ...formatChangedStringFlags(selection, GRAPH_RUST_BACKEND_FLAG_KEYS),
+          formatChangedArraySelectionFlag(selection, "rustLibraries", "rust-libraries"),
+        ].filter((flag): flag is string => Boolean(flag))
+      : []),
+    ...(hasPythonBackend
+      ? [
+          ...formatChangedStringFlags(selection, GRAPH_PYTHON_BACKEND_FLAG_KEYS),
+          formatChangedArraySelectionFlag(selection, "pythonAi", "python-ai"),
+        ].filter((flag): flag is string => Boolean(flag))
+      : []),
+    ...(hasGoBackend ? formatChangedStringFlags(selection, GRAPH_GO_BACKEND_FLAG_KEYS) : []),
+    ...(hasJavaBackend
+      ? [
+          ...formatChangedStringFlags(selection, GRAPH_JAVA_BACKEND_FLAG_KEYS),
+          formatChangedArraySelectionFlag(selection, "javaLibraries", "java-libraries"),
+          formatChangedArraySelectionFlag(
+            selection,
+            "javaTestingLibraries",
+            "java-testing-libraries",
+          ),
+        ].filter((flag): flag is string => Boolean(flag))
+      : []),
+    ...(hasElixirBackend
+      ? formatChangedStringFlags(selection, GRAPH_ELIXIR_BACKEND_FLAG_KEYS)
       : []),
     ...(hasMobile
-      ? GRAPH_MOBILE_FLAG_KEYS.flatMap(([key, flag]) => {
-          const formattedFlag = formatChangedStringFlag(selection, key, flag);
-          return formattedFlag ? [formattedFlag] : [];
-        })
+      ? formatChangedStringFlags(selection, GRAPH_MOBILE_FLAG_KEYS)
       : []),
+    ...formatChangedStringFlags(selection, GRAPH_GLOBAL_FLAG_KEYS),
+    ...(areStringArraysEqual(
+      [...selection.codeQuality, ...selection.documentation, ...selection.appPlatforms],
+      [...DEFAULT_STACK_SELECTION.codeQuality, ...DEFAULT_STACK_SELECTION.documentation, ...DEFAULT_STACK_SELECTION.appPlatforms],
+    )
+      ? []
+      : [formatTypeScriptAddonsFlag(selection)]),
+    ...(areStringArraysEqual(selection.examples, DEFAULT_STACK_SELECTION.examples)
+      ? []
+      : [formatArrayFlag("examples", selection.examples)]),
     `--package-manager ${selection.packageManager}`,
     ...(selection.versionChannel !== "stable"
       ? [`--version-channel ${selection.versionChannel}`]

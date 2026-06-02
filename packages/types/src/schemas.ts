@@ -701,6 +701,7 @@ export const CreateInputSchema = z.object({
   yolo: z.boolean().optional(),
   verbose: z.boolean().optional(),
   dryRun: z.boolean().optional(),
+  verify: z.boolean().optional(),
   ecosystem: EcosystemSchema.optional(),
   database: DatabaseSchema.optional(),
   orm: ORMSchema.optional(),
@@ -947,6 +948,11 @@ export const ProjectConfigSchema = z.object({
 export const BetterTStackConfigSchema = z.object({
   version: z.string().describe("CLI version used to create this project"),
   createdAt: z.string().describe("Timestamp when the project was created"),
+  graphSummary: z.string().optional().describe("Human-readable summary of selected stack parts"),
+  effectiveStack: z
+    .record(z.string(), z.string())
+    .optional()
+    .describe("Graph-aware effective stack, keyed by role"),
   ecosystem: EcosystemSchema,
   database: DatabaseSchema,
   orm: ORMSchema,

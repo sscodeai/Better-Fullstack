@@ -116,7 +116,7 @@ export function getGraphBackendConnection(config: ProjectConfig): GraphBackendCo
         serverUrl: "http://localhost:8080",
         healthPath: "/health",
         healthUrl: "http://localhost:8080/health",
-        setupCommand: `cd ${targetPath} && go mod download`,
+        setupCommand: `cd ${targetPath} && go mod tidy`,
         devCommand: `cd ${targetPath} && go run cmd/server/main.go`,
         checkCommand: `cd ${targetPath} && go test ./...`,
         testCommand: `cd ${targetPath} && go test ./...`,

@@ -1,6 +1,7 @@
 import type { ProjectConfig } from "../types";
 
 import { formatStackPartSpec } from "../types";
+import { hasGraphPart } from "./graph-summary";
 
 function getBaseCommand(packageManager: ProjectConfig["packageManager"]) {
   switch (packageManager) {
@@ -194,7 +195,9 @@ function appendGraphExtraFlags(flags: string[], config: ProjectConfig) {
     appendChangedStringFlag(flags, "elixir-validation", config.elixirValidation, "ecto-changesets");
     appendChangedStringFlag(flags, "elixir-http", config.elixirHttp, "req");
     appendChangedStringFlag(flags, "elixir-json", config.elixirJson, "jason");
-    appendChangedStringFlag(flags, "elixir-email", config.elixirEmail, "none");
+    if (!hasGraphPart(config, "email", "elixir")) {
+      appendChangedStringFlag(flags, "elixir-email", config.elixirEmail, "none");
+    }
     appendChangedStringFlag(flags, "elixir-caching", config.elixirCaching, "none");
     appendChangedStringFlag(flags, "elixir-observability", config.elixirObservability, "telemetry");
     appendChangedStringFlag(flags, "elixir-testing", config.elixirTesting, "ex_unit");

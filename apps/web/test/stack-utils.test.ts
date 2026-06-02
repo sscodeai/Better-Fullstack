@@ -97,6 +97,47 @@ describe("generateStackCommand", () => {
     expect(command).not.toContain("--frontend");
     expect(command).not.toContain("--ecosystem typescript");
   });
+
+  it("keeps backend advanced options in multi-ecosystem commands", () => {
+    const command = generateStackCommand({
+      ...DEFAULT_STACK,
+      projectName: "advanced-mixed-stack",
+      stackMode: "multi",
+      stackPartSpecs: [
+        "frontend:typescript:next",
+        "backend:python:fastapi",
+        "backend.orm:python:sqlalchemy",
+      ],
+      pythonAi: ["langchain"],
+      pythonQuality: "mypy",
+      appPlatforms: ["turborepo", "docker-compose"],
+      examples: ["ai"],
+    });
+
+    expect(command).toContain("--part backend:python:fastapi");
+    expect(command).toContain("--python-ai langchain");
+    expect(command).toContain("--python-quality mypy");
+    expect(command).toContain("--addons turborepo docker-compose");
+    expect(command).toContain("--examples ai");
+    expect(command).not.toContain("--ecosystem python");
+  });
+
+  it("keeps TypeScript frontend sub-options in multi-ecosystem commands", () => {
+    const command = generateStackCommand({
+      ...DEFAULT_STACK,
+      projectName: "styled-mixed-stack",
+      stackMode: "multi",
+      stackPartSpecs: ["frontend:typescript:astro", "backend:go:gin"],
+      astroIntegration: "react",
+      shadcnStyle: "luma",
+      shadcnFont: "geist",
+    });
+
+    expect(command).toContain("--part frontend:typescript:astro");
+    expect(command).toContain("--astro-integration react");
+    expect(command).toContain("--shadcn-style luma");
+    expect(command).toContain("--shadcn-font geist");
+  });
 });
 
 describe("stack URL state helpers", () => {

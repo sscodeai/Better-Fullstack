@@ -113,6 +113,47 @@ describe("stack selection translation", () => {
     expect(command).not.toContain("--backend");
   });
 
+  it("emits changed ecosystem-specific graph flags for multi-ecosystem selections", () => {
+    const command = generateStackSelectionCommand({
+      ...DEFAULT_SELECTION,
+      stackMode: "multi",
+      projectName: "advanced-graph-app",
+      stackPartSpecs: [
+        "frontend:typescript:next",
+        "backend:elixir:phoenix",
+        "backend.orm:elixir:ecto-sql",
+      ],
+      elixirRealtime: "presence",
+      elixirDeploy: "docker",
+      appPlatforms: ["turborepo", "docker-compose"],
+      examples: ["ai"],
+    });
+
+    expect(command).toContain("--part frontend:typescript:next");
+    expect(command).toContain("--part backend:elixir:phoenix");
+    expect(command).toContain("--elixir-realtime presence");
+    expect(command).toContain("--elixir-deploy docker");
+    expect(command).toContain("--addons turborepo docker-compose");
+    expect(command).toContain("--examples ai");
+  });
+
+  it("emits changed TypeScript frontend graph sub-flags", () => {
+    const command = generateStackSelectionCommand({
+      ...DEFAULT_SELECTION,
+      stackMode: "multi",
+      projectName: "styled-graph-app",
+      stackPartSpecs: ["frontend:typescript:astro", "backend:go:gin"],
+      astroIntegration: "react",
+      shadcnStyle: "luma",
+      shadcnFont: "geist",
+    });
+
+    expect(command).toContain("--part frontend:typescript:astro");
+    expect(command).toContain("--astro-integration react");
+    expect(command).toContain("--shadcn-style luma");
+    expect(command).toContain("--shadcn-font geist");
+  });
+
   it("keeps partial CLI preselection flags out of stackParts until config is complete", () => {
     expect(cliInputToProjectConfigPartial({ orm: "prisma" })).toEqual({
       orm: "prisma",

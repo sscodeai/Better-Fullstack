@@ -1,8 +1,21 @@
 import { describe, expect, it } from "bun:test";
 
+import { ECOSYSTEM_PROMPT_OPTIONS } from "../src/prompts/ecosystem";
 import { expectError, expectSuccess, PACKAGE_MANAGERS, runTRPCTest } from "./test-utils";
 
 describe("Basic Configurations", () => {
+  it("lists every supported ecosystem in the interactive CLI picker", () => {
+    expect(ECOSYSTEM_PROMPT_OPTIONS.map((option) => option.value)).toEqual([
+      "typescript",
+      "react-native",
+      "rust",
+      "python",
+      "go",
+      "java",
+      "elixir",
+    ]);
+  });
+
   describe("Default Configuration", () => {
     it("should create project with --yes flag (default config)", async () => {
       const result = await runTRPCTest({
@@ -73,6 +86,8 @@ describe("Basic Configurations", () => {
           "database:universal:postgres",
         ],
         dryRun: true,
+        dbSetup: "docker",
+        serverDeploy: "railway",
         install: false,
       });
 
@@ -82,6 +97,8 @@ describe("Basic Configurations", () => {
       );
       expect(result.result?.projectConfig.goWebFramework).toBe("gin");
       expect(result.result?.projectConfig.database).toBe("postgres");
+      expect(result.result?.projectConfig.dbSetup).toBe("docker");
+      expect(result.result?.projectConfig.serverDeploy).toBe("railway");
       expect(result.result?.files).toContain("apps/native/package.json");
       expect(result.result?.files).toContain("apps/server/go.mod");
       expect(result.result?.files).toContain("packages/database/README.md");
@@ -133,6 +150,19 @@ describe("Basic Configurations", () => {
       });
 
       expectError(result, "can only be selected for a Phoenix LiveView backend");
+    });
+
+    it("should validate array flag exclusivity when graph part bindings skip prompts", async () => {
+      const result = await runTRPCTest({
+        projectName: "bad-graph-python-ai",
+        part: ["backend:python:fastapi"],
+        pythonAi: ["none", "langchain"],
+        dryRun: true,
+        install: false,
+        expectError: true,
+      });
+
+      expectError(result, "Cannot combine 'none' with other python ai libraries");
     });
   });
 
