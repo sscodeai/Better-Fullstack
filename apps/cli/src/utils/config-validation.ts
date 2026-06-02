@@ -31,6 +31,14 @@ export function validateDatabaseOrmAuth(cfg: Partial<ProjectConfig>, flags?: Set
   const hasGraphOrm = cfg.stackParts?.some(
     (part) => part.role === "orm" && part.source !== "provided",
   );
+  const ecosystemOrm = getEcosystemOrm(cfg);
+  const hasEcosystemOrm = ecosystemOrm !== undefined && ecosystemOrm !== "none";
+  const isNonTypeScriptSqliteDefault =
+    cfg.ecosystem !== undefined &&
+    cfg.ecosystem !== "typescript" &&
+    cfg.ecosystem !== "react-native" &&
+    db === "sqlite" &&
+    !hasEcosystemOrm;
 
   if (has("orm") && has("database") && orm === "mongoose" && db !== "mongodb") {
     incompatibilityError({
@@ -122,7 +130,9 @@ export function validateDatabaseOrmAuth(cfg: Partial<ProjectConfig>, flags?: Set
     db !== "edgedb" &&
     db !== "redis" &&
     orm === "none" &&
-    !hasGraphOrm
+    !hasGraphOrm &&
+    !hasEcosystemOrm &&
+    !isNonTypeScriptSqliteDefault
   ) {
     missingRequirementError({
       message: "Database selection requires an ORM.",
@@ -170,6 +180,48 @@ export function validateDatabaseOrmAuth(cfg: Partial<ProjectConfig>, flags?: Set
         "Set --orm none",
       ],
     });
+  }
+}
+
+function getEcosystemOrm(cfg: Partial<ProjectConfig>) {
+  switch (cfg.ecosystem) {
+    case "rust":
+      return cfg.rustOrm;
+    case "python":
+      return cfg.pythonOrm;
+    case "go":
+      return cfg.goOrm;
+    case "java":
+      return cfg.javaOrm;
+    case "elixir":
+      return cfg.elixirOrm;
+    default:
+      return undefined;
+  }
+}
+
+function getEcosystemBackend(cfg: Partial<ProjectConfig>) {
+  switch (cfg.ecosystem) {
+    case "rust":
+      return cfg.rustWebFramework && cfg.rustWebFramework !== "none"
+        ? cfg.rustWebFramework
+        : undefined;
+    case "python":
+      return cfg.pythonWebFramework && cfg.pythonWebFramework !== "none"
+        ? cfg.pythonWebFramework
+        : undefined;
+    case "go":
+      return cfg.goWebFramework && cfg.goWebFramework !== "none" ? cfg.goWebFramework : undefined;
+    case "java":
+      return cfg.javaWebFramework && cfg.javaWebFramework !== "none"
+        ? cfg.javaWebFramework
+        : undefined;
+    case "elixir":
+      return cfg.elixirWebFramework && cfg.elixirWebFramework !== "none"
+        ? cfg.elixirWebFramework
+        : undefined;
+    default:
+      return undefined;
   }
 }
 
@@ -393,8 +445,9 @@ export function validateBackendNoneConstraints(
       part.ecosystem !== "react-native" &&
       part.ecosystem !== "universal",
   );
+  const hasEcosystemBackend = getEcosystemBackend(config) !== undefined;
 
-  if (backend !== "none" || hasGraphBackend) {
+  if (backend !== "none" || hasGraphBackend || hasEcosystemBackend) {
     return;
   }
 
