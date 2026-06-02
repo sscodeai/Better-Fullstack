@@ -1,17 +1,17 @@
 # Single Source of Truth for the Stack Graph
 
 > **Active design doc — keep this updated as decisions land.**
-> Status: **Exploring** (no code changes yet)
-> Branch in question: `feat/multi-ecosystem-stack-graph`
-> Last updated: 2026-05-29
+> Status: **Phase 1 landed (foundation); Phases 2–4 planned**
+> Branch in question: `feat/multi-ecosystem-stack-graph` (shipped in PR #209)
+> Last updated: 2026-06-02
 
 ## Active State (read this first)
 
 - **Goal:** Move toward a *single source of truth* for stack configuration so Solo and Multi-Ecosystem creation cannot drift apart.
-- **Direction (tentative):** The **graph (`stackParts`) becomes the single source of truth**; the flat `ProjectConfig` becomes a *derived, generator-only projection*. Not yet committed — we are validating the approach in this doc before touching code.
-- **Settled decision:** Libraries are **owned by their part** (`ownerPartId`), the same way `orm`/`api`/`auth` already work — not global per-project fields.
+- **What shipped (PR #209):** the **stack-graph model** (`packages/types/src/stack-graph.ts`), graph-shaped schemas/compatibility/translation, CLI scoped `--part` parsing/emission, graph threading through the template generator, and the multi-ecosystem web builder redesign. The graph currently lives **alongside** the flat `ProjectConfig` (dual representation); it is not yet the sole source of truth.
+- **Direction:** The **graph (`stackParts`) becomes the single source of truth**; the flat `ProjectConfig` becomes a *derived, generator-only projection*. Foundation is in place; the authority flip and library promotion are the remaining work (see Phases 2–4).
+- **Settled decision:** Libraries are **owned by their part** (`ownerPartId`), the same way `orm`/`api`/`auth` already work — not global per-project fields. (Not yet implemented — Phase 2.)
 - **Constraint:** Neither Solo nor Multi is "legacy." Both are first-class creation modes. (See memory: project-creation-modes.) "Legacy" only ever refers to the flat config *data shape*.
-- **No code changes** until this doc has an agreed implementation phase.
 
 ---
 
@@ -76,13 +76,13 @@ There are **two categories** of configuration data and they behave differently:
 - **URL/state back-compat:** existing shared builder URLs encode flat selections; the importer must keep round-tripping them.
 - **Generator coupling:** templates read flat `ProjectConfig`; the derived projection must stay byte-for-byte equivalent to avoid scaffold regressions.
 
-## Phased Implementation Sketch (draft — not approved)
+## Phased Implementation Sketch
 
 - **Phase 0 — Inventory & invariants:** catalog every library field, its role, supported ecosystems, and existing compatibility rules. Add round-trip property tests proving flat ↔ graph is lossless for *structural* parts first.
-- **Phase 1 — Graph authoritative for structure:** make `stackParts` the single SoT for frontend/backend/mobile/database/orm/api/auth in both modes; flat structural fields become derived. Remove the mode-flip. `compareLegacyConfigToStackParts` becomes an assertion in tests, not runtime.
-- **Phase 2 — Promote libraries to owned parts:** register library tools, add `ownerPartId` scoping, extend the importer/exporter, update both UIs to write library parts. Solo collapses to single-owner.
-- **Phase 3 — Consolidate compatibility:** route library compatibility through the graph engine; retire duplicated flat rules.
-- **Phase 4 — Storage cleanup:** decide final `bts.jsonc` shape (graph-only vs graph+cache).
+- **Phase 1 — Graph foundation + structural round-trip (LANDED in PR #209):** the graph model, schemas, compatibility hooks, translation layer, CLI `--part` parsing/emission, generator threading, and the multi-ecosystem builder shipped. The graph and flat config coexist (dual representation); `compareLegacyConfigToStackParts` is still a **runtime** drift guard, not yet demoted to a test-only assertion, and the mode-dependent authority flip is not yet removed. Finishing that flip is the remaining Phase 1 work.
+- **Phase 2 — Promote libraries to owned parts:** register library tools, add `ownerPartId` scoping, extend the importer/exporter, update both UIs to write library parts. Solo collapses to single-owner. *Not started — libraries are still flat fields.*
+- **Phase 3 — Consolidate compatibility:** route library compatibility through the graph engine; retire duplicated flat rules. *Not started — flat `compatibility.ts` and graph `getStackPartCompatibilityIssue` still coexist.*
+- **Phase 4 — Storage cleanup:** decide final `bts.jsonc` shape (graph-only vs graph+cache). *Not started.*
 
 ## Reference Map (files)
 
@@ -98,3 +98,4 @@ There are **two categories** of configuration data and they behave differently:
 ## Decision Log
 
 - **2026-05-29:** Created doc. Chose "libraries owned by their part." Leaning toward "graph as single source of truth" but not committed — exploring via this doc, no code changes yet.
+- **2026-06-02:** Phase 1 foundation shipped in PR #209 (`feat/multi-ecosystem-stack-graph`): stack-graph model + schemas/compatibility/translation, CLI `--part` round-trip, generator threading, and the multi-ecosystem builder redesign. Graph coexists with the flat config rather than replacing it; Phases 2–4 (library promotion, compatibility consolidation, storage cleanup) and the structural authority flip remain open follow-ups.
