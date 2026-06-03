@@ -24,6 +24,10 @@ export function MultiEcosystemUpdateModal() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (window.navigator.webdriver) {
+      return;
+    }
+
     try {
       if (window.localStorage.getItem(MULTI_ECOSYSTEM_UPDATE_STORAGE_KEY) === null) {
         setOpen(true);
