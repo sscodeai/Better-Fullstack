@@ -1,9 +1,15 @@
 import { Link, useMatchRoute, useRouterState } from "@tanstack/react-router";
-import { ArrowRight, Check, ClipboardCopy, Github } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, ClipboardCopy, Github } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { type BuilderMode, useBuilderMode } from "@/lib/builder-mode-bridge";
 import { parseStackShareSlug } from "@/lib/stack-share-paths";
 import { parseStackFromUrlRecord } from "@/lib/stack-url-state.shared";
@@ -83,10 +89,11 @@ function StackModeToggle({
   return (
     <fieldset
       aria-label="Creation method"
-      className="relative inline-flex rounded-lg border border-border/60 bg-muted/40 p-0.5 shadow-sm"
+      className="relative inline-flex rounded-lg bg-muted/40 p-0.5 shadow-sm"
     >
       {options.map((option) => {
         const active = mode === option.value;
+        const isMulti = option.value === "multi";
         return (
           <button
             key={option.value}
@@ -97,12 +104,15 @@ function StackModeToggle({
             className={cn(
               "relative cursor-pointer rounded-[7px] px-3.5 py-1.5 text-center text-xs font-medium transition-colors duration-200",
               active ? "text-[#0c0c0e]" : "text-muted-foreground hover:text-foreground",
+              isMulti &&
+                "isolate overflow-hidden border border-transparent shadow-[0_0_18px_-10px_rgba(198,232,83,0.95)] before:absolute before:inset-[-18px] before:z-0 before:bg-[conic-gradient(from_90deg,#101011,#402fb5_10%,#101011_36%,#cf30aa_58%,#C6E853_76%,#101011_92%)] before:opacity-55 before:blur-[3px] before:transition-all before:duration-700 hover:before:rotate-180 hover:before:opacity-95 focus-visible:before:rotate-[240deg] focus-visible:before:opacity-95 after:absolute after:inset-[1px] after:z-[1] after:rounded-[6px] after:bg-background/95 after:transition-colors after:duration-200",
+              isMulti && active && "before:opacity-100 after:bg-[#C6E853]",
             )}
           >
             {active && (
               <motion.span
                 layoutId="creation-mode-indicator"
-                className="absolute inset-0 rounded-[7px] bg-[#C6E853] shadow-sm"
+                className="absolute inset-0 z-[2] rounded-[7px] bg-[#C6E853] shadow-sm"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
               />
             )}
@@ -111,6 +121,40 @@ function StackModeToggle({
         );
       })}
     </fieldset>
+  );
+}
+
+// On the builder page the full nav is hidden to make room for the stack
+// controls, so docs entry points live in a compact dropdown instead.
+function BuilderDocsMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <button
+            type="button"
+            className={cn(NAV_LINK_CLASS, "inline-flex cursor-pointer items-center gap-1")}
+          />
+        }
+      >
+        Docs
+        <ChevronDown className="h-3 w-3" aria-hidden />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-36">
+        <DropdownMenuItem
+          render={<Link to="/docs" />}
+          className="font-mono text-[11px] uppercase tracking-[0.18em]"
+        >
+          Docs
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          render={<Link to="/mcp" />}
+          className="font-mono text-[11px] uppercase tracking-[0.18em]"
+        >
+          MCP
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -173,6 +217,14 @@ export function Navbar() {
                 >
                   Docs
                 </Link>
+              </div>
+            </>
+          )}
+          {onBuilder && (
+            <>
+              <span className="hidden h-4 w-px bg-border sm:block" aria-hidden />
+              <div className="hidden sm:block">
+                <BuilderDocsMenu />
               </div>
             </>
           )}

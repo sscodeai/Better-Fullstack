@@ -1461,7 +1461,7 @@ function CreationModeComposer({
         aria-pressed={selected}
         onClick={onClick}
         className={cn(
-          "group relative flex min-h-16 cursor-pointer items-center justify-center gap-3 px-3 py-3 transition-all sm:min-h-18 sm:px-4",
+          "group relative flex cursor-pointer items-center justify-center gap-2 px-3 py-3 transition-all sm:gap-2.5 sm:px-4 sm:py-3.5",
           selected
             ? "bg-muted/40 text-foreground"
             : "text-muted-foreground hover:bg-muted/30 hover:text-foreground",
@@ -1483,14 +1483,14 @@ function CreationModeComposer({
             icon={icon}
             name={label}
             className={cn(
-              "relative h-5.5 w-5.5 shrink-0 transition-all sm:h-6 sm:w-6",
-              selected ? "scale-110" : "opacity-55 group-hover:opacity-80",
+              "relative h-4.5 w-4.5 shrink-0 transition-all sm:h-5 sm:w-5",
+              selected ? "scale-110" : "opacity-50 group-hover:opacity-75",
             )}
           />
         )}
         <span
           className={cn(
-            "relative font-mono text-xs uppercase tracking-wide transition-all sm:text-sm",
+            "relative hidden font-mono text-[11px] uppercase tracking-wide transition-all min-[480px]:inline sm:text-xs",
             selected && "font-bold",
           )}
         >
@@ -1513,7 +1513,7 @@ function CreationModeComposer({
 
     return (
       <div className="-mx-4 -mt-4 mb-5 overflow-hidden rounded-t-xl border-b border-border/60 sm:-mx-5 sm:-mt-5">
-        <div className={cn("grid bg-fd-background sm:grid-cols-2", gridClassName)}>{children}</div>
+        <div className={cn("grid bg-fd-background", gridClassName)}>{children}</div>
       </div>
     );
   };
@@ -1559,6 +1559,7 @@ function CreationModeComposer({
           <div className="space-y-5">
             {renderLanguagePicker({
               optionCount: GRAPH_FRONTEND_CONFIGS.length,
+              gridClassName: "grid-cols-2",
               children: GRAPH_FRONTEND_CONFIGS.map((config) =>
                 renderLanguageButton({
                   selected: graphSelection.frontendEcosystem === config.ecosystem,
@@ -1616,7 +1617,7 @@ function CreationModeComposer({
           <div className="space-y-5">
             {renderLanguagePicker({
               optionCount: GRAPH_BACKEND_CONFIGS.length,
-              gridClassName: "lg:grid-cols-3",
+              gridClassName: "grid-cols-3 lg:grid-cols-6",
               children: GRAPH_BACKEND_CONFIGS.map((config) =>
                 renderLanguageButton({
                   selected: graphSelection.backendEcosystem === config.ecosystem,
@@ -3332,7 +3333,14 @@ const StackBuilder = ({ initialStack }: { initialStack?: StackState }) => {
                   type="button"
                   onClick={copyToClipboard}
                   aria-label={copied ? "Command copied" : "Copy command"}
-                  className="border-beam inline-flex h-10 w-32 shrink-0 cursor-pointer items-center justify-center rounded-[11px] bg-[linear-gradient(90deg,#C6E853,#2f7df4,#C6E853)] bg-[length:200%_100%] p-px text-[11.5px] font-semibold text-[#2A3303] shadow-[0_0_24px_rgba(198,232,83,0.22)] transition-transform hover:scale-[1.02] min-[420px]:w-40 sm:w-48"
+                  className={cn(
+                    "inline-flex h-10 w-32 shrink-0 cursor-pointer items-center justify-center rounded-[11px] p-px text-[11.5px] font-semibold text-[#2A3303] transition-transform hover:scale-[1.02] min-[420px]:w-40 sm:w-48",
+                    // The animated gradient border + glow is a multi-ecosystem
+                    // affordance; solo keeps a plain solid lime copy button.
+                    isMultiMode
+                      ? "border-beam bg-[linear-gradient(90deg,#C6E853,#2f7df4,#C6E853)] bg-[length:200%_100%] shadow-[0_0_24px_rgba(198,232,83,0.22)]"
+                      : "bg-[#C6E853] hover:bg-[#d2ee72]",
+                  )}
                 >
                   <span className="flex h-full w-full items-center justify-center gap-2 rounded-[10px] bg-[#C6E853] px-4 transition-colors hover:bg-[#d2ee72]">
                     {copied ? (
