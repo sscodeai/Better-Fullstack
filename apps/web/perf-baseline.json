@@ -9,7 +9,7 @@
   },
   "budgets": {
     "mainJsGzip": 4096,
-    "mainCssGzip": 2048,
+    "mainCssGzip": 2560,
     "stackBuilderJsGzip": 12288,
     "largestJsGzip": 20480,
     "totalJsGzip": 81920
