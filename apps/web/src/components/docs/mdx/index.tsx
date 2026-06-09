@@ -3,11 +3,9 @@ import type { ComponentType } from "react";
 import { Callout } from "./callout";
 import { CodeBlock } from "./code-block";
 import { CompatibilityMatrix } from "./compatibility-matrix";
-import { GuideCommandTabs } from "./guide-command-tabs";
 import { GuideCompatibilityNote } from "./guide-compatibility-note";
-import { GuideDecisionTable } from "./guide-decision-table";
-import { GuideFileTree } from "./guide-file-tree";
 import { GuideStackSnapshot } from "./guide-stack-snapshot";
+import { OptionCategoryTable, OptionReferenceSummary } from "./option-reference";
 import { CategoryCount, OptionCount } from "./option-stats";
 import { PMTabs } from "./pm-tabs";
 
@@ -29,11 +27,10 @@ export const mdxComponents: Record<string, ComponentType<any>> = {
   Callout,
   CategoryCount,
   CompatibilityMatrix,
-  GuideCommandTabs,
   GuideCompatibilityNote,
-  GuideDecisionTable,
-  GuideFileTree,
   GuideStackSnapshot,
   OptionCount,
+  OptionCategoryTable,
+  OptionReferenceSummary,
   PMTabs,
 };
