@@ -253,14 +253,26 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://www.better-auth.com/docs",
     githubUrl: "https://github.com/better-auth/better-auth",
   },
+  "better-auth-organizations": {
+    docsUrl: "https://www.better-auth.com/docs",
+    githubUrl: "https://github.com/better-auth/better-auth",
+  },
   "go-better-auth": {
     docsUrl: "https://go-better-auth.vercel.app/",
     githubUrl: "https://github.com/GoBetterAuth/go-better-auth",
   },
   clerk: { docsUrl: "https://clerk.com/docs", githubUrl: "https://github.com/clerk/javascript" },
+  workos: {
+    docsUrl: "https://docs.workos.com",
+    githubUrl: "https://github.com/workos",
+  },
   nextauth: {
     docsUrl: "https://authjs.dev/",
     githubUrl: "https://github.com/nextauthjs/next-auth",
+  },
+  kinde: {
+    docsUrl: "https://docs.kinde.com",
+    githubUrl: "https://github.com/kinde",
   },
   "stack-auth": {
     docsUrl: "https://docs.stack-auth.com/",

@@ -56,7 +56,7 @@ export type { TemplateData };
 
 type NonTypeScriptTemplateEcosystem = Exclude<
   ProjectConfig["ecosystem"],
-  "typescript" | "react-native"
+  "typescript" | "react-native" | "dotnet"
 >;
 
 type EcosystemBaseTemplateProcessor = (

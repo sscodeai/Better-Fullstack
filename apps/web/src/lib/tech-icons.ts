@@ -198,7 +198,10 @@ export const ICON_REGISTRY: Record<string, IconConfig> = {
 
   // ─── Auth ──────────────────────────────────────────────────────────────────
   "better-auth": { type: "local", src: "/icon/better-auth.svg" },
+  "better-auth-organizations": { type: "local", src: "/icon/better-auth.svg" },
   clerk: { type: "si", slug: "clerk", hex: "6C47FF" },
+  workos: { type: "local", src: "https://github.com/workos.png" },
+  kinde: { type: "local", src: "https://github.com/kinde.png" },
   nextauth: { type: "local", src: "/icon/nextauth.png" },
   "stack-auth": { type: "local", src: "/icon/stack-auth.svg" },
   "supabase-auth": { type: "si", slug: "supabase", hex: "3FCF8E" },
