@@ -18,6 +18,12 @@ export const dependencyVersionMap = {
   // and the 1.6.13 adapter packages are no longer quarantined by Yarn.
   "better-auth": "^1.6.14",
   "@better-auth/expo": "^1.6.14",
+  // Runtime imports of @better-auth/expo's client — must exist in the
+  // native app even when the corresponding mobile options are "none".
+  "expo-linking": "^56.0.13",
+  "expo-constants": "^56.0.17",
+  "expo-web-browser": "^56.0.5",
+  "expo-network": "^56.0.5",
   "@better-auth/drizzle-adapter": "^1.6.14",
   "@better-auth/prisma-adapter": "^1.6.14",
   "@better-auth/mongo-adapter": "^1.6.14",

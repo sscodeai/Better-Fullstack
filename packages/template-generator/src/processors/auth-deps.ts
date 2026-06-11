@@ -101,7 +101,12 @@ function processConvexAuthDeps(vfs: VirtualFileSystem, config: ProjectConfig): v
       addPackageDependency({
         vfs,
         packagePath: nativePath,
-        dependencies: ["better-auth", "@better-auth/expo", "@convex-dev/better-auth"],
+        dependencies: [
+          "better-auth",
+          "@better-auth/expo",
+          "@convex-dev/better-auth",
+          "expo-linking", "expo-constants", "expo-web-browser", "expo-network",
+        ],
         customDependencies: {
           "better-auth": "1.4.9",
           "@better-auth/expo": "1.4.9",
@@ -176,7 +181,7 @@ function processStandardAuthDeps(vfs: VirtualFileSystem, config: ProjectConfig):
       addPackageDependency({
         vfs,
         packagePath: nativePath,
-        dependencies: ["better-auth", "@better-auth/expo"],
+        dependencies: ["better-auth", "@better-auth/expo", "expo-linking", "expo-constants", "expo-web-browser", "expo-network"],
       });
     }
   } else if (auth === "clerk") {
