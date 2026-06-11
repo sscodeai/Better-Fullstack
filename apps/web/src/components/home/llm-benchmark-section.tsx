@@ -6,8 +6,8 @@ import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 /**
- * Data source: testing/llm-benchmarks/benchmark-reports/20260610-230521
- * 36 runs = 3 models x 3 creation paths x 4 project specs (Codex CLI agent,
+ * Data source: testing/llm-benchmarks/benchmark-reports/claude-20260612-005109
+ * 36 runs = 3 models x 3 creation paths x 4 project specs (Claude Code agent,
  * empty workspace). Each point averages a model+path pair across the 4 specs.
  * "Builds passing" = post-validation (real install + build) pass rate.
  */
@@ -76,38 +76,38 @@ interface ComboPoint {
 }
 
 const COMBOS: readonly ComboPoint[] = [
-  { id: "spark-mcp", model: "spark", path: "mcp", time: 32.4, tokens: 5.8, pass: 100, error: 0 },
-  { id: "spark-cli", model: "spark", path: "cli", time: 65.6, tokens: 9.9, pass: 100, error: 0 },
+  { id: "fable-mcp", model: "fable-5", path: "mcp", time: 172.6, tokens: 7.6, pass: 100, error: 0 },
+  { id: "fable-cli", model: "fable-5", path: "cli", time: 405.7, tokens: 17.7, pass: 100, error: 0 },
   {
-    id: "spark-prompt",
-    model: "spark",
+    id: "fable-prompt",
+    model: "fable-5",
     path: "prompt",
-    time: 44.8,
-    tokens: 31.4,
-    pass: 50,
-    error: 50,
-  },
-  { id: "5.4-mcp", model: "gpt-5.4", path: "mcp", time: 92.0, tokens: 5.2, pass: 100, error: 0 },
-  { id: "5.4-cli", model: "gpt-5.4", path: "cli", time: 156.0, tokens: 7.1, pass: 100, error: 0 },
-  {
-    id: "5.4-prompt",
-    model: "gpt-5.4",
-    path: "prompt",
-    time: 203.1,
-    tokens: 13.3,
+    time: 572.8,
+    tokens: 24.9,
     pass: 75,
     error: 25,
   },
-  { id: "5.5-mcp", model: "gpt-5.5", path: "mcp", time: 76.5, tokens: 3.8, pass: 100, error: 0 },
-  { id: "5.5-cli", model: "gpt-5.5", path: "cli", time: 74.1, tokens: 4.5, pass: 100, error: 0 },
+  { id: "opus-mcp", model: "opus-4.8", path: "mcp", time: 97.1, tokens: 5.2, pass: 100, error: 0 },
+  { id: "opus-cli", model: "opus-4.8", path: "cli", time: 154.7, tokens: 10.6, pass: 100, error: 0 },
   {
-    id: "5.5-prompt",
-    model: "gpt-5.5",
+    id: "opus-prompt",
+    model: "opus-4.8",
     path: "prompt",
-    time: 264.2,
-    tokens: 15.7,
-    pass: 100,
-    error: 0,
+    time: 510.8,
+    tokens: 21.5,
+    pass: 75,
+    error: 25,
+  },
+  { id: "sonnet-mcp", model: "sonnet-4.6", path: "mcp", time: 70.3, tokens: 3.9, pass: 100, error: 0 },
+  { id: "sonnet-cli", model: "sonnet-4.6", path: "cli", time: 98.3, tokens: 4.8, pass: 100, error: 0 },
+  {
+    id: "sonnet-prompt",
+    model: "sonnet-4.6",
+    path: "prompt",
+    time: 464.9,
+    tokens: 31.2,
+    pass: 75,
+    error: 25,
   },
 ] as const;
 
@@ -142,8 +142,8 @@ const PASS_AXIS: AxisSpec = {
 
 const TIME_AXIS: AxisSpec = {
   key: "time",
-  max: 300,
-  ticks: [240, 160, 80, 0],
+  max: 640,
+  ticks: [600, 400, 200, 0],
   unit: "s",
   label: "Avg scaffold time",
 };
@@ -190,24 +190,22 @@ interface LabelPlacement {
 // Manual nudges where dot labels would collide.
 const LABEL_OVERRIDES: Record<TabId, Record<string, LabelPlacement>> = {
   speed: {
-    "5.4-mcp": { anchor: "middle", dx: 0, dy: 22 },
-    "5.5-mcp": { anchor: "middle", dx: 0, dy: -14 },
-    "5.5-cli": { anchor: "middle", dx: 0, dy: 22 },
+    "fable-mcp": { anchor: "middle", dx: 0, dy: 22 },
+    "opus-cli": { anchor: "middle", dx: 0, dy: -14 },
+    "sonnet-cli": { anchor: "middle", dx: 0, dy: 22 },
+    "opus-mcp": { anchor: "middle", dx: 0, dy: -14 },
   },
   tokens: {
-    "5.4-cli": { anchor: "end", dx: -10 },
-    "spark-mcp": { anchor: "middle", dx: 0, dy: -14 },
-    "5.4-mcp": { anchor: "middle", dx: 0, dy: 22 },
-    "5.5-cli": { anchor: "middle", dx: 0, dy: -30 },
+    "opus-mcp": { anchor: "middle", dx: 0, dy: 22 },
+    "sonnet-cli": { anchor: "middle", dx: 0, dy: -14 },
   },
   error: {
-    "spark-mcp": { anchor: "end", dx: -10 },
-    "spark-cli": { anchor: "end", dx: -10 },
-    "5.4-mcp": { anchor: "end", dx: -10 },
-    "5.4-cli": { anchor: "end", dx: -10 },
-    "5.5-mcp": { anchor: "end", dx: -10, dy: 14 },
-    "5.5-cli": { anchor: "end", dx: -10, dy: -8 },
-    "5.5-prompt": { anchor: "end", dx: -10 },
+    "sonnet-mcp": { anchor: "end", dx: -10, dy: -2 },
+    "opus-mcp": { anchor: "end", dx: -10, dy: -4 },
+    "sonnet-cli": { anchor: "end", dx: -10, dy: 12 },
+    "opus-cli": { anchor: "end", dx: -10 },
+    "fable-mcp": { anchor: "end", dx: -10, dy: 12 },
+    "fable-cli": { anchor: "end", dx: -10 },
   },
 };
 
@@ -339,8 +337,9 @@ function Header() {
       <div className="col-span-12 lg:col-span-5">
         <h3 className="text-base font-semibold sm:text-lg">How we measured</h3>
         <p className="mt-2 max-w-md text-pretty text-sm text-muted-foreground sm:text-base">
-          36 runs across three frontier models, four project specs, and three creation paths — every
-          generated project had to survive a real install and build.
+          36 runs — Fable 5, Opus 4.8, and Sonnet 4.6 in Claude Code, building four project specs
+          through each creation path. Every generated project had to survive a real install and
+          build.
         </p>
       </div>
     </div>
@@ -566,9 +565,6 @@ function CardLegend({ palette }: { palette: ChartPalette }) {
           <span className="text-[#71706a] dark:text-[#8a8a8a]">— {PATHS[path].detail}</span>
         </span>
       ))}
-      <span className="basis-full text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[#9c9a93] dark:text-[#6c6a61]">
-        failures from since-fixed generator bugs are excluded — only agent-authored failures count
-      </span>
     </div>
   );
 }
