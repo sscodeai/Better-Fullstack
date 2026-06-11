@@ -147,7 +147,7 @@ async function processGraphTemplates(
       database: databasePart.toolId as ProjectConfig["database"],
     };
     const databaseTargetPath =
-      databasePart.targetPath ?? getRoleTargetPath("database") ?? "packages/database";
+      databasePart.targetPath ?? getRoleTargetPath("database") ?? "packages/db";
     if (
       dbConfig.orm !== "none" ||
       dbConfig.database === "edgedb" ||

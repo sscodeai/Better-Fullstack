@@ -1,13 +1,13 @@
-{{#if (eq frontend "next")}}
-import type { Preview } from "@storybook/nextjs";
-{{else if (or (eq frontend "tanstack-router") (eq frontend "react-router") (eq frontend "react-vite") (eq frontend "solid"))}}
-import type { Preview } from "@storybook/react-vite";
-{{else if (eq frontend "nuxt")}}
-import type { Preview } from "@storybook/vue3-vite";
-{{else if (eq frontend "svelte")}}
-import type { Preview } from "@storybook/svelte-vite";
+{{#if (includes frontend "next")}}
+import type { Preview } from "@storybook/react";
+{{else if (or (includes frontend "tanstack-router") (includes frontend "react-router") (includes frontend "react-vite") (includes frontend "solid"))}}
+import type { Preview } from "@storybook/react";
+{{else if (includes frontend "nuxt")}}
+import type { Preview } from "@storybook/vue3";
+{{else if (includes frontend "svelte")}}
+import type { Preview } from "@storybook/svelte";
 {{else}}
-import type { Preview } from "@storybook/react-vite";
+import type { Preview } from "@storybook/react";
 {{/if}}
 {{#if (eq cssFramework "tailwind")}}
 import "../src/index.css";

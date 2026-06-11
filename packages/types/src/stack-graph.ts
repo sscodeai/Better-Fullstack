@@ -238,7 +238,7 @@ const ROLE_TARGET_PATHS: Record<StackPrimaryRole, string> = {
   frontend: "apps/web",
   backend: "apps/server",
   mobile: "apps/native",
-  database: "packages/database",
+  database: "packages/db",
 };
 
 const LEGACY_BACKEND_CATEGORY_BY_ECOSYSTEM = {

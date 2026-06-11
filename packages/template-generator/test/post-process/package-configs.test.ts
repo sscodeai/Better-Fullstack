@@ -329,7 +329,7 @@ describe("processPackageConfigs", () => {
     const backendOnly = createSeededVFS([
       "package.json",
       "apps/server/go.mod",
-      "packages/database/README.md",
+      "packages/db/README.md",
     ]);
     backendOnly.writeJson("package.json", {
       name: "starter",

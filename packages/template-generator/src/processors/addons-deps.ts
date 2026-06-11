@@ -182,14 +182,17 @@ export function processAddonsDeps(vfs: VirtualFileSystem, config: ProjectConfig)
 
       // Add framework-specific renderer
       if (hasNext) {
-        devDeps.push("@storybook/nextjs");
+        // @storybook/react must be installed explicitly: @storybook/nextjs
+        // re-exports its types (Meta/StoryObj) and isolated installs (bun)
+        // don't hoist it for the app's type-checker.
+        devDeps.push("@storybook/nextjs", "@storybook/react");
       } else if (hasReactVite || hasSolid) {
         // Solid can use React Storybook with adapter, but for now use React-Vite
         devDeps.push("@storybook/react-vite", "@storybook/react");
       } else if (hasVue) {
-        devDeps.push("@storybook/vue3-vite");
+        devDeps.push("@storybook/vue3-vite", "@storybook/vue3");
       } else if (hasSvelte) {
-        devDeps.push("@storybook/svelte-vite");
+        devDeps.push("@storybook/svelte-vite", "@storybook/svelte");
       }
 
       addPackageDependency({ vfs, packagePath: webPkgPath, devDependencies: devDeps });

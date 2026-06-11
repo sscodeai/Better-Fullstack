@@ -133,7 +133,7 @@ describe("Basic Configurations", () => {
       expect(result.result?.projectConfig.serverDeploy).toBe("railway");
       expect(result.result?.files).toContain("apps/native/package.json");
       expect(result.result?.files).toContain("apps/server/go.mod");
-      expect(result.result?.files).toContain("packages/database/README.md");
+      expect(result.result?.files).toContain("packages/db/README.md");
     });
 
     it("should reject invalid graph part role bindings", async () => {

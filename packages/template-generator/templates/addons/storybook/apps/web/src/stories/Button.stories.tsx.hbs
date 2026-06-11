@@ -1,5 +1,5 @@
-{{#if (or (eq frontend "tanstack-router") (eq frontend "react-router") (eq frontend "react-vite") (eq frontend "next") (eq frontend "solid"))}}
-import type { Meta, StoryObj } from "{{#if (eq frontend "next")}}@storybook/nextjs{{else}}@storybook/react-vite{{/if}}";
+{{#if (or (includes frontend "tanstack-router") (includes frontend "react-router") (includes frontend "react-vite") (includes frontend "next") (includes frontend "solid"))}}
+import type { Meta, StoryObj } from "@storybook/react";
 
 // Example Button component for demonstration
 // Replace this with your actual component imports
@@ -80,8 +80,8 @@ export const Small: Story = {
     label: "Small Button",
   },
 };
-{{else if (eq frontend "nuxt")}}
-import type { Meta, StoryObj } from "@storybook/vue3-vite";
+{{else if (includes frontend "nuxt")}}
+import type { Meta, StoryObj } from "@storybook/vue3";
 import { fn } from "@storybook/test";
 
 // Example Button component for demonstration
@@ -141,8 +141,8 @@ export const Secondary: Story = {
     label: "Secondary Button",
   },
 };
-{{else if (eq frontend "svelte")}}
-import type { Meta, StoryObj } from "@storybook/svelte-vite";
+{{else if (includes frontend "svelte")}}
+import type { Meta, StoryObj } from "@storybook/svelte";
 import { fn } from "@storybook/test";
 
 // Example Button component for demonstration
@@ -192,7 +192,7 @@ export const Secondary: Story = {
 };
 {{else}}
 // Generic Storybook example
-import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { Meta, StoryObj } from "@storybook/react";
 
 const Button = ({ label }: { label: string }) => (
   <button type="button">{label}</button>
