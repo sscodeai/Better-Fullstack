@@ -19,10 +19,35 @@ const RELEASE_BASE_URL = "https://github.com/Marve10s/Better-Fullstack/releases/
 
 export const changelogReleases: ChangelogRelease[] = [
   {
+    version: "v2.0.2",
+    publishedAt: "2026-06-12T00:00:00Z",
+    displayDate: "June 12, 2026",
+    isLatest: true,
+    href: `${RELEASE_BASE_URL}/v2.0.2`,
+    title: "Agent benchmark, .NET ecosystem, and a 42% lighter install",
+    summary:
+      "This release benchmarks how AI agents scaffold with Better Fullstack and publishes the results on the homepage, adds .NET as a first-class ecosystem on the new stack graph, and ships a much leaner install. It also fixes four scaffold bugs the benchmark itself uncovered.",
+    highlights: [
+      "Benchmarked frontier models scaffolding the same project specs three ways — prompt-only, our CLI, and our MCP server. Agents on the MCP path finished up to 7× faster with 4× fewer output tokens; the full results live on the homepage with an interactive chart.",
+      "Redesigned the MCP page with one-paste setup for Claude Code, Codex, Gemini CLI, Cursor, VS Code, Claude Desktop, Windsurf, and Zed.",
+      "Added .NET as a first-class ecosystem, plus an enterprise tier, backend-utils, and Render/Netlify deployment options on the stack graph (Phases 0–4).",
+      "Cut install size by 42% (122 MB → 71 MB) and the web entry chunk by 32%.",
+      "Added starter tracks: curated, goal-based stack presets for common product shapes.",
+      "Fixed Storybook scaffolds on Next.js projects: framework detection now handles multi-frontend stacks and story types import from the renderer package, so generated apps type-check and build.",
+      "Fixed multi-ecosystem database packages missing their ORM dependencies and auth schema, and added the missing expo-network dependency for Better Auth on the unistyles native template.",
+    ],
+    image: {
+      src: "https://images.unsplash.com/photo-1777711391050-7e0cefd4b33b?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      alt: "Abstract colorful gradient artwork",
+      credit: "Unsplash",
+      creditHref:
+        "https://images.unsplash.com/photo-1777711391050-7e0cefd4b33b?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+  },
+  {
     version: "v2.0.0 + v2.0.1",
     publishedAt: "2026-06-06T00:00:00Z",
     displayDate: "June 6, 2026",
-    isLatest: true,
     href: `${RELEASE_BASE_URL}/v2.0.1`,
     title: "Multi-ecosystem support + shadcn/ui hotfix",
     summary:
