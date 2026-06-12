@@ -339,9 +339,6 @@ function Masthead() {
           ScaffBench
         </h2>
       </div>
-      <p className="mt-4 font-mono text-xs uppercase tracking-[0.22em] text-lime-700 dark:text-[#C6E853]">
-        ✦ by Better-Fullstack
-      </p>
       <p className="mt-5 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">
         Measuring coding agents on real fullstack scaffolding tasks — time, tokens, cost, and
         whether the result actually builds.
@@ -359,7 +356,7 @@ function Masthead() {
           to="/mcp"
           className="rounded-md border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-lime-700/40 hover:text-lime-700 dark:hover:text-[#C6E853]"
         >
-          Run it with your agent
+          Try out MCP
         </Link>
       </div>
     </div>
