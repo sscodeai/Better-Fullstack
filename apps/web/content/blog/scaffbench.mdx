@@ -371,13 +371,6 @@ varying minutes and, twice, a wall-clock ceiling.
 - **Timeout cost under-reporting.** Runs killed at 900s report $0 cost, which flatters the prompt
   path's totals.
 
-## What's next
-
-Re-running the Codex sweep against the fixed generator (its excluded cells should flip to green),
-adding more agent CLIs, repeated trials per cell, and validating *feature* completeness (does auth
-actually work?) rather than just builds. The harness also doubles as our regression suite now —
-every release candidate gets the heavy spec thrown at it.
-
 ## Appendix: all 102 runs
 
 ### Claude sweep (Claude Code, June 12)
@@ -503,9 +496,12 @@ this sweep ran before the fixes shipped. GPT prompt-path failures are agent-auth
 | Qwen3.7 Max | opencode | BF mention | 35.2s | 843 | pass |
 | Qwen3.7 Max | opencode | Prompt | 378.9s | 13,313 | pass |
 
-† Hit the 900-second budget, but the project written before the cutoff installs and builds.
-\*\* Passed install + build; failed the project's own Biome lint script, which the headline
-criterion doesn't count.
+Notes:
+
+- Laguna m.1 prompt-only hit the 900-second budget, but the project written before the cutoff
+  installs and builds.
+- Gemini 3.1 Pro prompt-only passed install + build; it failed the project's own Biome lint script,
+  which the headline criterion doesn't count.
 
 We also attempted **Nemotron-3 Ultra 550B** on Kilo's free tier, but its runs are excluded from
 the results: the endpoint was effectively unusable for agentic work in our harness (minutes per
