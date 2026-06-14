@@ -126,6 +126,8 @@ export function AsciiHeroBackground({ className, variant = "graph" }: AsciiHeroB
     const isDark = resolvedTheme === "dark";
     const baseColor = isDark ? "242, 238, 238" : "27, 26, 23";
     const brand = "#c6e853";
+    const labelPlate = isDark ? "rgba(10, 10, 10, 0.72)" : "rgba(246, 245, 241, 0.78)";
+    const stackLabelColor = isDark ? brand : `rgba(${baseColor}, 0.86)`;
     const bodyAlpha = isDark ? 0.78 : 0.8;
     const starAlpha = isDark ? 0.5 : 0.45;
     const textColor = `rgba(${baseColor}, 0.78)`;
@@ -230,7 +232,7 @@ export function AsciiHeroBackground({ className, variant = "graph" }: AsciiHeroB
     type Slab = { yc: number; cx: number; W: number; H: number; T: number };
 
     const stackSlabs = (t: number): Slab[] => {
-      const cx = cols * 0.73;
+      const cx = cols * 0.84;
       const W = Math.min(cols * 0.15, rows * 0.34);
       const H = W * 0.42;
       const T = Math.max(3, W * 0.22);
@@ -368,12 +370,19 @@ export function AsciiHeroBackground({ className, variant = "graph" }: AsciiHeroB
 
     const drawStackLabels = (t: number) => {
       const slabs = stackSlabs(t);
-      ctx.font = `9px "Geist Mono", ui-monospace, monospace`;
-      ctx.textAlign = "right";
+      ctx.font = `10px "Geist Mono", ui-monospace, monospace`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
       for (let k = 0; k < slabs.length; k++) {
         const s = slabs[k];
-        ctx.fillStyle = textColor;
-        ctx.fillText(STACK_SLABS[k], (s.cx - s.W - 3) * CELL, s.yc * CELL);
+        const label = STACK_SLABS[k];
+        const x = s.cx * CELL;
+        const y = (s.yc + s.H * 0.04) * CELL;
+        const w = ctx.measureText(label).width + 12;
+        ctx.fillStyle = labelPlate;
+        ctx.fillRect(x - w / 2, y - 7, w, 14);
+        ctx.fillStyle = stackLabelColor;
+        ctx.fillText(label, x, y);
       }
       ctx.textAlign = "left";
     };

@@ -3,10 +3,7 @@ import { ArrowRight, Check, Copy } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 
-import {
-  AsciiHeroBackground,
-  type AsciiHeroVariant,
-} from "@/components/ui/ascii-hero-background";
+import { AsciiHeroBackground } from "@/components/ui/ascii-hero-background";
 import { latestChangelogRelease } from "@/lib/changelog";
 import { cn } from "@/lib/utils";
 
@@ -22,8 +19,6 @@ const COMMANDS: Record<PM, string> = {
 };
 
 const ACCENT_TEXT = "text-ink dark:text-brand";
-// TODO(temp): remove the variant switcher once a hero scene is picked.
-const HERO_VARIANTS: readonly AsciiHeroVariant[] = ["graph", "stack", "terminal", "globe"];
 const RELEASE_BADGE = latestChangelogRelease
   ? `${latestChangelogRelease.version} · ${latestChangelogRelease.displayDate}`
   : "";
@@ -31,7 +26,6 @@ const RELEASE_BADGE = latestChangelogRelease
 export default function HeroSection() {
   const [pm, setPm] = useState<PM>("bun");
   const [copied, setCopied] = useState(false);
-  const [heroVariant, setHeroVariant] = useState<AsciiHeroVariant>("graph");
 
   const copy = () => {
     navigator.clipboard.writeText(COMMANDS[pm]).then(
@@ -102,12 +96,12 @@ export default function HeroSection() {
         </motion.div>
       </div>
 
-      <div className="relative overflow-hidden px-4 pb-20 pt-16 sm:px-8 sm:pb-28 sm:pt-24">
+      <div className="relative overflow-hidden px-4 pb-16 pt-12 sm:px-8 sm:pb-24 sm:pt-20">
         <div
           className="pointer-events-none absolute inset-y-0 left-1/2 w-screen -translate-x-1/2"
           aria-hidden
         >
-          <AsciiHeroBackground className="size-full" variant={heroVariant} />
+          <AsciiHeroBackground className="size-full" variant="stack" />
         </div>
 
         <motion.h1
@@ -159,22 +153,6 @@ export default function HeroSection() {
           </Link>
         </motion.div>
 
-        {/* TODO(temp): variant switcher — remove once a hero scene is picked. */}
-        <div className="absolute bottom-3 right-3 z-10 flex gap-1">
-          {HERO_VARIANTS.map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => setHeroVariant(v)}
-              className={cn(
-                "cursor-pointer rounded-sm border border-edge px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors",
-                heroVariant === v ? "bg-brand text-[#0a0a0a]" : "text-soft hover:text-ink",
-              )}
-            >
-              {v}
-            </button>
-          ))}
-        </div>
       </div>
     </section>
   );
