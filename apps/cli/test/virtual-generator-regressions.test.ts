@@ -383,12 +383,36 @@ describe("Virtual Generator Regressions", () => {
     const testProject = readTextFromTree(result.tree!, "DotnetApi.Tests/DotnetApi.Tests.csproj");
 
     expect(projectFile).toContain("<TargetFramework>net10.0</TargetFramework>");
+    expect(projectFile).toContain('<Compile Remove="**/*.Tests/**/*.cs" />');
     expect(projectFile).toContain('PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL"');
     expect(projectFile).toContain('PackageReference Include="Serilog.AspNetCore"');
     expect(program).toContain("builder.Services.AddDbContext<AppDbContext>");
     expect(program).toContain('app.MapHub<UpdatesHub>("/hubs/updates")');
     expect(dockerfile).toContain("FROM mcr.microsoft.com/dotnet/sdk:10.0");
     expect(testProject).toContain('PackageReference Include="xunit"');
+  });
+
+  it("pins Angular to the TypeScript range required by Angular 22", async () => {
+    const result = await createVirtual({
+      projectName: "AngularTs",
+      frontend: ["angular"],
+      backend: "fets",
+      runtime: "node",
+      api: "none",
+      database: "sqlite",
+      orm: "drizzle",
+      auth: "none",
+      cssFramework: "postcss-only",
+      uiLibrary: "none",
+      addons: ["turborepo"],
+      examples: [],
+    });
+
+    expect(result.success).toBe(true);
+
+    const webPackageJson = readJsonFromTree(result.tree!, "apps/web/package.json");
+
+    expect(webPackageJson?.devDependencies?.typescript).toBe(">=6.0.0 <6.1.0");
   });
 
   it("keeps .NET Minimal API templates valid when EF Core is disabled", async () => {

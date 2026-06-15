@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="**/*.Tests/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
 {{#if dotnetHasEfCore}}
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" PrivateAssets="all" />
 {{#if (eq database "postgres")}}
