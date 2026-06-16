@@ -53,6 +53,10 @@ function readContentFiles(): ContentFile[] {
   }));
 }
 
+function isLocalizedMdxFile(path: string): boolean {
+  return /\.(es|zh)\.mdx$/.test(path);
+}
+
 function parseFrontmatter(source: string): Map<string, string> {
   const match = source.match(/^---\n([\s\S]*?)\n---/);
   const fields = new Map<string, string>();
@@ -165,7 +169,10 @@ describe("docs content contract", () => {
       }
     }
 
-    for (const pagePath of walkFiles(DOCS_ROOT, (path) => path.endsWith(".mdx"))) {
+    for (const pagePath of walkFiles(
+      DOCS_ROOT,
+      (path) => path.endsWith(".mdx") && !isLocalizedMdxFile(path),
+    )) {
       const dir = dirname(pagePath);
       const localMetaPath = join(dir, "meta.json");
       const pageName = pagePath.endsWith(`${sep}index.mdx`)
