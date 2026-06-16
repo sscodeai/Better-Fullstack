@@ -21,6 +21,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -313,7 +314,7 @@ function MobileLocaleItems() {
   const locale = getLocale();
 
   return (
-    <>
+    <DropdownMenuGroup>
       <DropdownMenuLabel className="px-2.5 py-2 font-mono text-[10px] uppercase tracking-[0.16em]">
         {m.navLanguage()}
       </DropdownMenuLabel>
@@ -332,7 +333,7 @@ function MobileLocaleItems() {
           {locale === availableLocale ? <Check className="h-3.5 w-3.5" /> : null}
         </DropdownMenuItem>
       ))}
-    </>
+    </DropdownMenuGroup>
   );
 }
 
