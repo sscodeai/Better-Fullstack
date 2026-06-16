@@ -20,6 +20,7 @@ const TRACKED_KEYS = [
 
 const MAIN_JS_PATTERNS = [/^main-.*\.js$/, /^index-.*\.js$/];
 const MAIN_CSS_PATTERNS = [/^main-.*\.css$/, /^index-.*\.css$/];
+const LOCALIZED_CONTENT_JS_PATTERN = /\.(es|zh)-.*\.js$/;
 
 const DEFAULT_BUDGETS = {
   mainJsGzip: 8 * 1024,
@@ -57,6 +58,10 @@ function findAsset(entries, patterns) {
     .find((entry) => patterns.some((pattern) => pattern.test(entry.file)));
 }
 
+function isLocalizedContentAsset(file) {
+  return LOCALIZED_CONTENT_JS_PATTERN.test(file);
+}
+
 async function collectMetrics() {
   const files = await fs.readdir(ASSETS_DIR);
   const jsFiles = files.filter((file) => file.endsWith(".js"));
@@ -77,6 +82,8 @@ async function collectMetrics() {
   const mainJs = findAsset(jsSizes, MAIN_JS_PATTERNS);
   const mainCss = findAsset(cssSizes, MAIN_CSS_PATTERNS);
   const stackBuilderJs = jsSizes.find((entry) => /^stack-builder-.*\.js$/.test(entry.file));
+  const localizedContentJsSizes = jsSizes.filter((entry) => isLocalizedContentAsset(entry.file));
+  const budgetedJsSizes = jsSizes.filter((entry) => !isLocalizedContentAsset(entry.file));
 
   if (!mainJs || !mainCss || !stackBuilderJs) {
     throw new Error(
@@ -84,14 +91,23 @@ async function collectMetrics() {
     );
   }
 
-  const largestJs = jsSizes.reduce((max, current) => (current.gzip > max.gzip ? current : max));
-  const totalJsRaw = jsSizes.reduce((sum, item) => sum + item.raw, 0);
-  const totalJsGzip = jsSizes.reduce((sum, item) => sum + item.gzip, 0);
+  const largestJs = budgetedJsSizes.reduce((max, current) =>
+    current.gzip > max.gzip ? current : max,
+  );
+  const totalJsRaw = budgetedJsSizes.reduce((sum, item) => sum + item.raw, 0);
+  const totalJsGzip = budgetedJsSizes.reduce((sum, item) => sum + item.gzip, 0);
+  const localizedContentJsRaw = localizedContentJsSizes.reduce((sum, item) => sum + item.raw, 0);
+  const localizedContentJsGzip = localizedContentJsSizes.reduce(
+    (sum, item) => sum + item.gzip,
+    0,
+  );
 
   return {
     generatedAt: new Date().toISOString(),
     assetCount: {
       js: jsSizes.length,
+      budgetedJs: budgetedJsSizes.length,
+      localizedContentJs: localizedContentJsSizes.length,
       css: cssSizes.length,
     },
     metrics: {
@@ -105,6 +121,8 @@ async function collectMetrics() {
       largestJsGzip: largestJs.gzip,
       totalJsRaw,
       totalJsGzip,
+      localizedContentJsRaw,
+      localizedContentJsGzip,
     },
     largestJsChunk: largestJs.file,
     trackedAssets: {
@@ -113,6 +131,14 @@ async function collectMetrics() {
       stackBuilderJs: stackBuilderJs.file,
     },
     topJsChunksByGzip: [...jsSizes]
+      .sort((a, b) => b.gzip - a.gzip)
+      .slice(0, 10)
+      .map((entry) => ({
+        file: entry.file,
+        raw: entry.raw,
+        gzip: entry.gzip,
+      })),
+    topLocalizedContentJsChunksByGzip: [...localizedContentJsSizes]
       .sort((a, b) => b.gzip - a.gzip)
       .slice(0, 10)
       .map((entry) => ({
@@ -215,6 +241,7 @@ async function checkAgainstBaseline(current) {
     "",
     `Largest JS chunk: \`${current.largestJsChunk}\` (${formatBytes(current.metrics.largestJsGzip)} gzip)`,
     `Tracked assets: main JS \`${current.trackedAssets?.mainJs ?? "unknown"}\`, main CSS \`${current.trackedAssets?.mainCss ?? "unknown"}\`, stack builder JS \`${current.trackedAssets?.stackBuilderJs ?? "unknown"}\``,
+    `Localized lazy content JS excluded from total budget: ${current.assetCount.localizedContentJs ?? 0} chunks (${formatBytes(current.metrics.localizedContentJsGzip ?? 0)} gzip)`,
     "",
   ];
 
