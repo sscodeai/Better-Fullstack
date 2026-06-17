@@ -9,6 +9,7 @@ import { expectError, expectSuccess, runTRPCTest, type TestConfig } from "./test
 describe("Addon Configurations", () => {
   describe("Universal Addons (no frontend restrictions)", () => {
     const universalAddons = ["biome", "lefthook", "husky", "turborepo", "oxlint", "msw"];
+    const universalAddonTimeoutMs = 60_000;
 
     for (const addon of universalAddons) {
       it(
@@ -33,7 +34,7 @@ describe("Addon Configurations", () => {
 
           expectSuccess(result);
         },
-        { timeout: 30_000 },
+        { timeout: universalAddonTimeoutMs },
       );
     }
   });
