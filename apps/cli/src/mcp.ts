@@ -458,7 +458,7 @@ const MCP_COMPATIBILITY_DEFAULTS = {
   versionChannel: "stable",
   examples: [],
   aiSdk: "none",
-  aiDocs: ["claude-md"],
+  aiDocs: ["claude-md", "agents-md"],
   git: "true",
   install: "false",
   api: "none",

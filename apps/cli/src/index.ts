@@ -203,8 +203,8 @@ export async function createVirtual(
       elixirQuality: options.elixirQuality || (options.ecosystem === "elixir" ? "credo" : "none"),
       elixirDeploy: options.elixirDeploy || "none",
       elixirLibraries: options.elixirLibraries || [],
-      // AI documentation files
-      aiDocs: options.aiDocs || ["claude-md"],
+      // AI documentation files (canonical default ships both CLAUDE.md + AGENTS.md)
+      aiDocs: options.aiDocs || ["claude-md", "agents-md"],
     };
     if (options.stackParts) {
       config.stackParts = options.stackParts;
