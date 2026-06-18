@@ -527,13 +527,16 @@ export async function gatherConfig(
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as Effect);
         return getEffectChoice(flags.effect);
       },
-      addons: ({ results }) => {
-        if (results.ecosystem !== "typescript") {
-          const nonTypeScriptAddons = (flags.addons ?? []).filter(
-            (addon): addon is Addons => addon === "docker-compose" || addon === "devcontainer",
-          );
-          return Promise.resolve(nonTypeScriptAddons);
-        }
+        addons: ({ results }) => {
+          if (results.ecosystem !== "typescript") {
+            const nonTypeScriptAddons = (flags.addons ?? []).filter(
+              (addon): addon is Addons =>
+                addon === "docker-compose" ||
+                addon === "devcontainer" ||
+                addon === "github-actions",
+            );
+            return Promise.resolve(nonTypeScriptAddons);
+          }
         return getAddonsChoice(
           flags.addons,
           results.frontend,

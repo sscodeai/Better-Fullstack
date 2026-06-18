@@ -1046,6 +1046,9 @@ function recommendStackFromBrief(
     rationale.push(
       `Ecosystem forced to ${ecosystemHint} from the provided hint; using ${ecosystemHint} defaults.`,
     );
+    rationale.push(
+      `Brief keyword analysis (database/auth/payments/AI feature detection) currently applies to the TypeScript ecosystem only — configure those features explicitly for ${ecosystemHint} via bfs_check_compatibility.`,
+    );
     return { input, rationale, matchedPreset: null };
   }
 
@@ -1126,6 +1129,13 @@ function recommendStackFromBrief(
       "user",
       "users",
       "authentication",
+      "admin",
+      "dashboard",
+      "portal",
+      "members",
+      "rbac",
+      "permissions",
+      "roles",
     )
   ) {
     input.auth = "better-auth";
@@ -1187,15 +1197,23 @@ function normalizeAdjustedToInput(
 }
 
 function summarizeRecommendedConfig(config: ProjectConfig) {
+  // frontend/backend/runtime/api are TypeScript-web concepts; for native backend
+  // ecosystems (rust/go/python/java/dotnet/elixir) the framework lives in stackParts,
+  // so surfacing the TS-shaped defaults here would misrepresent the recommendation.
+  const isTsWeb = config.ecosystem === "typescript" || config.ecosystem === "react-native";
   return {
     projectName: config.projectName,
     ecosystem: config.ecosystem,
-    frontend: config.frontend,
-    backend: config.backend,
-    runtime: config.runtime,
+    ...(isTsWeb
+      ? {
+          frontend: config.frontend,
+          backend: config.backend,
+          runtime: config.runtime,
+          api: config.api,
+        }
+      : {}),
     database: config.database,
     orm: config.orm,
-    api: config.api,
     auth: config.auth,
     payments: config.payments,
     ai: config.ai,
@@ -1580,17 +1598,31 @@ export async function startMcpServer() {
         const result = analyzeStackCompatibility(compatInput);
         const filtered = filterCompatibilityResult(result, input.ecosystem as string);
         const evaluation = evaluateCompatibility(compatInput);
+        // Filter issues to the selected ecosystem, mirroring filterCompatibilityResult.
+        // buildCompatibilityInput injects every ecosystem's defaults, so evaluate()
+        // otherwise flags cross-ecosystem leftovers (elixir*/cssFramework/etc.) as
+        // spurious INCOMPATIBLE issues on a perfectly valid stack.
+        const relevantEcosystem = isMcpEcosystem(input.ecosystem as string)
+          ? (input.ecosystem as OptionCategoryEcosystem)
+          : "typescript";
+        const relevantIssueKeys = new Set<string>([
+          ...getMcpCategoryKeysForEcosystem(relevantEcosystem),
+          ...MCP_SHARED_COMPATIBILITY_KEYS,
+        ]);
+        const issues = evaluation.issues.filter(
+          (issue) => !issue.category || relevantIssueKeys.has(issue.category),
+        );
         const structuredContent = {
           adjustedStack: filtered.adjustedStack,
           changes: filtered.changes,
-          issues: evaluation.issues,
-          hasIssues: evaluation.issues.length > 0,
+          issues,
+          hasIssues: issues.length > 0,
         };
         return {
           content: [
             {
               type: "text",
-              text: JSON.stringify({ ...filtered, issues: evaluation.issues }, null, 2),
+              text: JSON.stringify({ ...filtered, issues }, null, 2),
             },
           ],
           structuredContent,
