@@ -60,7 +60,7 @@ const API_LITERAL_GUARDS: readonly ApiLiteralGuard[] = [
     // Verify the pinned value against https://docs.stripe.com/api/versioning
     // whenever the major below changes, then add the new entry.
     expectedByMajor: {
-      22: "2024-12-18",
+      22: "2026-05-27.dahlia",
     },
   },
 ];
