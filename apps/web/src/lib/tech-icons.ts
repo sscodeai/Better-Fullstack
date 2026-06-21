@@ -412,6 +412,7 @@ export const ICON_REGISTRY: Record<string, IconConfig> = {
   strapi: { type: "si", slug: "strapi", hex: "4945FF" },
   tinacms: { type: "local", src: "/icon/tinacms.svg" },
   directus: { type: "si", slug: "directus", hex: "263238" },
+  keystatic: { type: "local", src: "/icon/keystatic.svg" },
 
   // ─── Rust ──────────────────────────────────────────────────────────────────
   axum: { type: "local", src: "/icon/axum.svg" },

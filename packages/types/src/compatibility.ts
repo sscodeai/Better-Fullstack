@@ -1780,6 +1780,14 @@ export const getDisabledReason = (
     if (optionId === "workers" && currentStack.backend !== "hono") {
       return "In Better-Fullstack, Workers runtime currently requires the Hono backend";
     }
+    if (
+      optionId === "workers" &&
+      currentStack.cms === "keystatic" &&
+      currentStack.webFrontend.includes("astro") &&
+      !currentStack.webFrontend.includes("next")
+    ) {
+      return "Keystatic with Astro requires a Node-compatible runtime";
+    }
     if (optionId === "none") {
       const allowedBackends = [
         "convex",
@@ -1979,6 +1987,18 @@ export const getDisabledReason = (
   if (category === "cms" && optionId === "payload") {
     if (!currentStack.webFrontend.includes("next")) {
       return "Payload CMS v3 requires Next.js";
+    }
+  }
+  if (category === "cms" && optionId === "keystatic") {
+    if (!currentStack.webFrontend.includes("next") && !currentStack.webFrontend.includes("astro")) {
+      return "Keystatic is currently scaffolded for Next.js and Astro";
+    }
+    if (
+      currentStack.webFrontend.includes("astro") &&
+      !currentStack.webFrontend.includes("next") &&
+      currentStack.runtime === "workers"
+    ) {
+      return "Keystatic with Astro requires a Node-compatible runtime";
     }
   }
 
