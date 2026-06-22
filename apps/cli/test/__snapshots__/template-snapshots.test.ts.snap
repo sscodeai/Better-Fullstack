@@ -414,10 +414,14 @@ exports[`Template Snapshots File Structure Snapshots file structure: hono-apollo
   "apps/web/src/routes/dashboard.tsx",
   "apps/web/src/routes/index.tsx",
   "apps/web/src/routes/login.tsx",
+  "apps/web/src/utils/graphql.ts",
   "apps/web/tsconfig.json",
   "apps/web/vite.config.ts",
   "bunfig.toml",
   "package.json",
+  "packages/api/package.json",
+  "packages/api/src/index.ts",
+  "packages/api/tsconfig.json",
   "packages/auth/package.json",
   "packages/auth/src/index.ts",
   "packages/auth/tsconfig.json",
@@ -832,6 +836,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: opensearch-
   "apps/server/.env",
   "apps/server/package.json",
   "apps/server/src/index.ts",
+  "apps/server/src/lib/search.ts",
   "apps/server/tsconfig.json",
   "apps/server/tsdown.config.ts",
   "apps/web/.env",
@@ -6559,7 +6564,7 @@ export const accountRelations = relations(account, ({ one }) => ({
 
 exports[`Template Snapshots Key File Content Snapshots key files: hono-apollo-server 1`] = `
 {
-  "fileCount": 59,
+  "fileCount": 64,
   "files": [
     {
       "content": "[exists]",
@@ -6582,9 +6587,10 @@ exports[`Template Snapshots Key File Content Snapshots key files: hono-apollo-se
     "dotenv": "catalog:",
     "zod": "catalog:",
     "@snapshot-hono-apollo-server/env": "workspace:*",
+    "@snapshot-hono-apollo-server/api": "workspace:*",
     "@snapshot-hono-apollo-server/auth": "workspace:*",
     "@snapshot-hono-apollo-server/db": "workspace:*",
-    "hono": "^4.12.25",
+    "hono": "catalog:",
     "better-auth": "catalog:"
   },
   "devDependencies": {
@@ -6601,6 +6607,7 @@ exports[`Template Snapshots Key File Content Snapshots key files: hono-apollo-se
     {
       "content": 
 "import { env } from "@snapshot-hono-apollo-server/env/server";
+import { executeApolloRequest } from "@snapshot-hono-apollo-server/api";
 import { auth } from "@snapshot-hono-apollo-server/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -6622,6 +6629,12 @@ app.use(
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 
+app.on(["GET", "POST"], "/graphql", async (c) => {
+	const session = await auth.api.getSession({
+		headers: c.req.raw.headers,
+	});
+	return executeApolloRequest(c.req.raw, { session });
+});
 
 
 
@@ -6693,6 +6706,7 @@ export default app;
     "dotenv": "catalog:",
     "zod": "catalog:",
     "@snapshot-hono-apollo-server/env": "workspace:*",
+    "@snapshot-hono-apollo-server/api": "workspace:*",
     "@snapshot-hono-apollo-server/auth": "workspace:*",
     "@libsql/client": "catalog:",
     "libsql": "catalog:",
@@ -6800,13 +6814,22 @@ import ReactDOM from "react-dom/client";
 import Loader from "./components/loader";
 import { routeTree } from "./routeTree.gen";
 
+  import { QueryClientProvider } from "@tanstack/react-query";
+  import { queryClient } from "./utils/graphql";
 
 const router = createRouter({
   routeTree,
   defaultPreload: "intent",
   defaultPendingComponent: () => <Loader />,
-  context: {},
-  });
+  context: { queryClient },
+  Wrap: function WrapComponent({ children }: { children: React.ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    );
+  },
+});
 
 declare module "@tanstack/react-router" {
   interface Register {
@@ -6839,6 +6862,8 @@ if (!rootElement.innerHTML) {
     {
       "content": 
 "import { createFileRoute } from "@tanstack/react-router";
+import { graphqlFetch } from "@/utils/graphql";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
@@ -6861,6 +6886,10 @@ const TITLE_TEXT = \`
  \`;
 
 function HomeComponent() {
+  const healthCheck = useQuery({
+    queryKey: ["healthCheck"],
+    queryFn: () => graphqlFetch<{ health: string }>("{ health }").then((d) => d.health),
+  });
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-2">
@@ -6892,6 +6921,10 @@ function HomeComponent() {
     {
       "content": "[exists]",
       "path": "apps/web/src/routes/login.tsx",
+    },
+    {
+      "content": "[exists]",
+      "path": "apps/web/src/utils/graphql.ts",
     },
     {
       "content": 
@@ -6967,6 +7000,7 @@ export default defineConfig({
       "zod": "^4.4.3",
       "typescript": "^6.0.3",
       "@types/bun": "^1.3.14",
+      "hono": "^4.12.25",
       "better-auth": "^1.6.18",
       "@libsql/client": "^0.17.3",
       "libsql": "^0.5.29"
@@ -7002,6 +7036,201 @@ export default defineConfig({
 "
 ,
       "path": "package.json",
+    },
+    {
+      "content": 
+"{
+  "name": "@snapshot-hono-apollo-server/api",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "type": "module",
+  "scripts": {},
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@snapshot-hono-apollo-server/config": "workspace:*"
+  },
+  "dependencies": {
+    "dotenv": "catalog:",
+    "zod": "catalog:",
+    "@snapshot-hono-apollo-server/env": "workspace:*",
+    "@snapshot-hono-apollo-server/auth": "workspace:*",
+    "@snapshot-hono-apollo-server/db": "workspace:*",
+    "@apollo/server": "^5.5.1",
+    "graphql": "^16.14.2",
+    "better-auth": "catalog:",
+    "hono": "catalog:"
+  }
+}
+"
+,
+      "path": "packages/api/package.json",
+    },
+    {
+      "content": 
+"import { ApolloServer, HeaderMap } from "@apollo/server";
+import type { HTTPGraphQLRequest } from "@apollo/server";
+import type { Session, User } from "better-auth";
+
+type AuthSession = { user: User; session: Session } | null;
+
+export type ApolloContext = {
+	session: AuthSession;
+};
+
+export const typeDefs = \`#graphql
+	type Query {
+		health: String!
+		me: User
+	}
+
+	type User {
+		id: ID!
+		email: String!
+		name: String
+	}
+
+	type Mutation {
+		_empty: String
+	}
+\`;
+
+export const resolvers = {
+	Query: {
+		health: () => "OK",
+		me: (_parent: unknown, _args: unknown, context: ApolloContext) => {
+			if (!context.session) return null;
+			return {
+				id: context.session.user.id,
+				email: context.session.user.email,
+				name: context.session.user.name,
+			};
+		},
+	},
+	Mutation: {
+		_empty: () => null,
+	},
+};
+
+export const apolloServer = new ApolloServer<ApolloContext>({
+	typeDefs,
+	resolvers,
+});
+
+let apolloStartPromise: Promise<void> | undefined;
+
+async function ensureApolloStarted() {
+	apolloStartPromise ??= apolloServer.start();
+	await apolloStartPromise;
+}
+
+async function parseRequestBody(request: Request) {
+	if (request.method === "GET" || request.method === "HEAD") return undefined;
+	if (!request.headers.get("content-type")?.includes("application/json")) return undefined;
+
+	const text = await request.text();
+	if (text.trim() === "") return undefined;
+
+	return JSON.parse(text) as unknown;
+}
+
+function getApolloHeaders(request: Request) {
+	const headers = new HeaderMap();
+	request.headers.forEach((value, key) => {
+		headers.set(key, value);
+	});
+	return headers;
+}
+
+function getResponseHeaders(headers: HeaderMap) {
+	const responseHeaders = new Headers();
+	for (const [key, value] of headers) {
+		responseHeaders.set(key, value);
+	}
+	return responseHeaders;
+}
+
+export async function executeApolloRequest(
+	request: Request,
+	context: ApolloContext = {
+		session: null,
+	},
+): Promise<Response> {
+	await ensureApolloStarted();
+
+	let body: unknown;
+	try {
+		body = await parseRequestBody(request);
+	} catch {
+		return Response.json({ errors: [{ message: "Invalid JSON request body" }] }, { status: 400 });
+	}
+
+	const url = new URL(request.url);
+	const httpGraphQLRequest: HTTPGraphQLRequest = {
+		method: request.method.toUpperCase(),
+		headers: getApolloHeaders(request),
+		search: url.search,
+		body,
+	};
+
+	const result = await apolloServer.executeHTTPGraphQLRequest({
+		httpGraphQLRequest,
+		context: async () => context,
+	});
+
+	const responseHeaders = getResponseHeaders(result.headers);
+	const status = result.status ?? 200;
+	const responseBody = result.body;
+
+	if (responseBody.kind === "complete") {
+		return new Response(responseBody.string, {
+			status,
+			headers: responseHeaders,
+		});
+	}
+
+	const encoder = new TextEncoder();
+	const stream = new ReadableStream({
+		async start(controller) {
+			try {
+				for await (const chunk of responseBody.asyncIterator) {
+					controller.enqueue(encoder.encode(chunk));
+				}
+			} finally {
+				controller.close();
+			}
+		},
+	});
+
+	return new Response(stream, {
+		status,
+		headers: responseHeaders,
+	});
+}
+"
+,
+      "path": "packages/api/src/index.ts",
+    },
+    {
+      "content": 
+"{
+  "extends": "@snapshot-hono-apollo-server/config/tsconfig.base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "composite": true
+  }
+}
+"
+,
+      "path": "packages/api/tsconfig.json",
     },
     {
       "content": 
@@ -12496,7 +12725,7 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: opensearch-search-hono 1`] = `
 {
-  "fileCount": 56,
+  "fileCount": 57,
   "files": [
     {
       "content": "[exists]",
@@ -12523,7 +12752,8 @@ exports[`Template Snapshots Key File Content Snapshots key files: opensearch-sea
     "@snapshot-opensearch-search-hono/db": "workspace:*",
     "hono": "catalog:",
     "@trpc/server": "catalog:",
-    "@hono/trpc-server": "^0.4.2"
+    "@hono/trpc-server": "^0.4.2",
+    "@opensearch-project/opensearch": "^3.6.0"
   },
   "devDependencies": {
     "typescript": "catalog:",
@@ -12579,6 +12809,10 @@ export default app;
 "
 ,
       "path": "apps/server/src/index.ts",
+    },
+    {
+      "content": "[exists]",
+      "path": "apps/server/src/lib/search.ts",
     },
     {
       "content": 
