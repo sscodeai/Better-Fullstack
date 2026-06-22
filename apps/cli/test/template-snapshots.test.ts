@@ -207,6 +207,20 @@ const SNAPSHOT_CONFIGS: Array<{
     },
   },
 
+  // === CMS VARIATIONS ===
+  {
+    name: "cms-keystatic-next",
+    config: {
+      frontend: ["next"],
+      backend: "self",
+      api: "trpc",
+      database: "sqlite",
+      orm: "drizzle",
+      auth: "none",
+      cms: "keystatic",
+    },
+  },
+
   // === AI VARIATIONS ===
   {
     name: "ai-cli-root-tooling",

@@ -312,7 +312,7 @@ export const JobQueueSchema = z
   .describe("Job queue/background worker solution");
 
 export const CMSSchema = z
-  .enum(["payload", "sanity", "strapi", "tinacms", "directus", "none"])
+  .enum(["payload", "sanity", "strapi", "tinacms", "directus", "keystatic", "none"])
   .describe("Headless CMS solution");
 
 export const CachingSchema = z

@@ -1013,6 +1013,10 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://directus.io/docs",
     githubUrl: "https://github.com/directus/directus",
   },
+  keystatic: {
+    docsUrl: "https://keystatic.com/docs",
+    githubUrl: "https://github.com/Thinkmill/keystatic",
+  },
   axum: {
     docsUrl: "https://docs.rs/axum/latest/axum/",
     githubUrl: "https://github.com/tokio-rs/axum",

@@ -922,7 +922,7 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     sst: "SST",
     vercel: "Vercel",
   },
-  cms: { tinacms: "TinaCMS", directus: "Directus" },
+  cms: { tinacms: "TinaCMS", directus: "Directus", keystatic: "Keystatic" },
   auth: {
     "better-auth-organizations": "Better Auth + Organizations",
     auth0: "Auth0",

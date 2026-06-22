@@ -2923,6 +2923,14 @@ export const TECH_OPTIONS: Record<
       default: false,
     },
     {
+      id: "keystatic",
+      name: "Keystatic",
+      description: "Git-backed CMS for Markdown, JSON, and YAML content",
+      icon: "/icon/keystatic.svg",
+      color: "from-teal-500 to-emerald-600",
+      default: false,
+    },
+    {
       id: "none",
       name: "No CMS",
       description: "Skip headless CMS setup",
