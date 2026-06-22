@@ -388,6 +388,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: hono-openap
 
 exports[`Template Snapshots File Structure Snapshots file structure: hono-apollo-server 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -845,6 +846,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: algolia-sea
 
 exports[`Template Snapshots File Structure Snapshots file structure: opensearch-search-hono 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -902,6 +904,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: opensearch-
 
 exports[`Template Snapshots File Structure Snapshots file structure: cms-keystatic-next 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/web/.env",
@@ -961,6 +964,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: cms-keystat
 
 exports[`Template Snapshots File Structure Snapshots file structure: i18n-paraglide-tanstack-router 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -6697,8 +6701,12 @@ export const accountRelations = relations(account, ({ one }) => ({
 
 exports[`Template Snapshots Key File Content Snapshots key files: hono-apollo-server 1`] = `
 {
-  "fileCount": 64,
+  "fileCount": 65,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -7380,7 +7388,9 @@ export async function executeApolloRequest(
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-hono-apollo-server/config": "workspace:*"
@@ -7532,6 +7542,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -12908,8 +12919,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: opensearch-search-hono 1`] = `
 {
-  "fileCount": 57,
+  "fileCount": 58,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -13405,7 +13420,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-opensearch-search-hono/config": "workspace:*"
@@ -13553,6 +13570,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -13687,8 +13705,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: cms-keystatic-next 1`] = `
 {
-  "fileCount": 59,
+  "fileCount": 60,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/web/.env",
@@ -13724,6 +13746,7 @@ export default nextConfig;
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "check-types": "tsc --noEmit",
     "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start"
@@ -14015,7 +14038,9 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "^6.0.3",
     "@snapshot-cms-keystatic-next/config": "workspace:*"
@@ -14163,6 +14188,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -14298,8 +14324,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: i18n-paraglide-tanstack-router 1`] = `
 {
-  "fileCount": 59,
+  "fileCount": 60,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -14809,7 +14839,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-i18n-paraglide-tanstack-router/config": "workspace:*"
@@ -14957,6 +14989,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
