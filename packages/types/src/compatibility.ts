@@ -1816,7 +1816,7 @@ export const getDisabledReason = (
       currentStack.webFrontend.includes("astro") &&
       !currentStack.webFrontend.includes("next")
     ) {
-      return "Keystatic with Astro requires a Node-compatible runtime";
+      return "Keystatic's Astro integration is not Astro 7-compatible yet.";
     }
     if (optionId === "none") {
       const allowedBackends = [
@@ -2056,15 +2056,8 @@ export const getDisabledReason = (
     }
   }
   if (category === "cms" && optionId === "keystatic") {
-    if (!currentStack.webFrontend.includes("next") && !currentStack.webFrontend.includes("astro")) {
-      return "Keystatic is currently scaffolded for Next.js and Astro";
-    }
-    if (
-      currentStack.webFrontend.includes("astro") &&
-      !currentStack.webFrontend.includes("next") &&
-      currentStack.runtime === "workers"
-    ) {
-      return "Keystatic with Astro requires a Node-compatible runtime";
+    if (!currentStack.webFrontend.includes("next")) {
+      return "Keystatic is currently scaffolded for Next.js only because @keystatic/astro is not Astro 7-compatible yet.";
     }
   }
 

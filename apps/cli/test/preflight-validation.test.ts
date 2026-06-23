@@ -201,48 +201,22 @@ describe("preflight validation", () => {
   });
 
   describe("Keystatic CMS frontend support", () => {
-    test("warns without Next.js or Astro frontend", () => {
+    test("warns without Next.js frontend", () => {
       expect(ruleIds(config({ cms: "keystatic", frontend: ["nuxt"] }))).toContain(
-        "cms-keystatic-requires-nextjs-or-astro",
+        "cms-keystatic-requires-nextjs",
       );
     });
 
     test("passes with Next.js frontend", () => {
-      expect(ruleIds(config({ cms: "keystatic", frontend: ["next"], backend: "self" }))).not.toContain(
-        "cms-keystatic-requires-nextjs-or-astro",
-      );
-    });
-
-    test("passes with Astro frontend", () => {
-      expect(ruleIds(config({ cms: "keystatic", frontend: ["astro"], backend: "self" }))).not.toContain(
-        "cms-keystatic-requires-nextjs-or-astro",
-      );
-    });
-
-    test("warns with Astro frontend on Workers runtime", () => {
       expect(
-        ruleIds(
-          config({
-            cms: "keystatic",
-            frontend: ["astro"],
-            backend: "hono",
-            runtime: "workers",
-          }),
-        ),
-      ).toContain("cms-keystatic-astro-requires-node-runtime");
+        ruleIds(config({ cms: "keystatic", frontend: ["next"], backend: "self" })),
+      ).not.toContain("cms-keystatic-requires-nextjs");
     });
 
-    test("passes with Astro frontend on Node-compatible runtime", () => {
-      expect(
-        ruleIds(
-          config({
-            cms: "keystatic",
-            frontend: ["astro"],
-            backend: "hono",
-            runtime: "bun",
-          }),
-        ),
-      ).not.toContain("cms-keystatic-astro-requires-node-runtime");
+    test("warns with Astro frontend until @keystatic/astro supports Astro 7", () => {
+      expect(ruleIds(config({ cms: "keystatic", frontend: ["astro"], backend: "self" }))).toContain(
+        "cms-keystatic-requires-nextjs",
+      );
     });
   });
 

@@ -526,7 +526,7 @@ describe("stack graph", () => {
     );
   });
 
-  it("validates Keystatic CMS graph frontend and runtime support", () => {
+  it("validates Keystatic CMS graph frontend support", () => {
     const tanstackRouterParts = parseStackPartSpecs([
       "frontend:typescript:tanstack-router",
       "backend:typescript:hono",
@@ -535,12 +535,6 @@ describe("stack graph", () => {
     const nuxtParts = parseStackPartSpecs([
       "frontend:typescript:nuxt",
       "backend:typescript:hono",
-      "backend.cms:typescript:keystatic",
-    ]);
-    const astroWorkersParts = parseStackPartSpecs([
-      "frontend:typescript:astro",
-      "backend:typescript:hono",
-      "backend.runtime:typescript:workers",
       "backend.cms:typescript:keystatic",
     ]);
     const nextParts = parseStackPartSpecs([
@@ -555,31 +549,22 @@ describe("stack graph", () => {
       "backend.cms:typescript:keystatic",
     ]);
 
-    for (const parts of [tanstackRouterParts, nuxtParts]) {
+    for (const parts of [tanstackRouterParts, nuxtParts, astroNodeParts]) {
       expect(validateStackParts(parts).issues).toContainEqual(
         expect.objectContaining({
           code: "INCOMPATIBLE_GRAPH_SELECTION",
           role: "cms",
           toolId: "keystatic",
-          message: "Keystatic is currently scaffolded for Next.js and Astro frontends.",
+          message:
+            "Keystatic is currently scaffolded for Next.js only because @keystatic/astro is not Astro 7-compatible yet.",
         }),
       );
     }
-    expect(validateStackParts(astroWorkersParts).issues).toContainEqual(
-      expect.objectContaining({
-        code: "INCOMPATIBLE_GRAPH_SELECTION",
-        role: "cms",
-        toolId: "keystatic",
-        message: "Keystatic with Astro requires a Node-compatible runtime.",
-      }),
-    );
-    for (const parts of [nextParts, astroNodeParts]) {
-      expect(
-        validateStackParts(parts).issues.filter(
-          (issue) => issue.role === "cms" && issue.toolId === "keystatic",
-        ),
-      ).toEqual([]);
-    }
+    expect(
+      validateStackParts(nextParts).issues.filter(
+        (issue) => issue.role === "cms" && issue.toolId === "keystatic",
+      ),
+    ).toEqual([]);
   });
 
   it("rejects incompatible backend-owned TypeScript AI graph selections", () => {

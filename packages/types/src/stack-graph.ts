@@ -1119,24 +1119,14 @@ function createTypeScriptBackendCompatibilityIssue(
 
   if (part.role === "cms" && part.toolId === "keystatic") {
     const frontendTool = context.primaryToolIdsByRole?.frontend;
-    if (frontendTool !== "next" && frontendTool !== "astro") {
+    if (frontendTool !== "next") {
       return createStackGraphIssue({
         code: "INCOMPATIBLE_GRAPH_SELECTION",
         partId: part.id,
         role: part.role,
         toolId: part.toolId,
-        message: "Keystatic is currently scaffolded for Next.js and Astro frontends.",
-      });
-    }
-
-    const runtimeTool = context.siblingToolIdsByRole?.runtime ?? "bun";
-    if (frontendTool === "astro" && runtimeTool === "workers") {
-      return createStackGraphIssue({
-        code: "INCOMPATIBLE_GRAPH_SELECTION",
-        partId: part.id,
-        role: part.role,
-        toolId: part.toolId,
-        message: "Keystatic with Astro requires a Node-compatible runtime.",
+        message:
+          "Keystatic is currently scaffolded for Next.js only because @keystatic/astro is not Astro 7-compatible yet.",
       });
     }
   }

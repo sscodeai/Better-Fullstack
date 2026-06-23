@@ -136,24 +136,13 @@ const PREFLIGHT_RULES: readonly PreflightRule[] = [
     }),
   ),
   {
-    id: "cms-keystatic-requires-nextjs-or-astro",
+    id: "cms-keystatic-requires-nextjs",
     featureKey: "cms",
     displayName: "CMS (Keystatic)",
-    willSkip: (c) => c.cms === "keystatic" && !c.frontend.includes("next") && !c.frontend.includes("astro"),
-    reason: "Keystatic is currently scaffolded for Next.js and Astro frontends.",
-    suggestions: ["Add Next.js or Astro as your frontend", "Remove CMS"],
-  },
-  {
-    id: "cms-keystatic-astro-requires-node-runtime",
-    featureKey: "cms",
-    displayName: "CMS (Keystatic)",
-    willSkip: (c) =>
-      c.cms === "keystatic" &&
-      !c.frontend.includes("next") &&
-      c.frontend.includes("astro") &&
-      c.runtime === "workers",
-    reason: "Keystatic's Astro integration needs Node.js APIs and is not scaffolded for Workers.",
-    suggestions: ["Use a Node-compatible runtime", "Switch to Next.js", "Remove CMS"],
+    willSkip: (c) => c.cms === "keystatic" && !c.frontend.includes("next"),
+    reason:
+      "Keystatic is currently scaffolded for Next.js only because @keystatic/astro is not Astro 7-compatible yet.",
+    suggestions: ["Add Next.js as your frontend", "Remove CMS"],
   },
 
   {

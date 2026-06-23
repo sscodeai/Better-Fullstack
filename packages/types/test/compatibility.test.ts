@@ -389,46 +389,23 @@ describe("compatibility issue helpers", () => {
     expect(getDisabledReason(DEFAULT_STACK_SELECTION, "cms", "payload")).toBe(
       "Payload CMS v3 requires a Next.js frontend.",
     );
+    const keystaticAstro7Reason =
+      "Keystatic is currently scaffolded for Next.js only because @keystatic/astro is not Astro 7-compatible yet.";
     expect(getDisabledReason(DEFAULT_STACK_SELECTION, "cms", "keystatic")).toBe(
-      "Keystatic is currently scaffolded for Next.js and Astro frontends.",
+      keystaticAstro7Reason,
     );
-    expect(
-      getDisabledReason(
-        {
-          ...DEFAULT_STACK_SELECTION,
-          webFrontend: ["nuxt"],
-        },
-        "cms",
-        "keystatic",
-      ),
-    ).toBe("Keystatic is currently scaffolded for Next.js and Astro frontends.");
-    expect(
-      getDisabledReason(
-        {
-          ...DEFAULT_STACK_SELECTION,
-          webFrontend: ["astro"],
-          runtime: "workers",
-        },
-        "cms",
-        "keystatic",
-      ),
-    ).toBe("Keystatic with Astro requires a Node-compatible runtime.");
+    for (const stack of [
+      { ...DEFAULT_STACK_SELECTION, webFrontend: ["nuxt"] },
+      { ...DEFAULT_STACK_SELECTION, webFrontend: ["astro"], runtime: "workers" },
+      { ...DEFAULT_STACK_SELECTION, webFrontend: ["astro"], runtime: "node" },
+    ] as const) {
+      expect(getDisabledReason(stack, "cms", "keystatic")).toBe(keystaticAstro7Reason);
+    }
     expect(
       getDisabledReason(
         {
           ...DEFAULT_STACK_SELECTION,
           webFrontend: ["next"],
-        },
-        "cms",
-        "keystatic",
-      ),
-    ).toBeNull();
-    expect(
-      getDisabledReason(
-        {
-          ...DEFAULT_STACK_SELECTION,
-          webFrontend: ["astro"],
-          runtime: "node",
         },
         "cms",
         "keystatic",

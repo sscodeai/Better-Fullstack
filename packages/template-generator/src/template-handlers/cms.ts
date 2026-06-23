@@ -40,8 +40,6 @@ export async function processCMSTemplates(
   if (config.cms === "keystatic") {
     if (config.frontend.includes("next")) {
       processTemplatesFromPrefix(vfs, templates, "cms/keystatic/web/next", "apps/web", config);
-    } else if (config.frontend.includes("astro") && config.runtime !== "workers") {
-      processTemplatesFromPrefix(vfs, templates, "cms/keystatic/web/astro", "apps/web", config);
     }
     return;
   }

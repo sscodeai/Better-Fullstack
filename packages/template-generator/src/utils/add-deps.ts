@@ -727,11 +727,10 @@ export const dependencyVersionMap = {
   // Headless CMS - Keystatic
   "@keystatic/core": "^0.5.50",
   "@keystatic/next": "^5.0.4",
-  "@keystatic/astro": "^5.1.0",
   "@markdoc/markdoc": "^0.5.7",
-  "@astrojs/react": "^5.0.7",
-  "@astrojs/markdoc": "^1.0.6",
-  "@astrojs/node": "^10.1.4",
+  "@astrojs/react": "^6.0.0",
+  "@astrojs/markdoc": "^2.0.0",
+  "@astrojs/node": "^11.0.0",
 
   // File Storage - Cloudinary
   cloudinary: "^2.10.0",

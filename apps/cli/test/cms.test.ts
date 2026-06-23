@@ -39,7 +39,7 @@ describe("CMS Options", () => {
       expect(content).toContain("Keystatic-powered content collection");
     });
 
-    test("keystatic with Astro emits integration config, content, and dependencies", async () => {
+    test("keystatic with Astro skips unsupported Astro 7 integration", async () => {
       const result = await runTRPCTest(
         createCustomConfig({
           projectName: "keystatic-astro",
@@ -56,24 +56,16 @@ describe("CMS Options", () => {
       expectSuccess(result);
       const pkg = await Bun.file(`${result.projectDir}/apps/web/package.json`).text();
       const astroConfig = await Bun.file(`${result.projectDir}/apps/web/astro.config.mjs`).text();
-      const config = await Bun.file(`${result.projectDir}/apps/web/keystatic.config.ts`).text();
-      const content = await Bun.file(
-        `${result.projectDir}/apps/web/src/content/posts/hello-world.mdoc`,
-      ).text();
 
-      expect(pkg).toContain('"@keystatic/core"');
-      expect(pkg).toContain('"@keystatic/astro"');
-      expect(pkg).toContain('"@astrojs/react"');
-      expect(pkg).toContain('"@astrojs/markdoc"');
-      expect(pkg).toContain('"@astrojs/node"');
-      expect(astroConfig).toContain("@keystatic/astro");
-      expect(astroConfig).toContain("react()");
-      expect(astroConfig).toContain("markdoc()");
-      expect(astroConfig).toContain("keystatic()");
-      expect(astroConfig).toContain("adapter: node");
-      expect(astroConfig).toContain("standalone");
-      expect(config).toContain('kind: "local"');
-      expect(content).toContain("Keystatic-powered content collection");
+      expect(pkg).not.toContain("@keystatic/core");
+      expect(pkg).not.toContain("@keystatic/astro");
+      expect(pkg).not.toContain("@astrojs/markdoc");
+      expect(astroConfig).not.toContain("@keystatic/astro");
+      expect(astroConfig).not.toContain("markdoc()");
+      expect(astroConfig).not.toContain("keystatic()");
+      expect(await Bun.file(`${result.projectDir}/apps/web/keystatic.config.ts`).exists()).toBe(
+        false,
+      );
     });
 
     test("keystatic with Astro and Workers skips unsupported CMS scaffolding", async () => {
@@ -100,7 +92,9 @@ describe("CMS Options", () => {
       expect(pkg).not.toContain("@keystatic/astro");
       expect(astroConfig).not.toContain("@keystatic/astro");
       expect(astroConfig).not.toContain("keystatic()");
-      expect(await Bun.file(`${result.projectDir}/apps/web/keystatic.config.ts`).exists()).toBe(false);
+      expect(await Bun.file(`${result.projectDir}/apps/web/keystatic.config.ts`).exists()).toBe(
+        false,
+      );
     });
   });
 
